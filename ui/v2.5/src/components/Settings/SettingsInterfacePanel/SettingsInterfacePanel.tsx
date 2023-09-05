@@ -45,6 +45,7 @@ import {
 import { defaultMaxOptionsShown } from "src/core/config";
 
 const allMenuItems = [
+  { id: "home", headingID: "home" },
   { id: "scenes", headingID: "scenes" },
   { id: "images", headingID: "images" },
   { id: "movies", headingID: "movies" },
@@ -53,6 +54,7 @@ const allMenuItems = [
   { id: "performers", headingID: "performers" },
   { id: "studios", headingID: "studios" },
   { id: "tags", headingID: "tags" },
+  { id: "stats", headingID: "stats"},
 ];
 
 export const SettingsInterfacePanel: React.FC = () => {

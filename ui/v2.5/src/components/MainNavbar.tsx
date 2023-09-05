@@ -31,6 +31,7 @@ import {
   faTimes,
   faUser,
   faVideo,
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import { baseURL } from "src/core/createClient";
 
@@ -43,6 +44,10 @@ interface IMenuItem {
   userCreatable?: boolean;
 }
 const messages = defineMessages({
+  home: {
+    id: "home",
+    defaultMessage: "Home",
+  },
   scenes: {
     id: "scenes",
     defaultMessage: "Scenes",
@@ -84,12 +89,20 @@ const messages = defineMessages({
     defaultMessage: "Donate",
   },
   statistics: {
-    id: "statistics",
-    defaultMessage: "Statistics",
+    id: "statistics_short",
+    defaultMessage: "Stats",
   },
 });
 
 const allMenuItems: IMenuItem[] = [
+  {
+    name: "home",
+    message: messages.home,
+    href: "/",
+    icon: faHome,
+    hotkey: "g hx",
+    userCreatable: false,
+  },
   {
     name: "scenes",
     message: messages.scenes,
@@ -152,6 +165,13 @@ const allMenuItems: IMenuItem[] = [
     hotkey: "g t",
     userCreatable: true,
   },
+  { name: "stats", 
+    message: messages.statistics,
+    href: "/stats",
+    icon: faChartColumn,
+    hotkey: "i",
+    userCreatable: true,
+  }
 ];
 
 const newPathsList = allMenuItems
@@ -271,35 +291,6 @@ export const MainNavbar: React.FC = () => {
   function renderUtilityButtons() {
     return (
       <>
-        <Nav.Link
-          className="nav-utility"
-          href="https://opencollective.com/stashapp"
-          target="_blank"
-          onClick={handleDismiss}
-        >
-          <Button
-            className="minimal donate"
-            title={intl.formatMessage({ id: "donate" })}
-          >
-            <Icon icon={faHeart} />
-            <span className="d-none d-sm-inline">
-              {intl.formatMessage(messages.donate)}
-            </span>
-          </Button>
-        </Nav.Link>
-        <NavLink
-          className="nav-utility"
-          exact
-          to="/stats"
-          onClick={handleDismiss}
-        >
-          <Button
-            className="minimal d-flex align-items-center h-100"
-            title={intl.formatMessage({ id: "statistics" })}
-          >
-            <Icon icon={faChartColumn} />
-          </Button>
-        </NavLink>
         <NavLink
           className="nav-utility"
           exact
@@ -308,13 +299,6 @@ export const MainNavbar: React.FC = () => {
         >
           <SettingsButton />
         </NavLink>
-        <Button
-          className="nav-utility minimal"
-          onClick={() => openManual()}
-          title={intl.formatMessage({ id: "help" })}
-        >
-          <Icon icon={faQuestionCircle} />
-        </Button>
         {maybeRenderLogout()}
       </>
     );
@@ -360,12 +344,6 @@ export const MainNavbar: React.FC = () => {
             </>
           </Fade>
         </Navbar.Collapse>
-
-        <Navbar.Brand as="div" onClick={handleDismiss}>
-          <Link to="/">
-            <Button className="minimal brand-link d-inline-block">Stash</Button>
-          </Link>
-        </Navbar.Brand>
 
         <Nav className="navbar-buttons flex-row ml-auto order-xl-2">
           {!!newPath && (

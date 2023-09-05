@@ -1009,6 +1009,7 @@
   "height": "Height",
   "height_cm": "Height (cm)",
   "help": "Help",
+  "home": "Home",
   "ignore_auto_tag": "Ignore Auto Tag",
   "image": "Image",
   "image_count": "Image Count",
@@ -1254,6 +1255,7 @@
     "submit_update": "Already exists in {endpoint_name}"
   },
   "statistics": "Statistics",
+  "statistics_short": "Stats",
   "stats": {
     "image_size": "Images size",
     "scenes_duration": "Scenes duration",
