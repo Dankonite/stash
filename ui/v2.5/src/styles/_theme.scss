@@ -1,10 +1,14 @@
 /* Blueprint dark theme */
 
-$secondary: #394b59;
+$secondary: #202020;
 $muted-gray: #bfccd6;
 $success: #0f9960;
 $warning: #d9822b;
 $danger: #db3737;
+$menu-gray: #202020;
+$bg-color: #121212;
+$disabled: #181818;
+$active: #454545;
 
 $theme-colors: (
   primary: #137cbd,
@@ -12,10 +16,10 @@ $theme-colors: (
   success: $success,
   warning: $warning,
   danger: $danger,
-  dark: #394b59,
+  dark: $secondary,
 );
 
-$body-bg: #202b33;
+$body-bg: #121212;
 $text-muted: $muted-gray;
 $link-color: #48aff0;
 $link-hover-color: $link-color;
@@ -23,9 +27,9 @@ $text-color: #f5f8fa;
 $pre-color: $text-color;
 $navbar-dark-color: rgb(245, 248, 250);
 $popover-bg: $secondary;
-$dark-text: #182026;
+$dark-text: #000;
 $textfield-bg: rgba(16, 22, 26, 0.3);
-$card-bg: #30404d;
+$card-bg: $menu-gray;
 $card-cap-bg: rgba(#000, 0.03);
 
 @import "node_modules/bootstrap/scss/bootstrap";
@@ -38,8 +42,19 @@ $dark-gray5: #394b59;
 
 .btn.active:not(.disabled),
 .btn.active.minimal:not(.disabled) {
-  background-color: rgba(138, 155, 168, 0.3);
+  background-color: $active;
   color: $text-color;
+}
+
+.btn-secondary:not(:disabled):not(.disabled):active, .btn-secondary:not(:disabled):not(.disabled).active, .show > .btn-secondary.dropdown-toggle {
+  background-color: $active;
+  border-color: transparent;
+}
+
+.btn-secondary:hover {
+  color: #fff;
+  background-color: $active;
+  border-color: transparent;
 }
 
 a.minimal,
@@ -60,7 +75,7 @@ button.minimal {
   }
 
   &:active:not(:disabled) {
-    background: rgba(138, 155, 168, 0.3);
+    background: $active;
     color: $text-color;
   }
 }
@@ -72,7 +87,14 @@ hr {
 :not(.show-carat) > .dropdown-toggle::after {
   content: none;
 }
-
+.badge-info {
+  background-color: $active;
+}
+.filter-button .badge {
+  right: -.75rem!important;
+  top: -.75rem!important;
+  z-index: 99!important;
+}
 .nav-link {
   color: $text-color;
 }

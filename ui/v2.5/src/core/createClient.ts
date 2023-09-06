@@ -118,7 +118,7 @@ export const getPlatformURL = (ws?: boolean) => {
   const platformUrl = new URL(window.location.origin + baseURL);
 
   if (import.meta.env.DEV) {
-    platformUrl.port = import.meta.env.VITE_APP_PLATFORM_PORT ?? "9999";
+    platformUrl.port = import.meta.env.VITE_APP_PLATFORM_PORT ?? "9998";
 
     if (import.meta.env.VITE_APP_HTTPS === "true") {
       platformUrl.protocol = "https:";
