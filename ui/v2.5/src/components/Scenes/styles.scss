@@ -1,7 +1,7 @@
 .card-popovers {
   display: flex;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 
   .btn {
     padding-bottom: 3px;
@@ -9,7 +9,7 @@
   }
 
   .fa-icon {
-    margin-right: 7px;
+    margin-right: .4rem;
   }
 }
 
@@ -113,7 +113,8 @@ textarea.scene-description {
 
 .scene-specs-overlay,
 .scene-interactive-speed-overlay {
-  bottom: 1rem;
+  top: 0.3rem;
+  height: 10%;
   color: $text-color;
   display: block;
   font-weight: 400;
@@ -133,14 +134,14 @@ textarea.scene-description {
 
 .scene-studio-overlay {
   display: block;
-  font-weight: 900;
+  font-weight: 400;
   height: 10%;
-  max-width: 40%;
+  max-width: 75%;
   opacity: 0.75;
   position: absolute;
   right: 0.7rem;
-  top: 0.7rem;
-  z-index: 8;
+  bottom: 1rem;
+  z-index: auto;
 
   .image-thumbnail {
     height: auto;
@@ -472,8 +473,10 @@ input[type="range"].blue-slider {
 
 @media (min-width: 1200px), (max-width: 575px) {
   .performer-card .fi {
-    height: 1.33rem;
+    height: 2rem;
     width: 2rem;
+    border-radius: 999px;
+    background-size: cover;
   }
 
   .scene-performers {
@@ -494,7 +497,7 @@ input[type="range"].blue-slider {
   }
 
   .edit-buttons-container {
-    background-color: #202b33;
+    background-color: $bg-color;
     position: sticky;
     top: 0;
     z-index: 3;

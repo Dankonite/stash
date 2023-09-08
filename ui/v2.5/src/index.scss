@@ -43,13 +43,7 @@ body {
   -webkit-font-smoothing: antialiased;
   margin: 0;
   overflow-x: hidden;
-  padding: 4rem 0 0 0;
-
-  @include media-breakpoint-down(xs) {
-    @media (orientation: portrait) {
-      padding: 1rem 0 5rem;
-    }
-  }
+  padding: 3.2rem 0 0 0;
 }
 
 #movie-page,
@@ -74,7 +68,7 @@ dd {
   min-height: 50px;
   padding: unset;
   position: fixed;
-  top: 3.3rem;
+  top: 3rem;
   z-index: 10;
 
   @media (max-width: 576px) {
@@ -131,7 +125,7 @@ dd {
 }
 
 .detail-header {
-  background-color: #192127;
+  background-color: $disabled;
   min-height: 15rem;
   overflow: hidden;
   padding: 1rem;
@@ -240,7 +234,7 @@ dd {
 
   nav {
     align-content: center;
-    border-bottom: solid 2px #192127;
+    border-bottom: solid 2px $menu-gray;
     display: flex;
     justify-content: center;
     margin: 0;
@@ -450,7 +444,7 @@ dd {
 .text-input:focus,
 .text-input[readonly],
 .text-input:disabled {
-  background-color: $textfield-bg;
+  background-color: $disabled;
 }
 
 textarea.text-input {
@@ -986,18 +980,18 @@ div.dropdown-menu {
     height: 1.5rem;
   }
 }
+.top-nav .navbar-buttons {
+  @include media-breakpoint-down(lg) {
+    flex-direction: row-reverse !important; 
+  }
+}
 
 .top-nav {
   justify-content: start;
   padding: 0.25rem 1rem;
-
+  
   @include media-breakpoint-down(xs) {
-    padding: 0.25rem 2rem;
-
-    @media (orientation: portrait) {
-      bottom: 0;
-      top: auto;
-    }
+    flex-direction: column-reverse;
   }
 
   .navbar-toggler {
@@ -1113,7 +1107,9 @@ div.dropdown-menu {
 .btn-toolbar .form-control {
   width: inherit;
 }
-
+.btn-toolbar {
+  margin-top: .5rem;
+}
 .stats {
   &-element {
     flex-grow: 1;

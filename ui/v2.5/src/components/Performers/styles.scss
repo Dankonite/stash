@@ -89,7 +89,8 @@
     height: 2rem;
     position: absolute;
     right: 1rem;
-    width: 3rem;
+    width: 2rem;
+    
   }
 
   button.btn.favorite-button {
@@ -141,7 +142,7 @@
 
 .card {
   &.performer-card {
-    padding: 0 0 1rem 0;
+    padding: 0 0 0 0;
   }
 }
 
@@ -169,11 +170,18 @@
     }
   }
 }
-
+.scene-card__date, .tag-parent-tags, .tag-sub-tags {
+  display: none;
+}
+.performer-card__age {
+  display: flex;
+  justify-content: center;
+}
 .flex-aligned {
   align-items: center;
   column-gap: 0.5rem;
   display: flex;
+  justify-content: center;
 }
 
 .fa-mars {
