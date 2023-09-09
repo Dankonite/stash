@@ -129,6 +129,12 @@ dd {
       height: fit-content;
     }
 }
+@media (min-width: 576px) {
+  .custom-nav-tabs {
+    position: absolute;
+    bottom: 0;
+  }
+}
 .detail-header {
   background-color: $disabled;
   min-height: 15rem;
@@ -341,9 +347,13 @@ dd {
 #movie-page .detail-header-image img,
 #performer-page .detail-header-image img,
 #tag-page .detail-header-image img {
-  border-radius: 0.5rem;
+  border-radius: 1rem;
 }
-
+#tag-page .detail-header-image img {
+  padding: 0 !important;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
 #tag-page .full-width .detail-header-image img {
   max-width: 22rem;
 

@@ -385,7 +385,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         <div style={{
           opacity: edittagActive ? '1' : '0',
           display: edittagActive ? 'inline-flex' : 'none',
-          height: 33
+          height: 1
         }}>
         <DetailsEditNavbar
           objectName={tag.name}
