@@ -400,7 +400,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
           <div style={{
             opacity: editbarActive ? '1' : '0',
             display: editbarActive ? 'inline-flex' : 'none',
-            height: 30
+            height: 33
           }}>
             <DetailsEditNavbar
               objectName={

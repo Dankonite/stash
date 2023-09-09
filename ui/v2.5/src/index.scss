@@ -55,7 +55,11 @@ code,
 dd {
   white-space: pre-line;
 }
-
+@media (max-width: 576px) {
+  .custom-nav-tabs {
+    font-size: .9rem;
+  }
+}
 .sticky.detail-header {
   display: block;
   min-height: 50px;
@@ -249,14 +253,11 @@ dd {
     padding: 5px 0;
   }
 
-  .item-list-container {
-    padding-top: 15px;
-
     @media (max-width: 576px) {
       overflow-x: hidden;
     }
   }
-}
+
 
 .collapsed .detail-item-value {
   -webkit-box-orient: vertical;

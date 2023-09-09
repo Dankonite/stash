@@ -63,7 +63,12 @@
     width: 100%;
   }
 }
-
+.custom-nav-tabs {
+  @media (max-width: 576px) {
+    position: relative;
+    bottom: 0;
+  }
+}
 .performer-card {
   width: 20rem;
 

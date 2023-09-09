@@ -191,7 +191,9 @@ hr {
   margin: 5px 0;
   border-color: transparent;
 }
-
+.detail-body .nav-tabs {
+  display: none;
+}
 :not(.show-carat) > .dropdown-toggle::after {
   content: none;
 }
@@ -217,8 +219,11 @@ hr {
 .detail-container>.row, .detail-container .performer-head {
   height: 100%;
 }
+.detail-header-image>button.btn.btn-link {
+  padding-top: 0;
+}
 .detail-group {
-  height: 100%;
+  height: fit-content
 }
 .details-edit div, .details-edit .btn {
   height: 31.5px;
@@ -235,7 +240,10 @@ div>.details-edit.mb-2 {
   display: flex !important;
   flex-direction: column !important;
 }
-.detail-header-image>button {
+.detail-header-image>img {
+  padding-top: 0!important;
+}
+.detail-header-image>button, .detail-header-image>img {
   padding: 1rem;
 }
 .performer-tabs>.nav-tabs {
