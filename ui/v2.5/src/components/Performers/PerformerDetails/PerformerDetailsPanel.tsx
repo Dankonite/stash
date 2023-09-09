@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import { TagLink } from "src/components/Shared/TagLink";
 import * as GQL from "src/core/generated-graphql";
@@ -7,21 +7,50 @@ import { getStashboxBase } from "src/utils/stashbox";
 import { cmToImperial, cmToInches, kgToLbs } from "src/utils/units";
 import { DetailItem } from "src/components/Shared/DetailItem";
 import { CountryFlag } from "src/components/Shared/CountryFlag";
+import { Button, Tab, Tabs } from "react-bootstrap";
+import { Icon } from "src/components/Shared/Icon";
+import { faArrowUp, faArrowsUpToLine, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { Counter } from "src/components/Shared/Counter";
+import { PerformerAppearsWithPanel } from "./performerAppearsWithPanel";
+import { PerformerMoviesPanel } from "./PerformerMoviesPanel";
+import { PerformerImagesPanel } from "./PerformerImagesPanel";
+import { PerformerScenesPanel } from "./PerformerScenesPanel";
+import { PerformerGalleriesPanel } from "./PerformerGalleriesPanel";
+import { Redirect, useHistory } from "react-router-dom";
+import { useToast } from "src/hooks/Toast";
 
 interface IPerformerDetails {
   performer: GQL.PerformerDataFragment;
+  tabKey: TabKey;
   collapsed?: boolean;
   fullWidth?: boolean;
 }
-
+interface IPerformerParams {
+  id: string;
+  tab?: string;
+}
+const validTabs = [
+  "default",
+  "scenes",
+  "galleries",
+  "images",
+  "movies",
+  "appearswith",
+] as const;
+type TabKey = (typeof validTabs)[number];
 export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
   performer,
+  tabKey,
   collapsed,
   fullWidth,
 }) => {
   // Network state
+  const Toast = useToast();
+  const history = useHistory();
   const intl = useIntl();
-
+  function isTabKey(tab: string): tab is TabKey {
+    return validTabs.includes(tab as TabKey);
+  }
   function renderTagsField() {
     if (!performer.tags.length) {
       return;
@@ -34,7 +63,6 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
       </ul>
     );
   }
-
   function renderStashIDs() {
     if (!performer.stash_ids.length) {
       return;
@@ -64,7 +92,43 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
       </ul>
     );
   }
+  const validTabs = [
+    "default",
+    "scenes",
+    "galleries",
+    "images",
+    "movies",
+    "appearswith",
+  ] as const;
+  type TabKey = (typeof validTabs)[number];
+  const defaultTab: TabKey = "default";
+  const populatedDefaultTab = useMemo(() => {
+    let ret: TabKey = "scenes";
+    if (performer.scene_count == 0) {
+      if (performer.gallery_count != 0) {
+        ret = "galleries";
+      } else if (performer.image_count != 0) {
+        ret = "images";
+      } else if (performer.movie_count != 0) {
+        ret = "movies";
+      }
+    }
 
+    return ret;
+  }, [performer]);
+  if (tabKey === defaultTab) {
+    tabKey = populatedDefaultTab;
+  }
+  function setTabKey(newTabKey: string | null) {
+    if (!newTabKey || newTabKey === defaultTab) newTabKey = populatedDefaultTab;
+    if (newTabKey === tabKey) return;
+
+    if (newTabKey === populatedDefaultTab) {
+      history.replace(`/performers/${performer.id}`);
+    } else if (isTabKey(newTabKey)) {
+      history.replace(`/performers/${performer.id}/${newTabKey}`);
+    }
+  }
   const formatHeight = (height?: number | null) => {
     if (!height) {
       return "";
@@ -74,13 +138,6 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
 
     return (
       <span className="performer-height">
-        <span className="height-metric">
-          {intl.formatNumber(height, {
-            style: "unit",
-            unit: "centimeter",
-            unitDisplay: "short",
-          })}
-        </span>
         <span className="height-imperial">
           {intl.formatNumber(feet, {
             style: "unit",
@@ -181,7 +238,215 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
       </span>
     );
   };
+  function maybeRenderZeroGaleries() {
+    const galleriesCount = performer.gallery_count
+    if (galleriesCount === 0) {
+      return (
+        <Tab
+          className="tabZeroes"
+          eventKey="galleries"
+          title={
+        <>
+          {intl.formatMessage({ id: "galleries" })}
+          <Counter
+            count={performer.gallery_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    }
+    return 
+  }
+  function maybeRenderZeroScenes() {
+    const scenesCount = performer.scene_count
+    if (scenesCount === 0) {
+      return (
+      <Tab
+      eventKey="scenes"
+      title={
+        <>
+          {intl.formatMessage({ id: "scenes" })}
+          <Counter
+            count={performer.scene_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    }
+    return 
+  }
+  function maybeRenderZeroImages() {
+    const imagesCount = performer.image_count
+    if (imagesCount === 0) {
+      return (
+      <Tab
+      eventKey="images"
+      title={
+        <>
+          {intl.formatMessage({ id: "images" })}
+          <Counter
+            count={performer.image_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    }
+    return 
+  }
+  function maybeRenderZeroMovies() {
+    const movieCount = performer.movie_count
+    if (movieCount === 0) {
+      return (
+      <Tab
+      eventKey="movies"
+      title={
+        <>
+          {intl.formatMessage({ id: "movies" })}
+          <Counter
+            count={performer.movie_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    } return
+  }
+  function maybeRenderZeroAppearsWith() {
+    const appearsWithCount = performer.performer_count
+    if (appearsWithCount === 0) {
+      return (
+        <Tab
+        eventKey="appearswith"
+        title={
+          <>
+            {intl.formatMessage({ id: "appears_with" })}
+            <Counter
+              count={performer.performer_count}
+              hideZero
+            />
+          </>
+        }
+      >
+      </Tab>
+      )
+    } return
+  }
+  function maybeRenderGaleries() {
+    const galleriesCount = performer.gallery_count
+    if (galleriesCount !== 0) {
+      return (
+        <Tab
+          eventKey="galleries"
+          title={
+        <>
+          {intl.formatMessage({ id: "galleries" })}
+          <Counter
+            count={performer.gallery_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    }
+    return 
+  }
+  function maybeRenderScenes() {
+    const scenesCount = performer.scene_count
+    if (scenesCount !== 0) {
+      return (
+      <Tab
+      eventKey="scenes"
+      title={
+        <>
+          {intl.formatMessage({ id: "scenes" })}
+          <Counter
+            count={performer.scene_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    }
+    return 
+  }
+  function maybeRenderImages() {
+    const imagesCount = performer.image_count
+    if (imagesCount !== 0) {
+      return (
+      <Tab
+      eventKey="images"
+      title={
+        <>
+          {intl.formatMessage({ id: "images" })}
+          <Counter
+            count={performer.image_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    }
+    return 
+  }
+  function maybeRenderMovies() {
+    const movieCount = performer.movie_count
+    if (movieCount !== 0) {
+      return (
+      <Tab
+      
+      eventKey="movies"
+      title={
+        <>
+          {intl.formatMessage({ id: "movies" })}
+          <Counter
+            count={performer.movie_count}
+            hideZero
+          />
+        </>
+      }
+      >
+    </Tab>
+      )
+    } return
+  }
+  function maybeRenderAppearsWith() {
+    const appearsWithCount = performer.performer_count
+    if (appearsWithCount !== 0) {
+      return (
+        <Tab
+        eventKey="appearswith"
+        title={
+          <>
+            {intl.formatMessage({ id: "appears_with" })}
+            <Counter
 
+              count={performer.performer_count}
+              hideZero
+            />
+          </>
+        }
+      >
+      </Tab>
+      )
+    } return
+  }
   function maybeRenderExtraDetails() {
     if (!collapsed) {
       /* Remove extra urls provided in details since they will be present by perfomr name */
@@ -223,6 +488,7 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
   }
 
   return (
+    <>
     <div className="detail-group">
       {performer.gender ? (
         <DetailItem
@@ -310,6 +576,36 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
       />
       {maybeRenderExtraDetails()}
     </div>
+    <div className={"custom-nav-tabs"} style={{
+      display: "inline-flex",
+    }}>
+      <Tabs
+      id="performer-tabs"
+      mountOnEnter
+      unmountOnExit
+      activeKey={tabKey}
+      onSelect={setTabKey}
+      >
+      {maybeRenderScenes()}
+      {maybeRenderGaleries()}
+      {maybeRenderImages()}
+      {maybeRenderMovies()}
+      {maybeRenderAppearsWith()}
+      </Tabs>
+      <Tabs
+      id="performer-tabs"
+      unmountOnExit
+      activeKey={tabKey}
+      onSelect={setTabKey}
+      >
+      {maybeRenderZeroScenes()}
+      {maybeRenderZeroGaleries()}
+      {maybeRenderZeroImages()}
+      {maybeRenderZeroMovies()}
+      {maybeRenderZeroAppearsWith()}
+      </Tabs>
+    </div>
+    </>
   );
 };
 
@@ -324,8 +620,8 @@ export const CompressedPerformerDetailsPanel: React.FC<IPerformerDetails> = ({
   }
 
   return (
-    <div className="sticky detail-header">
-      <div className="sticky detail-header-group">
+    <div className="sticky detail-header" onClick={() => scrollToTop()}>
+      <div className="sticky detail-header-group d-flex align-items-center">
         <a className="performer-name" onClick={() => scrollToTop()}>
           {performer.name}
         </a>
@@ -369,6 +665,13 @@ export const CompressedPerformerDetailsPanel: React.FC<IPerformerDetails> = ({
         ) : (
           ""
         )}
+        <Button
+          className="minimal expand-collapse ml-auto"
+          onClick={() => scrollToTop()}
+        >
+          <Icon className="fa-fw" icon={faArrowsUpToLine} />
+        </Button>
+        
       </div>
     </div>
   );

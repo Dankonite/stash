@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Tabs, Tab, Col, Row } from "react-bootstrap";
 import { useIntl } from "react-intl";
 import { useHistory, Redirect, RouteComponentProps } from "react-router-dom";
@@ -35,9 +35,11 @@ import { PerformerEditPanel } from "./PerformerEditPanel";
 import { PerformerSubmitButton } from "./PerformerSubmitButton";
 import {
   faChevronDown,
+  faChevronRight,
   faChevronUp,
   faHeart,
   faLink,
+  faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram, faTwitter } from "@fortawesome/free-brands-svg-icons";
 import { IUIConfig } from "src/core/config";
@@ -78,6 +80,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
   const intl = useIntl();
 
   // Configuration settings
+  const detailbody = useRef<HTMLDivElement>(null);
   const { configuration } = React.useContext(ConfigurationContext);
   const uiConfig = configuration?.ui as IUIConfig | undefined;
   const abbreviateCounter = uiConfig?.abbreviateCounters ?? false;
@@ -85,13 +88,15 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     uiConfig?.enablePerformerBackgroundImage ?? false;
   const showAllDetails = uiConfig?.showAllDetails ?? true;
   const compactExpandedDetails = uiConfig?.compactExpandedDetails ?? false;
-
+  const [editbarActive, seteditbarActive] = useState<boolean>(false)
   const [collapsed, setCollapsed] = useState<boolean>(!showAllDetails);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [image, setImage] = useState<string | null>();
   const [encodingImage, setEncodingImage] = useState<boolean>(false);
   const loadStickyHeader = useLoadStickyHeader();
-
+  const toggleEditBar = () => {
+    seteditbarActive(current => !current)
+  }
   const activeImage = useMemo(() => {
     const performerImage = performer.image_path;
     if (isEditing) {
@@ -235,87 +240,97 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
       );
     }
   }
-  const renderTabs = () => (
-    <Tabs
-      id="performer-tabs"
-      mountOnEnter
-      unmountOnExit
-      activeKey={tabKey}
-      onSelect={setTabKey}
-    >
-      <Tab
-        eventKey="scenes"
-        title={
-          <>
-            {intl.formatMessage({ id: "scenes" })}
-            <Counter
-              abbreviateCounter={abbreviateCounter}
-              count={performer.scene_count}
-              hideZero
-            />
-          </>
-        }
+  function maybeRenderGaleries() {
+      return (
+        <Tab
+          eventKey="galleries"
+          title={
+        <>
+          {intl.formatMessage({ id: "galleries" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.gallery_count}
+            hideZero
+          />
+        </>
+      }
       >
-        <PerformerScenesPanel
-          active={tabKey === "scenes"}
-          performer={performer}
-        />
-      </Tab>
+      <PerformerGalleriesPanel
+        active={tabKey === "galleries"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderScenes() {
+      return (
       <Tab
-        eventKey="galleries"
-        title={
-          <>
-            {intl.formatMessage({ id: "galleries" })}
-            <Counter
-              abbreviateCounter={abbreviateCounter}
-              count={performer.gallery_count}
-              hideZero
-            />
-          </>
-        }
+      eventKey="scenes"
+      title={
+        <>
+          {intl.formatMessage({ id: "scenes" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.scene_count}
+            hideZero
+          />
+        </>
+      }
       >
-        <PerformerGalleriesPanel
-          active={tabKey === "galleries"}
-          performer={performer}
-        />
-      </Tab>
+      <PerformerScenesPanel
+        active={tabKey === "scenes"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderImages() {
+      return (
       <Tab
-        eventKey="images"
-        title={
-          <>
-            {intl.formatMessage({ id: "images" })}
-            <Counter
-              abbreviateCounter={abbreviateCounter}
-              count={performer.image_count}
-              hideZero
-            />
-          </>
-        }
+      eventKey="images"
+      title={
+        <>
+          {intl.formatMessage({ id: "images" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.image_count}
+            hideZero
+          />
+        </>
+      }
       >
-        <PerformerImagesPanel
-          active={tabKey === "images"}
-          performer={performer}
-        />
-      </Tab>
+      <PerformerImagesPanel
+        active={tabKey === "images"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderMovies() {
+      return (
       <Tab
-        eventKey="movies"
-        title={
-          <>
-            {intl.formatMessage({ id: "movies" })}
-            <Counter
-              abbreviateCounter={abbreviateCounter}
-              count={performer.movie_count}
-              hideZero
-            />
-          </>
-        }
+      eventKey="movies"
+      title={
+        <>
+          {intl.formatMessage({ id: "movies" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.movie_count}
+            hideZero
+          />
+        </>
+      }
       >
-        <PerformerMoviesPanel
-          active={tabKey === "movies"}
-          performer={performer}
-        />
-      </Tab>
-      <Tab
+      <PerformerMoviesPanel
+        active={tabKey === "movies"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderAppearsWith() {
+      return (
+        <Tab
         eventKey="appearswith"
         title={
           <>
@@ -333,9 +348,23 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
           performer={performer}
         />
       </Tab>
+      )
+    }
+  const renderTabs = () => (
+    <Tabs
+      id="performer-tabs"
+      mountOnEnter
+      unmountOnExit
+      activeKey={tabKey}
+      onSelect={setTabKey}
+    >
+      {maybeRenderScenes()}
+      {maybeRenderGaleries()}
+      {maybeRenderImages()}
+      {maybeRenderMovies()}
+      {maybeRenderAppearsWith()}
     </Tabs>
   );
-
   function maybeRenderHeaderBackgroundImage() {
     if (enableBackgroundImage && !isEditing && activeImage) {
       return (
@@ -368,8 +397,11 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     }
     {
       return (
-        <Col>
-          <Row xs={8}>
+          <div style={{
+            opacity: editbarActive ? '1' : '0',
+            display: editbarActive ? 'inline-flex' : 'none',
+            height: 30
+          }}>
             <DetailsEditNavbar
               objectName={
                 performer?.name ?? intl.formatMessage({ id: "performer" })
@@ -388,8 +420,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
                 </div>
               }
             ></DetailsEditNavbar>
-          </Row>
-        </Col>
+          </div>
       );
     }
   }
@@ -403,6 +434,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
       return (
         <PerformerDetailsPanel
           performer={performer}
+          tabKey={tabKey}
           collapsed={collapsed}
           fullWidth={!collapsed && !compactExpandedDetails}
         />
@@ -412,7 +444,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
 
   function maybeRenderCompressedDetails() {
     if (!isEditing && loadStickyHeader) {
-      return <CompressedPerformerDetailsPanel performer={performer} />;
+      return <CompressedPerformerDetailsPanel performer={performer} tabKey={tabKey} />;
     }
   }
 
@@ -472,7 +504,6 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
       );
     }
   }
-
   function renderClickableIcons() {
     /* Collect urls adding into details */
     /* This code can be removed once multple urls are supported for performers */
@@ -590,6 +621,13 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
                 )}
                 {maybeRenderShowCollapseButton()}
                 {renderClickableIcons()}
+                <Button
+                  className="minimal expand-collapse-edit edit-bar-toggle mr-2"
+                  onClick={toggleEditBar}
+                >
+                  <Icon className="fa-fw" icon={faPenToSquare} />
+                </Button>
+                {maybeRenderEditPanel()}
               </h2>
               {maybeRenderAliases()}
               <RatingSystem
@@ -597,13 +635,13 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
                 onSetRating={(value) => setRating(value ?? null)}
               />
               {maybeRenderDetails()}
-              {maybeRenderEditPanel()}
+              
             </div>
           </div>
         </div>
       </div>
       {maybeRenderCompressedDetails()}
-      <div className="detail-body">
+      <div className="detail-body" ref={detailbody}>
         <div className="performer-body">
           <div className="performer-tabs">{maybeRenderTab()}</div>
         </div>

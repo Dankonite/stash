@@ -75,7 +75,7 @@ $dark-gray5: #394b59;
       order: 3!important;
       position: absolute !important;
       left: 0 !important;
-      top: 3.2rem !important;
+      top: 3.8rem !important;
     border-bottom-right-radius: .75rem !important;
   }
   .navbar-buttons>.mr-2 {
@@ -198,14 +198,7 @@ hr {
 .badge-info {
   background-color: $active;
 }
-.filter-button .badge {
-  right: -.75rem!important;
-  top: -.5rem!important;
-  z-index: 99!important;
-}
-.detail-header.collapsed div.col {
-  display: none;
-}
+
 .tag-card-image {
   height: 180px !important;
 }
@@ -213,6 +206,40 @@ hr {
 	border-radius: 999px;
 	width: 1rem;
 	background-size: cover;
+}
+.detail-header .tab-content {
+  display: none;
+}
+.detail-header .nav-tabs {
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+}
+.detail-container>.row, .detail-container .performer-head {
+  height: 100%;
+}
+.detail-group {
+  height: 100%;
+}
+.details-edit div, .details-edit .btn {
+  height: 31.5px;
+  display: block;
+}
+.details-edit div>.btn {
+  height: 100%;
+  display: block;
+}
+div>.details-edit.mb-2 {
+  margin-bottom: none !important;
+}
+#performer-page .performer-head {
+  display: flex !important;
+  flex-direction: column !important;
+}
+.detail-header-image>button {
+  padding: 1rem;
+}
+.performer-tabs>.nav-tabs {
+  display: none;
 }
 .sticky>.performer-country>.fi {
 	border-radius: 9999px;
