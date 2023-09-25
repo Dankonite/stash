@@ -13,14 +13,6 @@ type GalleryChapter struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-func NewGalleryChapter() GalleryChapter {
-	currentTime := time.Now()
-	return GalleryChapter{
-		CreatedAt: currentTime,
-		UpdatedAt: currentTime,
-	}
-}
-
 // GalleryChapterPartial represents part of a GalleryChapter object.
 // It is used to update the database entry.
 type GalleryChapterPartial struct {
@@ -32,8 +24,8 @@ type GalleryChapterPartial struct {
 }
 
 func NewGalleryChapterPartial() GalleryChapterPartial {
-	currentTime := time.Now()
+	updatedTime := time.Now()
 	return GalleryChapterPartial{
-		UpdatedAt: NewOptionalTime(currentTime),
+		UpdatedAt: NewOptionalTime(updatedTime),
 	}
 }

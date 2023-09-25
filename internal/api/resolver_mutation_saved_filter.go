@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -19,7 +18,7 @@ func (r *mutationResolver) SaveFilter(ctx context.Context, input SaveFilterInput
 	if input.ID != nil {
 		idv, err := strconv.Atoi(*input.ID)
 		if err != nil {
-			return nil, fmt.Errorf("converting id: %w", err)
+			return nil, err
 		}
 		id = &idv
 	}
@@ -54,7 +53,7 @@ func (r *mutationResolver) SaveFilter(ctx context.Context, input SaveFilterInput
 func (r *mutationResolver) DestroySavedFilter(ctx context.Context, input DestroyFilterInput) (bool, error) {
 	id, err := strconv.Atoi(input.ID)
 	if err != nil {
-		return false, fmt.Errorf("converting id: %w", err)
+		return false, err
 	}
 
 	if err := r.withTxn(ctx, func(ctx context.Context) error {

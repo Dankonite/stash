@@ -36,7 +36,7 @@ type ImageCounter interface {
 
 // ImageCreator provides methods to create images.
 type ImageCreator interface {
-	Create(ctx context.Context, newImage *Image, fileIDs []FileID) error
+	Create(ctx context.Context, newImage *ImageCreateInput) error
 }
 
 // ImageUpdater provides methods to update images.
@@ -63,7 +63,6 @@ type ImageReader interface {
 	ImageQueryer
 	ImageCounter
 
-	URLLoader
 	FileIDLoader
 	GalleryIDLoader
 	PerformerIDLoader

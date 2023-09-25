@@ -72,7 +72,7 @@ func (t *GenerateCoverTask) Start(ctx context.Context) {
 
 	if err := t.txnManager.WithTxn(ctx, func(ctx context.Context) error {
 		qb := t.txnManager.Scene
-		scenePartial := models.NewScenePartial()
+		updatedScene := models.NewScenePartial()
 
 		// update the scene cover table
 		if err := qb.UpdateCover(ctx, t.Scene.ID, coverImageData); err != nil {
@@ -80,7 +80,7 @@ func (t *GenerateCoverTask) Start(ctx context.Context) {
 		}
 
 		// update the scene with the update date
-		_, err = qb.UpdatePartial(ctx, t.Scene.ID, scenePartial)
+		_, err = qb.UpdatePartial(ctx, t.Scene.ID, updatedScene)
 		if err != nil {
 			return fmt.Errorf("error updating scene: %v", err)
 		}

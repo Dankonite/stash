@@ -6,7 +6,7 @@ import * as GQL from "src/core/generated-graphql";
 import * as yup from "yup";
 import { TagSelect, StudioSelect } from "src/components/Shared/Select";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
-import { URLListInput } from "src/components/Shared/URLField";
+import { URLField } from "src/components/Shared/URLField";
 import { useToast } from "src/hooks/Toast";
 import FormUtils from "src/utils/form";
 import { useFormik } from "formik";
@@ -16,7 +16,6 @@ import { useRatingKeybinds } from "src/hooks/keybinds";
 import { ConfigurationContext } from "src/hooks/Config";
 import isEqual from "lodash-es/isEqual";
 import { DateInput } from "src/components/Shared/DateInput";
-import { yupDateString, yupUniqueStringList } from "src/utils/yup";
 import {
   Performer,
   PerformerSelect,
@@ -47,8 +46,20 @@ export const ImageEditPanel: React.FC<IProps> = ({
 
   const schema = yup.object({
     title: yup.string().ensure(),
-    urls: yupUniqueStringList("urls"),
-    date: yupDateString(intl),
+    url: yup.string().ensure(),
+    date: yup
+      .string()
+      .ensure()
+      .test({
+        name: "date",
+        test: (value) => {
+          if (!value) return true;
+          if (!value.match(/^\d{4}-\d{2}-\d{2}$/)) return false;
+          if (Number.isNaN(Date.parse(value))) return false;
+          return true;
+        },
+        message: intl.formatMessage({ id: "validation.date_invalid_form" }),
+      }),
     rating100: yup.number().nullable().defined(),
     studio_id: yup.string().required().nullable(),
     performer_ids: yup.array(yup.string().required()).defined(),
@@ -57,7 +68,7 @@ export const ImageEditPanel: React.FC<IProps> = ({
 
   const initialValues = {
     title: image.title ?? "",
-    urls: image?.urls ?? [],
+    url: image?.url ?? "",
     date: image?.date ?? "",
     rating100: image.rating100 ?? null,
     studio_id: image.studio?.id ?? null,
@@ -151,14 +162,6 @@ export const ImageEditPanel: React.FC<IProps> = ({
 
   if (isLoading) return <LoadingIndicator />;
 
-  const urlsErrors = Array.isArray(formik.errors.urls)
-    ? formik.errors.urls[0]
-    : formik.errors.urls;
-  const urlsErrorMsg = urlsErrors
-    ? intl.formatMessage({ id: "validation.urls_must_be_unique" })
-    : undefined;
-  const urlsErrorIdx = urlsErrors?.split(" ").map((e) => parseInt(e));
-
   return (
     <div id="image-edit-details">
       <Prompt
@@ -189,18 +192,20 @@ export const ImageEditPanel: React.FC<IProps> = ({
         <div className="form-container row px-3">
           <div className="col-12 col-lg-6 col-xl-12">
             {renderTextField("title", intl.formatMessage({ id: "title" }))}
-            <Form.Group controlId="urls" as={Row}>
+            <Form.Group controlId="url" as={Row}>
               <Col xs={3} className="pr-0 url-label">
                 <Form.Label className="col-form-label">
-                  <FormattedMessage id="urls" />
+                  <FormattedMessage id="url" />
                 </Form.Label>
               </Col>
               <Col xs={9}>
-                <URLListInput
-                  value={formik.values.urls ?? []}
-                  setValue={(value) => formik.setFieldValue("urls", value)}
-                  errors={urlsErrorMsg}
-                  errorIdx={urlsErrorIdx}
+                <URLField
+                  {...formik.getFieldProps("url")}
+                  onScrapeClick={() => {}}
+                  urlScrapable={() => {
+                    return false;
+                  }}
+                  isInvalid={!!formik.getFieldMeta("url").error}
                 />
               </Col>
             </Form.Group>

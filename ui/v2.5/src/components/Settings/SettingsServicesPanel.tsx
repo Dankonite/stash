@@ -43,13 +43,17 @@ export const SettingsServicesPanel: React.FC = () => {
   } = React.useContext(SettingStateContext);
 
   // undefined to hide dialog, true for enable, false for disable
-  const [enableDisable, setEnableDisable] = useState<boolean>();
+  const [enableDisable, setEnableDisable] = useState<boolean | undefined>(
+    undefined
+  );
 
   const [enableUntilRestart, setEnableUntilRestart] = useState<boolean>(false);
-  const [enableDuration, setEnableDuration] = useState<number>(0);
+  const [enableDuration, setEnableDuration] = useState<number | undefined>(
+    undefined
+  );
 
   const [ipEntry, setIPEntry] = useState<string>("");
-  const [tempIP, setTempIP] = useState<string>();
+  const [tempIP, setTempIP] = useState<string | undefined>();
 
   const { data: statusData, loading, refetch: statusRefetch } = useDLNAStatus();
 
@@ -269,8 +273,8 @@ export const SettingsServicesPanel: React.FC = () => {
 
         <Form.Group id="temp-enable-duration">
           <DurationInput
-            value={enableDuration}
-            setValue={(v) => setEnableDuration(v ?? 0)}
+            numericValue={enableDuration ?? 0}
+            onValueChange={(v) => setEnableDuration(v ?? 0)}
             disabled={enableUntilRestart}
           />
           <Form.Text className="text-muted">
@@ -311,8 +315,8 @@ export const SettingsServicesPanel: React.FC = () => {
 
         <Form.Group id="temp-enable-duration">
           <DurationInput
-            value={enableDuration}
-            setValue={(v) => setEnableDuration(v ?? 0)}
+            numericValue={enableDuration ?? 0}
+            onValueChange={(v) => setEnableDuration(v ?? 0)}
             disabled={enableUntilRestart}
           />
           <Form.Text className="text-muted">

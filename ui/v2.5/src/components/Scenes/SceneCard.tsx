@@ -4,12 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
 import { Icon } from "../Shared/Icon";
-import {
-  GalleryLink,
-  TagLink,
-  MovieLink,
-  SceneMarkerLink,
-} from "../Shared/TagLink";
+import { TagLink } from "../Shared/TagLink";
 import { HoverPopover } from "../Shared/HoverPopover";
 import { SweatDrops } from "../Shared/SweatDrops";
 import { TruncatedText } from "../Shared/TruncatedText";
@@ -224,7 +219,7 @@ export const SceneCard: React.FC<ISceneCardProps> = (
             src={sceneMovie.movie.front_image_path ?? ""}
           />
         </Link>
-        <MovieLink
+        <TagLink
           key={sceneMovie.movie.id}
           movie={sceneMovie.movie}
           className="d-block"
@@ -250,8 +245,8 @@ export const SceneCard: React.FC<ISceneCardProps> = (
     if (props.scene.scene_markers.length <= 0) return;
 
     const popoverContent = props.scene.scene_markers.map((marker) => {
-      const markerWithScene = { ...marker, scene: { id: props.scene.id } };
-      return <SceneMarkerLink key={marker.id} marker={markerWithScene} />;
+      const markerPopover = { ...marker, scene: { id: props.scene.id } };
+      return <TagLink key={marker.id} marker={markerPopover} />;
     });
 
     return (
@@ -287,7 +282,7 @@ export const SceneCard: React.FC<ISceneCardProps> = (
     if (props.scene.galleries.length <= 0) return;
 
     const popoverContent = props.scene.galleries.map((gallery) => (
-      <GalleryLink key={gallery.id} gallery={gallery} />
+      <TagLink key={gallery.id} gallery={gallery} />
     ));
 
     return (

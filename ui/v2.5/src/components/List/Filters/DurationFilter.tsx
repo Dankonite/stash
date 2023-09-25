@@ -17,50 +17,67 @@ export const DurationFilter: React.FC<IDurationFilterProps> = ({
 }) => {
   const intl = useIntl();
 
-  function onChanged(v: number | undefined, property: "value" | "value2") {
+  function onChanged(valueAsNumber: number, property: "value" | "value2") {
     const { value } = criterion;
-    value[property] = v;
+    value[property] = valueAsNumber;
     onValueChanged(value);
   }
 
-  function renderTop() {
-    let placeholder: string;
-    if (
-      criterion.modifier === CriterionModifier.GreaterThan ||
-      criterion.modifier === CriterionModifier.Between ||
-      criterion.modifier === CriterionModifier.NotBetween
-    ) {
-      placeholder = intl.formatMessage({ id: "criterion.greater_than" });
-    } else if (criterion.modifier === CriterionModifier.LessThan) {
-      placeholder = intl.formatMessage({ id: "criterion.less_than" });
-    } else {
-      placeholder = intl.formatMessage({ id: "criterion.value" });
-    }
-
-    return (
+  let equalsControl: JSX.Element | null = null;
+  if (
+    criterion.modifier === CriterionModifier.Equals ||
+    criterion.modifier === CriterionModifier.NotEquals
+  ) {
+    equalsControl = (
       <Form.Group>
         <DurationInput
-          value={criterion.value?.value}
-          setValue={(v) => onChanged(v, "value")}
-          placeholder={placeholder}
+          numericValue={criterion.value?.value}
+          onValueChange={(v: number) => onChanged(v, "value")}
+          placeholder={intl.formatMessage({ id: "criterion.value" })}
         />
       </Form.Group>
     );
   }
 
-  function renderBottom() {
-    if (
-      criterion.modifier !== CriterionModifier.Between &&
-      criterion.modifier !== CriterionModifier.NotBetween
-    ) {
-      return;
-    }
-
-    return (
+  let lowerControl: JSX.Element | null = null;
+  if (
+    criterion.modifier === CriterionModifier.GreaterThan ||
+    criterion.modifier === CriterionModifier.Between ||
+    criterion.modifier === CriterionModifier.NotBetween
+  ) {
+    lowerControl = (
       <Form.Group>
         <DurationInput
-          value={criterion.value?.value2}
-          setValue={(v) => onChanged(v, "value2")}
+          numericValue={criterion.value?.value}
+          onValueChange={(v: number) => onChanged(v, "value")}
+          placeholder={intl.formatMessage({ id: "criterion.greater_than" })}
+        />
+      </Form.Group>
+    );
+  }
+
+  let upperControl: JSX.Element | null = null;
+  if (
+    criterion.modifier === CriterionModifier.LessThan ||
+    criterion.modifier === CriterionModifier.Between ||
+    criterion.modifier === CriterionModifier.NotBetween
+  ) {
+    upperControl = (
+      <Form.Group>
+        <DurationInput
+          numericValue={
+            criterion.modifier === CriterionModifier.LessThan
+              ? criterion.value?.value
+              : criterion.value?.value2
+          }
+          onValueChange={(v: number) =>
+            onChanged(
+              v,
+              criterion.modifier === CriterionModifier.LessThan
+                ? "value"
+                : "value2"
+            )
+          }
           placeholder={intl.formatMessage({ id: "criterion.less_than" })}
         />
       </Form.Group>
@@ -69,8 +86,9 @@ export const DurationFilter: React.FC<IDurationFilterProps> = ({
 
   return (
     <>
-      {renderTop()}
-      {renderBottom()}
+      {equalsControl}
+      {lowerControl}
+      {upperControl}
     </>
   );
 };

@@ -151,10 +151,9 @@ func (i *Importer) getParents(ctx context.Context) ([]int, error) {
 }
 
 func (i *Importer) createParent(ctx context.Context, name string) (int, error) {
-	newTag := models.NewTag()
-	newTag.Name = name
+	newTag := models.NewTag(name)
 
-	err := i.ReaderWriter.Create(ctx, &newTag)
+	err := i.ReaderWriter.Create(ctx, newTag)
 	if err != nil {
 		return 0, err
 	}

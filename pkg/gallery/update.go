@@ -3,6 +3,7 @@ package gallery
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/stashapp/stash/pkg/models"
 )
@@ -14,8 +15,9 @@ type ImageUpdater interface {
 }
 
 func (s *Service) Updated(ctx context.Context, galleryID int) error {
-	galleryPartial := models.NewGalleryPartial()
-	_, err := s.Repository.UpdatePartial(ctx, galleryID, galleryPartial)
+	_, err := s.Repository.UpdatePartial(ctx, galleryID, models.GalleryPartial{
+		UpdatedAt: models.NewOptionalTime(time.Now()),
+	})
 	return err
 }
 
@@ -53,21 +55,21 @@ func (s *Service) RemoveImages(ctx context.Context, g *models.Gallery, toRemove 
 }
 
 func AddPerformer(ctx context.Context, qb models.GalleryUpdater, o *models.Gallery, performerID int) error {
-	galleryPartial := models.NewGalleryPartial()
-	galleryPartial.PerformerIDs = &models.UpdateIDs{
-		IDs:  []int{performerID},
-		Mode: models.RelationshipUpdateModeAdd,
-	}
-	_, err := qb.UpdatePartial(ctx, o.ID, galleryPartial)
+	_, err := qb.UpdatePartial(ctx, o.ID, models.GalleryPartial{
+		PerformerIDs: &models.UpdateIDs{
+			IDs:  []int{performerID},
+			Mode: models.RelationshipUpdateModeAdd,
+		},
+	})
 	return err
 }
 
 func AddTag(ctx context.Context, qb models.GalleryUpdater, o *models.Gallery, tagID int) error {
-	galleryPartial := models.NewGalleryPartial()
-	galleryPartial.TagIDs = &models.UpdateIDs{
-		IDs:  []int{tagID},
-		Mode: models.RelationshipUpdateModeAdd,
-	}
-	_, err := qb.UpdatePartial(ctx, o.ID, galleryPartial)
+	_, err := qb.UpdatePartial(ctx, o.ID, models.GalleryPartial{
+		TagIDs: &models.UpdateIDs{
+			IDs:  []int{tagID},
+			Mode: models.RelationshipUpdateModeAdd,
+		},
+	})
 	return err
 }

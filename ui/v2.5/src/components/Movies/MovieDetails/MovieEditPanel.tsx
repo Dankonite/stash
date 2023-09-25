@@ -135,10 +135,10 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     }
 
     if (state.duration) {
-      const seconds = DurationUtils.stringToSeconds(state.duration);
-      if (seconds !== undefined) {
-        formik.setFieldValue("duration", seconds);
-      }
+      formik.setFieldValue(
+        "duration",
+        DurationUtils.stringToSeconds(state.duration)
+      );
     }
 
     if (state.date) {
@@ -402,8 +402,10 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
           </Form.Label>
           <Col xs={fieldXS} xl={fieldXL}>
             <DurationInput
-              value={formik.values.duration ?? undefined}
-              setValue={(v) => formik.setFieldValue("duration", v ?? null)}
+              numericValue={formik.values.duration ?? undefined}
+              onValueChange={(valueAsNumber) => {
+                formik.setFieldValue("duration", valueAsNumber ?? null);
+              }}
             />
           </Col>
         </Form.Group>

@@ -1,44 +1,14 @@
 import {
   convertFromRatingFormat,
   convertToRatingFormat,
-  defaultRatingSystemOptions,
   RatingSystemOptions,
 } from "src/utils/rating";
 import {
-  ConfigDataFragment,
   CriterionModifier,
   IntCriterionInput,
-} from "src/core/generated-graphql";
+} from "../../../core/generated-graphql";
 import { INumberValue } from "../types";
 import { Criterion, CriterionOption } from "./criterion";
-import { IUIConfig } from "src/core/config";
-
-const modifierOptions = [
-  CriterionModifier.Equals,
-  CriterionModifier.NotEquals,
-  CriterionModifier.GreaterThan,
-  CriterionModifier.LessThan,
-  CriterionModifier.Between,
-  CriterionModifier.NotBetween,
-  CriterionModifier.IsNull,
-  CriterionModifier.NotNull,
-];
-
-function getRatingSystemOptions(config?: ConfigDataFragment) {
-  return (
-    (config?.ui as IUIConfig)?.ratingSystemOptions ?? defaultRatingSystemOptions
-  );
-}
-
-export const RatingCriterionOption = new CriterionOption({
-  messageID: "rating",
-  type: "rating100",
-  modifierOptions,
-  defaultModifier: CriterionModifier.Equals,
-  makeCriterion: (o, config) =>
-    new RatingCriterion(getRatingSystemOptions(config)),
-  inputType: "number",
-});
 
 export class RatingCriterion extends Criterion<INumberValue> {
   ratingSystem: RatingSystemOptions;
@@ -80,8 +50,8 @@ export class RatingCriterion extends Criterion<INumberValue> {
     }
   }
 
-  constructor(ratingSystem: RatingSystemOptions) {
-    super(RatingCriterionOption, { value: 0, value2: undefined });
+  constructor(type: CriterionOption, ratingSystem: RatingSystemOptions) {
+    super(type, { value: 0, value2: undefined });
     this.ratingSystem = ratingSystem;
   }
 }

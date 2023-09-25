@@ -1,13 +1,13 @@
-import React, { useRef, useMemo, useState, useLayoutEffect } from "react";
+import React, { useMemo } from "react";
+import { useDebounce } from "src/hooks/debounce";
 import { useSpriteInfo } from "src/hooks/sprite";
-import { useThrottle } from "src/hooks/throttle";
 import TextUtils from "src/utils/text";
 
 interface IHoverScrubber {
   totalSprites: number;
   activeIndex: number | undefined;
   setActiveIndex: (index: number | undefined) => void;
-  onClick?: () => void;
+  onClick?: (index: number) => void;
 }
 
 const HoverScrubber: React.FC<IHoverScrubber> = ({
@@ -20,12 +20,7 @@ const HoverScrubber: React.FC<IHoverScrubber> = ({
     const { width } = e.currentTarget.getBoundingClientRect();
     const x = e.nativeEvent.offsetX;
 
-    const i = Math.floor((x / width) * totalSprites);
-
-    // clamp to [0, totalSprites)
-    if (i < 0) return 0;
-    if (i >= totalSprites) return totalSprites - 1;
-    return i;
+    return Math.floor((x / width) * (totalSprites - 1));
   }
 
   function onMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
@@ -48,11 +43,11 @@ const HoverScrubber: React.FC<IHoverScrubber> = ({
     if (relatedTarget !== e.target) return;
 
     e.preventDefault();
-    onClick();
+    onClick(getActiveIndex(e));
   }
 
   const indicatorStyle = useMemo(() => {
-    if (activeIndex === undefined || !totalSprites) return {};
+    if (activeIndex === undefined) return {};
 
     const width = (activeIndex / totalSprites) * 100;
 
@@ -102,53 +97,55 @@ export const PreviewScrubber: React.FC<IScenePreviewProps> = ({
   vttPath,
   onClick,
 }) => {
-  const imageParentRef = useRef<HTMLDivElement>(null);
-  const [style, setStyle] = useState({});
+  const imageParentRef = React.useRef<HTMLDivElement>(null);
 
-  const [activeIndex, setActiveIndex] = useState<number>();
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>();
 
-  const debounceSetActiveIndex = useThrottle(setActiveIndex, 50);
+  const debounceSetActiveIndex = useDebounce(
+    setActiveIndex,
+    [setActiveIndex],
+    1
+  );
 
   const spriteInfo = useSpriteInfo(vttPath);
 
-  const sprite = useMemo(() => {
-    if (!spriteInfo || activeIndex === undefined) {
-      return undefined;
-    }
-    return spriteInfo[activeIndex];
-  }, [activeIndex, spriteInfo]);
-
-  useLayoutEffect(() => {
-    const imageParent = imageParentRef.current;
-
-    if (!sprite || !imageParent) {
-      return setStyle({});
+  const style = useMemo(() => {
+    if (!spriteInfo || activeIndex === undefined || !imageParentRef.current) {
+      return {};
     }
 
-    const clientRect = imageParent.getBoundingClientRect();
-    const scale = scaleToFit(sprite, clientRect);
+    const sprite = spriteInfo[activeIndex];
 
-    setStyle({
+    const clientRect = imageParentRef.current?.getBoundingClientRect();
+    const scale = clientRect ? scaleToFit(sprite, clientRect) : 1;
+
+    return {
       backgroundPosition: `${-sprite.x}px ${-sprite.y}px`,
       backgroundImage: `url(${sprite.url})`,
       width: `${sprite.w}px`,
       height: `${sprite.h}px`,
       transform: `scale(${scale})`,
-    });
-  }, [sprite]);
+    };
+  }, [spriteInfo, activeIndex, imageParentRef]);
 
   const currentTime = useMemo(() => {
-    if (!sprite) return undefined;
+    if (!spriteInfo || activeIndex === undefined) {
+      return undefined;
+    }
+
+    const sprite = spriteInfo[activeIndex];
 
     const start = TextUtils.secondsToTimestamp(sprite.start);
 
     return start;
-  }, [sprite]);
+  }, [activeIndex, spriteInfo]);
 
-  function onScrubberClick() {
-    if (!sprite || !onClick) {
+  function onScrubberClick(index: number) {
+    if (!spriteInfo || !onClick) {
       return;
     }
+
+    const sprite = spriteInfo[index];
 
     onClick(sprite.start);
   }
@@ -157,7 +154,7 @@ export const PreviewScrubber: React.FC<IScenePreviewProps> = ({
 
   return (
     <div className="preview-scrubber">
-      {sprite && (
+      {activeIndex !== undefined && spriteInfo && (
         <div className="scene-card-preview-image" ref={imageParentRef}>
           <div className="scrubber-image" style={style}></div>
           {currentTime !== undefined && (
@@ -166,7 +163,7 @@ export const PreviewScrubber: React.FC<IScenePreviewProps> = ({
         </div>
       )}
       <HoverScrubber
-        totalSprites={spriteInfo.length}
+        totalSprites={81}
         activeIndex={activeIndex}
         setActiveIndex={(i) => debounceSetActiveIndex(i)}
         onClick={onScrubberClick}

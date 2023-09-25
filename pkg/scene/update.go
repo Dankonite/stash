@@ -74,32 +74,32 @@ func (u UpdateSet) UpdateInput() models.SceneUpdateInput {
 }
 
 func AddPerformer(ctx context.Context, qb models.SceneUpdater, o *models.Scene, performerID int) error {
-	scenePartial := models.NewScenePartial()
-	scenePartial.PerformerIDs = &models.UpdateIDs{
-		IDs:  []int{performerID},
-		Mode: models.RelationshipUpdateModeAdd,
-	}
-	_, err := qb.UpdatePartial(ctx, o.ID, scenePartial)
+	_, err := qb.UpdatePartial(ctx, o.ID, models.ScenePartial{
+		PerformerIDs: &models.UpdateIDs{
+			IDs:  []int{performerID},
+			Mode: models.RelationshipUpdateModeAdd,
+		},
+	})
 	return err
 }
 
 func AddTag(ctx context.Context, qb models.SceneUpdater, o *models.Scene, tagID int) error {
-	scenePartial := models.NewScenePartial()
-	scenePartial.TagIDs = &models.UpdateIDs{
-		IDs:  []int{tagID},
-		Mode: models.RelationshipUpdateModeAdd,
-	}
-	_, err := qb.UpdatePartial(ctx, o.ID, scenePartial)
+	_, err := qb.UpdatePartial(ctx, o.ID, models.ScenePartial{
+		TagIDs: &models.UpdateIDs{
+			IDs:  []int{tagID},
+			Mode: models.RelationshipUpdateModeAdd,
+		},
+	})
 	return err
 }
 
 func AddGallery(ctx context.Context, qb models.SceneUpdater, o *models.Scene, galleryID int) error {
-	scenePartial := models.NewScenePartial()
-	scenePartial.TagIDs = &models.UpdateIDs{
-		IDs:  []int{galleryID},
-		Mode: models.RelationshipUpdateModeAdd,
-	}
-	_, err := qb.UpdatePartial(ctx, o.ID, scenePartial)
+	_, err := qb.UpdatePartial(ctx, o.ID, models.ScenePartial{
+		TagIDs: &models.UpdateIDs{
+			IDs:  []int{galleryID},
+			Mode: models.RelationshipUpdateModeAdd,
+		},
+	})
 	return err
 }
 

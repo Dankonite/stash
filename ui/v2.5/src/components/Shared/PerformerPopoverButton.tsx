@@ -6,7 +6,7 @@ import * as GQL from "src/core/generated-graphql";
 import { sortPerformers } from "src/core/performers";
 import { HoverPopover } from "./HoverPopover";
 import { Icon } from "./Icon";
-import { PerformerLink } from "./TagLink";
+import { TagLink } from "./TagLink";
 
 interface IProps {
   performers: Partial<GQL.PerformerDataFragment>[];
@@ -26,11 +26,7 @@ export const PerformerPopoverButton: React.FC<IProps> = ({ performers }) => {
           src={performer.image_path ?? ""}
         />
       </Link>
-      <PerformerLink
-        key={performer.id}
-        performer={performer}
-        className="d-block"
-      />
+      <TagLink key={performer.id} performer={performer} className="d-block" />
     </div>
   ));
 

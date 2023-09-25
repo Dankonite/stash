@@ -44,7 +44,6 @@ export const ImageWallItem: React.FC<RenderImageProps> = (
   return (
     <ImagePreview
       loop={video}
-      muted={video}
       autoPlay={video}
       key={props.photo.key}
       style={imgStyle}

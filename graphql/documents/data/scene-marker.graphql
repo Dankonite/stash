@@ -13,10 +13,12 @@ fragment SceneMarkerData on SceneMarker {
   primary_tag {
     id
     name
+    aliases
   }
 
   tags {
     id
     name
+    aliases
   }
 }
