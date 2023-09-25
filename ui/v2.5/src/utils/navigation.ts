@@ -73,13 +73,8 @@ const makePerformerImagesUrl = (
   return `/images?${filter.makeQueryParameters()}`;
 };
 
-export interface INamedObject {
-  id?: string;
-  name?: string;
-}
-
 const makePerformerGalleriesUrl = (
-  performer: INamedObject,
+  performer: Partial<GQL.PerformerDataFragment>,
   extraPerformer?: ILabeledId,
   extraCriteria?: Criterion<CriterionValue>[]
 ) => {

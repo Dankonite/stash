@@ -3,25 +3,26 @@ import { CriterionType } from "../types";
 import { CriterionOption, StringCriterion, Option } from "./criterion";
 
 export class IsMissingCriterion extends StringCriterion {
+  public modifierOptions = [];
+
   protected toCriterionInput(): string {
     return this.value;
   }
 }
 
-class IsMissingCriterionOption extends CriterionOption {
+class IsMissingCriterionOptionClass extends CriterionOption {
   constructor(messageID: string, type: CriterionType, options: Option[]) {
     super({
       messageID,
       type,
       options,
-      modifierOptions: [],
       defaultModifier: CriterionModifier.Equals,
       makeCriterion: () => new IsMissingCriterion(this),
     });
   }
 }
 
-export const SceneIsMissingCriterionOption = new IsMissingCriterionOption(
+export const SceneIsMissingCriterionOption = new IsMissingCriterionOptionClass(
   "isMissing",
   "is_missing",
   [
@@ -39,16 +40,14 @@ export const SceneIsMissingCriterionOption = new IsMissingCriterionOption(
   ]
 );
 
-export const ImageIsMissingCriterionOption = new IsMissingCriterionOption(
+export const ImageIsMissingCriterionOption = new IsMissingCriterionOptionClass(
   "isMissing",
   "is_missing",
   ["title", "galleries", "studio", "performers", "tags"]
 );
 
-export const PerformerIsMissingCriterionOption = new IsMissingCriterionOption(
-  "isMissing",
-  "is_missing",
-  [
+export const PerformerIsMissingCriterionOption =
+  new IsMissingCriterionOptionClass("isMissing", "is_missing", [
     "url",
     "twitter",
     "instagram",
@@ -68,28 +67,33 @@ export const PerformerIsMissingCriterionOption = new IsMissingCriterionOption(
     "image",
     "details",
     "stash_id",
-  ]
-);
+  ]);
 
-export const GalleryIsMissingCriterionOption = new IsMissingCriterionOption(
-  "isMissing",
-  "is_missing",
-  ["title", "details", "url", "date", "studio", "performers", "tags", "scenes"]
-);
+export const GalleryIsMissingCriterionOption =
+  new IsMissingCriterionOptionClass("isMissing", "is_missing", [
+    "title",
+    "details",
+    "url",
+    "date",
+    "studio",
+    "performers",
+    "tags",
+    "scenes",
+  ]);
 
-export const TagIsMissingCriterionOption = new IsMissingCriterionOption(
+export const TagIsMissingCriterionOption = new IsMissingCriterionOptionClass(
   "isMissing",
   "is_missing",
   ["image"]
 );
 
-export const StudioIsMissingCriterionOption = new IsMissingCriterionOption(
+export const StudioIsMissingCriterionOption = new IsMissingCriterionOptionClass(
   "isMissing",
   "is_missing",
   ["image", "stash_id", "details"]
 );
 
-export const MovieIsMissingCriterionOption = new IsMissingCriterionOption(
+export const MovieIsMissingCriterionOption = new IsMissingCriterionOptionClass(
   "isMissing",
   "is_missing",
   ["front_image", "back_image", "scenes"]

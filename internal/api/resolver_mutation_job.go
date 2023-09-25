@@ -2,18 +2,17 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/stashapp/stash/internal/manager"
 )
 
 func (r *mutationResolver) StopJob(ctx context.Context, jobID string) (bool, error) {
-	id, err := strconv.Atoi(jobID)
+	idInt, err := strconv.Atoi(jobID)
 	if err != nil {
-		return false, fmt.Errorf("converting id: %w", err)
+		return false, err
 	}
-	manager.GetInstance().JobManager.CancelJob(id)
+	manager.GetInstance().JobManager.CancelJob(idInt)
 
 	return true, nil
 }

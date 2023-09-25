@@ -10,7 +10,6 @@ import AsyncSelect from "react-select/async";
 import AsyncCreatableSelect, {
   AsyncCreatableProps,
 } from "react-select/async-creatable";
-import cx from "classnames";
 
 import { useToast } from "src/hooks/Toast";
 import { useDebounce } from "src/hooks/debounce";
@@ -89,8 +88,8 @@ const SelectComponent = <T, IsMulti extends boolean>(
     ...props,
     styles,
     defaultOptions: true,
-    value: selectedOptions ?? null,
-    className: cx("react-select", props.className),
+    value: selectedOptions,
+    className: "react-select",
     classNamePrefix: "react-select",
     noOptionsMessage: () => noOptionsMessage,
     placeholder: isDisabled ? "" : placeholder,
@@ -120,7 +119,6 @@ export interface IFilterValueProps<T> {
 export interface IFilterProps {
   noSelectionString?: string;
   className?: string;
-  active?: boolean;
   isMulti?: boolean;
   isClearable?: boolean;
   isDisabled?: boolean;
@@ -231,9 +229,13 @@ export const FilterSelectComponent = <
   };
 
   const debounceDelay = 100;
-  const debounceLoadOptions = useDebounce((inputValue, callback) => {
-    loadOptions(inputValue).then(callback);
-  }, debounceDelay);
+  const debounceLoadOptions = useDebounce(
+    (inputValue, callback) => {
+      loadOptions(inputValue).then(callback);
+    },
+    [loadOptions],
+    debounceDelay
+  );
 
   return (
     <SelectComponent<T, IsMulti>

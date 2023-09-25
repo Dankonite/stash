@@ -1,14 +1,13 @@
 import {
   CriterionModifier,
   PhashDistanceCriterionInput,
-  PHashDuplicationCriterionInput,
 } from "src/core/generated-graphql";
 import { IPhashDistanceValue } from "../types";
 import {
   BooleanCriterionOption,
   Criterion,
   CriterionOption,
-  StringCriterion,
+  PhashDuplicateCriterion,
 } from "./criterion";
 
 export const PhashCriterionOption = new CriterionOption({
@@ -57,14 +56,8 @@ export const DuplicatedCriterionOption = new BooleanCriterionOption(
   () => new DuplicatedCriterion()
 );
 
-export class DuplicatedCriterion extends StringCriterion {
+export class DuplicatedCriterion extends PhashDuplicateCriterion {
   constructor() {
     super(DuplicatedCriterionOption);
-  }
-
-  protected toCriterionInput(): PHashDuplicationCriterionInput {
-    return {
-      duplicated: this.value === "true",
-    };
   }
 }

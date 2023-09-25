@@ -21,7 +21,7 @@ type Gallery struct {
 	ZipFiles   []string         `json:"zip_files,omitempty"`
 	FolderPath string           `json:"folder_path,omitempty"`
 	Title      string           `json:"title,omitempty"`
-	URLs       []string         `json:"urls,omitempty"`
+	URL        string           `json:"url,omitempty"`
 	Date       string           `json:"date,omitempty"`
 	Details    string           `json:"details,omitempty"`
 	Rating     int              `json:"rating,omitempty"`
@@ -32,9 +32,6 @@ type Gallery struct {
 	Tags       []string         `json:"tags,omitempty"`
 	CreatedAt  json.JSONTime    `json:"created_at,omitempty"`
 	UpdatedAt  json.JSONTime    `json:"updated_at,omitempty"`
-
-	// deprecated - for import only
-	URL string `json:"url,omitempty"`
 }
 
 func (s Gallery) Filename(basename string, hash string) string {

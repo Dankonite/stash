@@ -144,10 +144,6 @@
     padding-right: 15px;
   }
 
-  .image-selection-parent {
-    min-width: 100%;
-  }
-
   .image-selection {
     .select-buttons {
       align-items: center;
@@ -374,7 +370,6 @@ div.react-datepicker {
 
   .react-datepicker__day {
     color: $text-color;
-
     &.react-datepicker__day--disabled {
       color: $text-muted;
     }
@@ -444,7 +439,6 @@ div.react-datepicker {
     }
   }
 }
-
 /* stylelint-enable */
 
 #date-picker-portal .react-datepicker-popper {

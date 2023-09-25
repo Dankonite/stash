@@ -101,15 +101,14 @@ func importTags(ctx context.Context, tagWriter models.TagFinderCreator, names []
 func createTags(ctx context.Context, tagWriter models.TagFinderCreator, names []string) ([]*models.Tag, error) {
 	var ret []*models.Tag
 	for _, name := range names {
-		newTag := models.NewTag()
-		newTag.Name = name
+		newTag := models.NewTag(name)
 
-		err := tagWriter.Create(ctx, &newTag)
+		err := tagWriter.Create(ctx, newTag)
 		if err != nil {
 			return nil, err
 		}
 
-		ret = append(ret, &newTag)
+		ret = append(ret, newTag)
 	}
 
 	return ret, nil

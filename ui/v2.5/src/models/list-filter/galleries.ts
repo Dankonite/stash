@@ -1,8 +1,10 @@
 import {
   createMandatoryNumberCriterionOption,
   createStringCriterionOption,
+  NullNumberCriterionOption,
   createDateCriterionOption,
   createMandatoryTimestampCriterionOption,
+  createPathCriterionOption,
 } from "./criteria/criterion";
 import { PerformerFavoriteCriterionOption } from "./criteria/favorite";
 import { GalleryIsMissingCriterionOption } from "./criteria/is-missing";
@@ -17,8 +19,6 @@ import {
 } from "./criteria/tags";
 import { ListFilterOptions, MediaSortByOptions } from "./filter-options";
 import { DisplayMode } from "./types";
-import { RatingCriterionOption } from "./criteria/rating";
-import { PathCriterionOption } from "./criteria/path";
 
 const defaultSortBy = "path";
 
@@ -44,21 +44,21 @@ const displayModeOptions = [
 const criterionOptions = [
   createStringCriterionOption("title"),
   createStringCriterionOption("details"),
-  PathCriterionOption,
+  createPathCriterionOption("path"),
   createStringCriterionOption("checksum", "media_info.checksum"),
-  RatingCriterionOption,
+  new NullNumberCriterionOption("rating", "rating100"),
   OrganizedCriterionOption,
   AverageResolutionCriterionOption,
   GalleryIsMissingCriterionOption,
   TagsCriterionOption,
   HasChaptersCriterionOption,
-  createMandatoryNumberCriterionOption("tag_count"),
+  createStringCriterionOption("tag_count"),
   PerformerTagsCriterionOption,
   PerformersCriterionOption,
-  createMandatoryNumberCriterionOption("performer_count"),
+  createStringCriterionOption("performer_count"),
   createMandatoryNumberCriterionOption("performer_age"),
   PerformerFavoriteCriterionOption,
-  createMandatoryNumberCriterionOption("image_count"),
+  createStringCriterionOption("image_count"),
   StudiosCriterionOption,
   createStringCriterionOption("url"),
   createMandatoryNumberCriterionOption("file_count", "zip_file_count"),

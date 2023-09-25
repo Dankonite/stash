@@ -25,7 +25,6 @@ import { RatingSystem } from "src/components/Shared/Rating/RatingSystem";
 import { ModalComponent } from "../Shared/Modal";
 import { IHasStoredID, sortStoredIdObjects } from "src/utils/data";
 import {
-  ObjectListScrapeResult,
   ScrapeResult,
   ZeroableScrapeResult,
   hasScrapedValues,
@@ -119,9 +118,9 @@ const SceneMergeDetails: React.FC<ISceneMergeDetailsProps> = ({
   }
 
   const [performers, setPerformers] = useState<
-    ObjectListScrapeResult<GQL.ScrapedPerformer>
+    ScrapeResult<GQL.ScrapedPerformer[]>
   >(
-    new ObjectListScrapeResult<GQL.ScrapedPerformer>(
+    new ScrapeResult<GQL.ScrapedPerformer[]>(
       sortStoredIdObjects(dest.performers.map(idToStoredID))
     )
   );
@@ -204,8 +203,8 @@ const SceneMergeDetails: React.FC<ISceneMergeDetailsProps> = ({
     );
 
     setPerformers(
-      new ObjectListScrapeResult<GQL.ScrapedPerformer>(
-        sortStoredIdObjects(dest.performers.map(idToStoredID)),
+      new ScrapeResult(
+        dest.performers.map(idToStoredID),
         uniqIDStoredIDs(all.map((s) => s.performers.map(idToStoredID)).flat())
       )
     );

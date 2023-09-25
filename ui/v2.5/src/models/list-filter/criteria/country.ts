@@ -3,15 +3,11 @@ import { CriterionModifier } from "src/core/generated-graphql";
 import { getCountryByISO } from "src/utils/country";
 import { StringCriterion, StringCriterionOption } from "./criterion";
 
-export const CountryCriterionOption = new StringCriterionOption(
-  "country",
-  "country",
-  () => new CountryCriterion()
-);
+const countryCriterionOption = new StringCriterionOption("country", "country");
 
 export class CountryCriterion extends StringCriterion {
   constructor() {
-    super(CountryCriterionOption);
+    super(countryCriterionOption);
   }
 
   protected getLabelValue(intl: IntlShape) {

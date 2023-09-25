@@ -59,7 +59,7 @@ type GalleryUpdateInput struct {
 	ClientMutationID *string  `json:"clientMutationId"`
 	ID               string   `json:"id"`
 	Title            *string  `json:"title"`
-	Urls             []string `json:"urls"`
+	URL              *string  `json:"url"`
 	Date             *string  `json:"date"`
 	Details          *string  `json:"details"`
 	Rating           *int     `json:"rating"`
@@ -70,9 +70,6 @@ type GalleryUpdateInput struct {
 	TagIds           []string `json:"tag_ids"`
 	PerformerIds     []string `json:"performer_ids"`
 	PrimaryFileID    *string  `json:"primary_file_id"`
-
-	// deprecated
-	URL *string `json:"url"`
 }
 
 type GalleryDestroyInput struct {

@@ -321,10 +321,9 @@ func (h *cleanHandler) handleRelatedScenes(ctx context.Context, fileDeleter *fil
 				}
 			}
 
-			scenePartial := models.NewScenePartial()
-			scenePartial.PrimaryFileID = &newPrimaryID
-
-			if _, err := mgr.Repository.Scene.UpdatePartial(ctx, scene.ID, scenePartial); err != nil {
+			if _, err := mgr.Repository.Scene.UpdatePartial(ctx, scene.ID, models.ScenePartial{
+				PrimaryFileID: &newPrimaryID,
+			}); err != nil {
 				return err
 			}
 		}
@@ -367,10 +366,9 @@ func (h *cleanHandler) handleRelatedGalleries(ctx context.Context, fileID models
 				}
 			}
 
-			galleryPartial := models.NewGalleryPartial()
-			galleryPartial.PrimaryFileID = &newPrimaryID
-
-			if _, err := mgr.Repository.Gallery.UpdatePartial(ctx, g.ID, galleryPartial); err != nil {
+			if _, err := mgr.Repository.Gallery.UpdatePartial(ctx, g.ID, models.GalleryPartial{
+				PrimaryFileID: &newPrimaryID,
+			}); err != nil {
 				return err
 			}
 		}
@@ -441,10 +439,9 @@ func (h *cleanHandler) handleRelatedImages(ctx context.Context, fileDeleter *fil
 				}
 			}
 
-			imagePartial := models.NewImagePartial()
-			imagePartial.PrimaryFileID = &newPrimaryID
-
-			if _, err := mgr.Repository.Image.UpdatePartial(ctx, i.ID, imagePartial); err != nil {
+			if _, err := mgr.Repository.Image.UpdatePartial(ctx, i.ID, models.ImagePartial{
+				PrimaryFileID: &newPrimaryID,
+			}); err != nil {
 				return err
 			}
 		}

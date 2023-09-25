@@ -86,9 +86,10 @@ const renderInputGroup = (options: {
 const renderDurationInput = (options: {
   title: string;
   placeholder?: string;
-  value: number | undefined;
+  value: string | undefined;
   isEditing: boolean;
-  onChange: (value: number | undefined) => void;
+  asString?: boolean;
+  onChange: (value: string | undefined) => void;
   labelProps?: FormLabelProps;
   inputProps?: ColProps;
 }) => {

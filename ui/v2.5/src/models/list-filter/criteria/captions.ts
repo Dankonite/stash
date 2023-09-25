@@ -1,28 +1,33 @@
 import { CriterionModifier } from "src/core/generated-graphql";
 import { languageMap, valueToCode } from "src/utils/caption";
+import { CriterionType } from "../types";
 import { CriterionOption, StringCriterion } from "./criterion";
 
 const languageStrings = Array.from(languageMap.values());
 
-export const CaptionsCriterionOption = new CriterionOption({
-  messageID: "captions",
-  type: "captions",
-  modifierOptions: [
-    CriterionModifier.Includes,
-    CriterionModifier.Excludes,
-    CriterionModifier.IsNull,
-    CriterionModifier.NotNull,
-  ],
-  defaultModifier: CriterionModifier.Includes,
-  options: languageStrings,
-  makeCriterion: () => new CaptionCriterion(),
-});
+class CaptionsCriterionOptionType extends CriterionOption {
+  constructor(value: CriterionType) {
+    super({
+      messageID: value,
+      type: value,
+      modifierOptions: [
+        CriterionModifier.Includes,
+        CriterionModifier.Excludes,
+        CriterionModifier.IsNull,
+        CriterionModifier.NotNull,
+      ],
+      defaultModifier: CriterionModifier.Includes,
+      options: languageStrings,
+      makeCriterion: () => new CaptionCriterion(),
+    });
+  }
+}
+
+export const CaptionsCriterionOption = new CaptionsCriterionOptionType(
+  "captions"
+);
 
 export class CaptionCriterion extends StringCriterion {
-  constructor() {
-    super(CaptionsCriterionOption);
-  }
-
   protected toCriterionInput() {
     const value = valueToCode(this.value) ?? "";
 
@@ -30,5 +35,9 @@ export class CaptionCriterion extends StringCriterion {
       value,
       modifier: this.modifier,
     };
+  }
+
+  constructor() {
+    super(CaptionsCriterionOption);
   }
 }

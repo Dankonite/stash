@@ -145,14 +145,15 @@ export const SceneMarkerForm: React.FC<ISceneMarkerForm> = ({
               </Form.Label>
               <div className="col-sm-8 col-xl-12">
                 <DurationInput
-                  value={formik.values.seconds ?? 0}
-                  setValue={(v) => formik.setFieldValue("seconds", v ?? null)}
+                  onValueChange={(s) => formik.setFieldValue("seconds", s)}
                   onReset={() =>
                     formik.setFieldValue(
                       "seconds",
                       Math.round(getPlayerPosition() ?? 0)
                     )
                   }
+                  numericValue={formik.values.seconds}
+                  mandatory
                 />
               </div>
             </div>

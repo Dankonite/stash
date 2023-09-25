@@ -18,8 +18,9 @@ func addSceneStudio(ctx context.Context, sceneWriter models.SceneUpdater, o *mod
 	}
 
 	// set the studio id
-	scenePartial := models.NewScenePartial()
-	scenePartial.StudioID = models.NewOptionalInt(studioID)
+	scenePartial := models.ScenePartial{
+		StudioID: models.NewOptionalInt(studioID),
+	}
 
 	if _, err := sceneWriter.UpdatePartial(ctx, o.ID, scenePartial); err != nil {
 		return false, err
@@ -34,8 +35,9 @@ func addImageStudio(ctx context.Context, imageWriter models.ImageUpdater, i *mod
 	}
 
 	// set the studio id
-	imagePartial := models.NewImagePartial()
-	imagePartial.StudioID = models.NewOptionalInt(studioID)
+	imagePartial := models.ImagePartial{
+		StudioID: models.NewOptionalInt(studioID),
+	}
 
 	if _, err := imageWriter.UpdatePartial(ctx, i.ID, imagePartial); err != nil {
 		return false, err
@@ -50,8 +52,9 @@ func addGalleryStudio(ctx context.Context, galleryWriter GalleryFinderUpdater, o
 	}
 
 	// set the studio id
-	galleryPartial := models.NewGalleryPartial()
-	galleryPartial.StudioID = models.NewOptionalInt(studioID)
+	galleryPartial := models.GalleryPartial{
+		StudioID: models.NewOptionalInt(studioID),
+	}
 
 	if _, err := galleryWriter.UpdatePartial(ctx, o.ID, galleryPartial); err != nil {
 		return false, err
@@ -90,8 +93,9 @@ func (tagger *Tagger) StudioScenes(ctx context.Context, p *models.Studio, paths 
 			}
 
 			// set the studio id
-			scenePartial := models.NewScenePartial()
-			scenePartial.StudioID = models.NewOptionalInt(p.ID)
+			scenePartial := models.ScenePartial{
+				StudioID: models.NewOptionalInt(p.ID),
+			}
 
 			if err := txn.WithTxn(ctx, tagger.TxnManager, func(ctx context.Context) error {
 				_, err := rw.UpdatePartial(ctx, o.ID, scenePartial)
@@ -120,8 +124,9 @@ func (tagger *Tagger) StudioImages(ctx context.Context, p *models.Studio, paths 
 			}
 
 			// set the studio id
-			imagePartial := models.NewImagePartial()
-			imagePartial.StudioID = models.NewOptionalInt(p.ID)
+			imagePartial := models.ImagePartial{
+				StudioID: models.NewOptionalInt(p.ID),
+			}
 
 			if err := txn.WithTxn(ctx, tagger.TxnManager, func(ctx context.Context) error {
 				_, err := rw.UpdatePartial(ctx, i.ID, imagePartial)
@@ -150,8 +155,9 @@ func (tagger *Tagger) StudioGalleries(ctx context.Context, p *models.Studio, pat
 			}
 
 			// set the studio id
-			galleryPartial := models.NewGalleryPartial()
-			galleryPartial.StudioID = models.NewOptionalInt(p.ID)
+			galleryPartial := models.GalleryPartial{
+				StudioID: models.NewOptionalInt(p.ID),
+			}
 
 			if err := txn.WithTxn(ctx, tagger.TxnManager, func(ctx context.Context) error {
 				_, err := rw.UpdatePartial(ctx, o.ID, galleryPartial)

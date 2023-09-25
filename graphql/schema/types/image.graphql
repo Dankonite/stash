@@ -6,8 +6,7 @@ type Image {
   rating: Int @deprecated(reason: "Use 1-100 range with rating100")
   # rating expressed as 1-100
   rating100: Int
-  url: String @deprecated(reason: "Use urls")
-  urls: [String!]!
+  url: String
   date: String
   o_counter: Int
   organized: Boolean!
@@ -49,8 +48,7 @@ input ImageUpdateInput {
   # rating expressed as 1-100
   rating100: Int
   organized: Boolean
-  url: String @deprecated(reason: "Use urls")
-  urls: [String!]
+  url: String
   date: String
 
   studio_id: ID
@@ -70,8 +68,7 @@ input BulkImageUpdateInput {
   # rating expressed as 1-100
   rating100: Int
   organized: Boolean
-  url: String @deprecated(reason: "Use urls")
-  urls: BulkUpdateStrings
+  url: String
   date: String
 
   studio_id: ID

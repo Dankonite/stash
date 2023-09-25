@@ -20,7 +20,7 @@ const withoutEqualsModifierOptions = [
 const defaultModifier = CriterionModifier.IncludesAll;
 const inputType = "tags";
 
-class BaseTagsCriterionOption extends CriterionOption {
+export class TagsCriterionOptionClass extends CriterionOption {
   constructor(
     messageID: string,
     type: CriterionType,
@@ -31,37 +31,37 @@ class BaseTagsCriterionOption extends CriterionOption {
       type,
       modifierOptions,
       defaultModifier,
-      inputType,
       makeCriterion: () => new TagsCriterion(this),
+      inputType,
     });
   }
 }
 
-export const TagsCriterionOption = new BaseTagsCriterionOption(
+export const TagsCriterionOption = new TagsCriterionOptionClass(
   "tags",
   "tags",
   defaultModifierOptions
 );
 
-export const SceneTagsCriterionOption = new BaseTagsCriterionOption(
+export const SceneTagsCriterionOption = new TagsCriterionOptionClass(
   "scene_tags",
   "scene_tags",
   defaultModifierOptions
 );
 
-export const PerformerTagsCriterionOption = new BaseTagsCriterionOption(
+export const PerformerTagsCriterionOption = new TagsCriterionOptionClass(
   "performer_tags",
   "performer_tags",
   withoutEqualsModifierOptions
 );
 
-export const ParentTagsCriterionOption = new BaseTagsCriterionOption(
+export const ParentTagsCriterionOption = new TagsCriterionOptionClass(
   "parent_tags",
   "parents",
   withoutEqualsModifierOptions
 );
 
-export const ChildTagsCriterionOption = new BaseTagsCriterionOption(
+export const ChildTagsCriterionOption = new TagsCriterionOptionClass(
   "sub_tags",
   "children",
   withoutEqualsModifierOptions

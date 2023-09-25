@@ -25,7 +25,11 @@ export const TruncatedText: React.FC<ITruncatedTextProps> = ({
   const [showTooltip, setShowTooltip] = useState(false);
   const target = useRef(null);
 
-  const startShowingTooltip = useDebounce(() => setShowTooltip(true), delay);
+  const startShowingTooltip = useDebounce(
+    () => setShowTooltip(true),
+    [],
+    delay
+  );
 
   if (!text) return <></>;
 

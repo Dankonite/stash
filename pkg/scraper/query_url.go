@@ -66,8 +66,8 @@ func queryURLParametersFromGallery(gallery *models.Gallery) queryURLParameters {
 		ret["title"] = gallery.Title
 	}
 
-	if len(gallery.URLs.List()) > 0 {
-		ret["url"] = gallery.URLs.List()[0]
+	if gallery.URL != "" {
+		ret["url"] = gallery.URL
 	}
 
 	return ret

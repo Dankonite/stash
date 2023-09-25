@@ -14,14 +14,6 @@ type SceneMarker struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-func NewSceneMarker() SceneMarker {
-	currentTime := time.Now()
-	return SceneMarker{
-		CreatedAt: currentTime,
-		UpdatedAt: currentTime,
-	}
-}
-
 // SceneMarkerPartial represents part of a SceneMarker object.
 // It is used to update the database entry.
 type SceneMarkerPartial struct {
@@ -34,8 +26,8 @@ type SceneMarkerPartial struct {
 }
 
 func NewSceneMarkerPartial() SceneMarkerPartial {
-	currentTime := time.Now()
+	updatedTime := time.Now()
 	return SceneMarkerPartial{
-		UpdatedAt: NewOptionalTime(currentTime),
+		UpdatedAt: NewOptionalTime(updatedTime),
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/stashapp/stash/pkg/file/video"
 	"github.com/stashapp/stash/pkg/logger"
@@ -99,17 +100,21 @@ func (h *ScanHandler) Handle(ctx context.Context, f models.File, oldFile models.
 		}
 	} else {
 		// create a new scene
-		newScene := models.NewScene()
+		now := time.Now()
+		newScene := &models.Scene{
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
 
 		logger.Infof("%s doesn't exist. Creating new scene...", f.Base().Path)
 
-		if err := h.CreatorUpdater.Create(ctx, &newScene, []models.FileID{videoFile.ID}); err != nil {
+		if err := h.CreatorUpdater.Create(ctx, newScene, []models.FileID{videoFile.ID}); err != nil {
 			return fmt.Errorf("creating new scene: %w", err)
 		}
 
 		h.PluginCache.RegisterPostHooks(ctx, newScene.ID, plugin.SceneCreatePost, nil, nil)
 
-		existing = []*models.Scene{&newScene}
+		existing = []*models.Scene{newScene}
 	}
 
 	if oldFile != nil {
@@ -157,8 +162,7 @@ func (h *ScanHandler) associateExisting(ctx context.Context, existing []*models.
 			}
 
 			// update updated_at time
-			scenePartial := models.NewScenePartial()
-			if _, err := h.CreatorUpdater.UpdatePartial(ctx, s.ID, scenePartial); err != nil {
+			if _, err := h.CreatorUpdater.UpdatePartial(ctx, s.ID, models.NewScenePartial()); err != nil {
 				return fmt.Errorf("updating scene: %w", err)
 			}
 		}

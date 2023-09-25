@@ -65,10 +65,8 @@ func (i *Importer) galleryJSONToGallery(galleryJSON jsonschema.Gallery) models.G
 	if galleryJSON.Details != "" {
 		newGallery.Details = galleryJSON.Details
 	}
-	if len(galleryJSON.URLs) > 0 {
-		newGallery.URLs = models.NewRelatedStrings(galleryJSON.URLs)
-	} else if galleryJSON.URL != "" {
-		newGallery.URLs = models.NewRelatedStrings([]string{galleryJSON.URL})
+	if galleryJSON.URL != "" {
+		newGallery.URL = galleryJSON.URL
 	}
 	if galleryJSON.Date != "" {
 		d, err := models.ParseDate(galleryJSON.Date)
@@ -119,10 +117,11 @@ func (i *Importer) populateStudio(ctx context.Context) error {
 }
 
 func (i *Importer) createStudio(ctx context.Context, name string) (int, error) {
-	newStudio := models.NewStudio()
-	newStudio.Name = name
+	newStudio := &models.Studio{
+		Name: name,
+	}
 
-	err := i.StudioWriter.Create(ctx, &newStudio)
+	err := i.StudioWriter.Create(ctx, newStudio)
 	if err != nil {
 		return 0, err
 	}
@@ -178,8 +177,7 @@ func (i *Importer) populatePerformers(ctx context.Context) error {
 func (i *Importer) createPerformers(ctx context.Context, names []string) ([]*models.Performer, error) {
 	var ret []*models.Performer
 	for _, name := range names {
-		newPerformer := models.NewPerformer()
-		newPerformer.Name = name
+		newPerformer := *models.NewPerformer(name)
 
 		err := i.PerformerWriter.Create(ctx, &newPerformer)
 		if err != nil {
@@ -237,15 +235,14 @@ func (i *Importer) populateTags(ctx context.Context) error {
 func (i *Importer) createTags(ctx context.Context, names []string) ([]*models.Tag, error) {
 	var ret []*models.Tag
 	for _, name := range names {
-		newTag := models.NewTag()
-		newTag.Name = name
+		newTag := models.NewTag(name)
 
-		err := i.TagWriter.Create(ctx, &newTag)
+		err := i.TagWriter.Create(ctx, newTag)
 		if err != nil {
 			return nil, err
 		}
 
-		ret = append(ret, &newTag)
+		ret = append(ret, newTag)
 	}
 
 	return ret, nil
