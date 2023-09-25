@@ -76,7 +76,9 @@ function setTabKey(newTabKey: string | null) {
             key={p.id}
             tag={p}
             hoverPlacement="bottom"
-            tagType="details"
+            linkType="details"
+            showHierarchyIcon={p.parent_count !== 0}
+            hierarchyTooltipID="tag_parent_tooltip"
           />
         ))}
       </>
@@ -95,7 +97,9 @@ function setTabKey(newTabKey: string | null) {
             key={c.id}
             tag={c}
             hoverPlacement="bottom"
-            tagType="details"
+            linkType="details"
+            showHierarchyIcon={c.child_count !== 0}
+            hierarchyTooltipID="tag_sub_tag_tooltip"
           />
         ))}
       </>
