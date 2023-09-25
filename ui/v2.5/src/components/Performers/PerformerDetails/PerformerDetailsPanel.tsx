@@ -457,6 +457,51 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
       return (
         <>
           <DetailItem
+        id="ethnicity"
+        value={performer?.ethnicity}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="hair_color"
+        value={performer?.hair_color}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="eye_color"
+        value={performer?.eye_color}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="height"
+        value={formatHeight(performer.height_cm)}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="weight"
+        value={formatWeight(performer.weight)}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="penis_length"
+        value={formatPenisLength(performer.penis_length)}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="circumcised"
+        value={formatCircumcised(performer.circumcised)}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="measurements"
+        value={performer?.measurements}
+        fullWidth={fullWidth}
+      />
+      <DetailItem
+        id="fake_tits"
+        value={performer?.fake_tits}
+        fullWidth={fullWidth}
+      />
+          <DetailItem
             id="tattoos"
             value={performer?.tattoos}
             fullWidth={fullWidth}
@@ -472,11 +517,6 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
             fullWidth={fullWidth}
           />
           <DetailItem id="details" value={details} fullWidth={fullWidth} />
-          <DetailItem
-            id="tags"
-            value={renderTagsField()}
-            fullWidth={fullWidth}
-          />
           <DetailItem
             id="stash_ids"
             value={renderStashIDs()}
@@ -530,50 +570,10 @@ export const PerformerDetailsPanel: React.FC<IPerformerDetails> = ({
         ""
       )}
       <DetailItem
-        id="ethnicity"
-        value={performer?.ethnicity}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="hair_color"
-        value={performer?.hair_color}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="eye_color"
-        value={performer?.eye_color}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="height"
-        value={formatHeight(performer.height_cm)}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="weight"
-        value={formatWeight(performer.weight)}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="penis_length"
-        value={formatPenisLength(performer.penis_length)}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="circumcised"
-        value={formatCircumcised(performer.circumcised)}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="measurements"
-        value={performer?.measurements}
-        fullWidth={fullWidth}
-      />
-      <DetailItem
-        id="fake_tits"
-        value={performer?.fake_tits}
-        fullWidth={fullWidth}
-      />
+            id="tags"
+            value={renderTagsField()}
+            fullWidth={fullWidth}
+          />
       {maybeRenderExtraDetails()}
     </div>
     <div className={"custom-nav-tabs"} style={{

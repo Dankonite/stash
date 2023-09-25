@@ -598,6 +598,22 @@
           "heading": "Show all details"
         }
       },
+      "detail-order": {
+        "heading": "Performer Details",
+        "description": "Maybe add explanation here TODO",
+        "collapse_section": {
+          "description": "Details placed here will show when the details header is collapsed, in the order you choose.",
+          "heading": "Collapse Mode Details"
+        },
+        "expanded_section": {
+          "description": "Details placed here will show when the details header is expanded, in the order you choose.",
+          "heading": "Expanded Mode Details"
+        },
+        "hidden_section": {
+          "description": "Details placed here will not be shown, in either mode.",
+          "heading": "Hidden Details"
+        }
+      },
       "funscript_offset": {
         "description": "Time offset in milliseconds for interactive scripts playback.",
         "heading": "Funscript Offset (ms)"

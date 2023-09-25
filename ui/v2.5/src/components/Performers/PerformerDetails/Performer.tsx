@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Tabs, Tab, Col, Row } from "react-bootstrap";
+import { Button, Tabs, Tab } from "react-bootstrap";
 import { useIntl } from "react-intl";
 import { useHistory, Redirect, RouteComponentProps } from "react-router-dom";
 import { Helmet } from "react-helmet";
@@ -35,7 +35,6 @@ import { PerformerEditPanel } from "./PerformerEditPanel";
 import { PerformerSubmitButton } from "./PerformerSubmitButton";
 import {
   faChevronDown,
-  faChevronRight,
   faChevronUp,
   faHeart,
   faLink,

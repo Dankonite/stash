@@ -134,7 +134,14 @@ $dark-gray5: #394b59;
   margin-right: auto !important;
 }
 
-
+.detail-item.details {
+  display: none;
+}
+@media (min-width: 1199.98px) {
+  .detail-group {
+    margin-bottom: 38px;
+  }
+}
 .btn.active:not(.disabled),
 .btn.active.minimal:not(.disabled) {
   background-color: $active;
