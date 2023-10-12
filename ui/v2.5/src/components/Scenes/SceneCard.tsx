@@ -18,6 +18,7 @@ import TextUtils from "src/utils/text";
 import { SceneQueue } from "src/models/sceneQueue";
 import { ConfigurationContext } from "src/hooks/Config";
 import { PerformerPopoverButton } from "../Shared/PerformerPopoverButton";
+import { PerformerNameButton } from  "../Shared/PerformerNameButton";
 import { GridCard } from "../Shared/GridCard";
 import { RatingBanner } from "../Shared/RatingBanner";
 import { FormattedNumber } from "react-intl";
@@ -202,11 +203,13 @@ export const SceneCard: React.FC<ISceneCardProps> = (
       </HoverPopover>
     );
   }
-
+  function maybeRenderPerformerStringPopoverButton() {
+    return <PerformerNameButton performers={props.scene.performers} />
+  }
   function maybeRenderPerformerPopoverButton() {
     if (props.scene.performers.length <= 0) return;
-
-    return <PerformerPopoverButton performers={props.scene.performers} />;
+    return null
+    // return <PerformerPopoverButton performers={props.scene.performers} />;
   }
 
   function maybeRenderMoviePopoverButton() {
@@ -348,8 +351,11 @@ export const SceneCard: React.FC<ISceneCardProps> = (
     ) {
       return (
         <>
-          <hr />
-          <ButtonGroup className="card-popovers">
+          <ButtonGroup className="card-popovers" style={{
+            position: "absolute",
+            right: 0,
+            bottom:10.5
+          }}>
             {maybeRenderTagPopoverButton()}
             {maybeRenderPerformerPopoverButton()}
             {maybeRenderMoviePopoverButton()}
@@ -439,7 +445,12 @@ export const SceneCard: React.FC<ISceneCardProps> = (
       overlays={maybeRenderSceneStudioOverlay()}
       details={
         <div className="scene-card__details">
-          <span className="scene-card__date">{props.scene.date}</span>
+          {maybeRenderPerformerStringPopoverButton()}
+          <div className="date_then_popovers">
+            <span className="scene-card__date">{props.scene.date}</span>
+            {maybeRenderPopoverButtonGroup()}
+          </div>
+          
           <span className="file-path extra-scene-info">
             {objectPath(props.scene)}
           </span>
@@ -450,7 +461,6 @@ export const SceneCard: React.FC<ISceneCardProps> = (
           />
         </div>
       }
-      popovers={maybeRenderPopoverButtonGroup()}
       selected={props.selected}
       selecting={props.selecting}
       onSelectedChanged={props.onSelectedChanged}

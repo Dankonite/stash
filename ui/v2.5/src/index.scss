@@ -44,8 +44,9 @@ body {
   margin: 0;
   overflow-x: hidden;
   padding: 3.8rem 0 0 0;
+  background-image:url("./dark-gradient-background-free-vector.jpg");
+  background-size: cover;
 }
-
 code,
 .code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
@@ -909,10 +910,10 @@ div.dropdown-menu {
 }
 
 .card {
-  background-color: $card-bg;
+  background-color: transparent;
+  backdrop-filter: blur(50px);
   border-radius: 3px;
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0),
-    0 0 0 rgba(16, 22, 26, 0);
+  box-shadow: 0 0 3px 3px rgba(16, 22, 26, 0.4);
   padding: 20px;
 }
 

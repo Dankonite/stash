@@ -232,10 +232,7 @@ hr {
 .detail-group {
   height: fit-content
 }
-.details-edit div, .details-edit .btn {
-  height: 31.5px;
-  display: block;
-}
+
 .details-edit div>.btn {
   height: 100%;
   display: block;
@@ -347,14 +344,14 @@ div>.details-edit.mb-2 {
 .popover {
   max-width: inherit;
 }
-.scene-card__details, .studio-card__details {
-  display: none;
+.scene-card__description {
+  display: none !important;
 }
 .card {
   border: none;
   margin: 5px;
   overflow: hidden;
-  border-radius: .75rem!important;
+
 }
 .scene-card img {
   transition: opacity 300ms ease-in-out;

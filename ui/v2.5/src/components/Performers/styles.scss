@@ -175,7 +175,10 @@
     }
   }
 }
-.scene-card__date, .tag-parent-tags, .tag-sub-tags {
+.scene-card__date {
+  display: block;
+}
+.tag-parent-tags, .tag-sub-tags {
   display: none;
 }
 .performer-card__age {
@@ -186,7 +189,6 @@
   align-items: center;
   column-gap: 0.5rem;
   display: flex;
-  justify-content: center;
 }
 
 .fa-mars {
