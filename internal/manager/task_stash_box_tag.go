@@ -155,6 +155,13 @@ func (t *StashBoxBatchTagTask) processMatchedPerformer(ctx context.Context, p *m
 
 			partial := p.ToPartial(t.box.Endpoint, excluded, existingStashIDs)
 
+			existingStashIDs, err := qb.GetStashIDs(ctx, storedID)
+			if err != nil {
+				return err
+			}
+
+			partial := p.ToPartial(t.box.Endpoint, excluded, existingStashIDs)
+
 			if _, err := qb.UpdatePartial(ctx, t.performer.ID, partial); err != nil {
 				return err
 			}
@@ -296,6 +303,13 @@ func (t *StashBoxBatchTagTask) processMatchedStudio(ctx context.Context, s *mode
 		r := instance.Repository
 		err = r.WithTxn(ctx, func(ctx context.Context) error {
 			qb := r.Studio
+
+			existingStashIDs, err := qb.GetStashIDs(ctx, storedID)
+			if err != nil {
+				return err
+			}
+
+			partial := s.ToPartial(s.StoredID, t.box.Endpoint, excluded, existingStashIDs)
 
 			existingStashIDs, err := qb.GetStashIDs(ctx, storedID)
 			if err != nil {

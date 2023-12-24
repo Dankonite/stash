@@ -657,6 +657,11 @@ func (t *ExportTask) exportImage(ctx context.Context, wg *sync.WaitGroup, jobCha
 			continue
 		}
 
+		if err := s.LoadURLs(ctx, repo.Image); err != nil {
+			logger.Errorf("[images] <%s> error getting image urls: %s", imageHash, err.Error())
+			continue
+		}
+
 		newImageJSON := image.ToBasicJSON(s)
 
 		// export files
