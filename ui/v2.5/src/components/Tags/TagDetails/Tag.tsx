@@ -147,7 +147,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
   useEffect(() => {
     Mousetrap.bind("e", () => toggleEditing());
     Mousetrap.bind("d d", () => {
-      onDelete();
+      setIsDeleteAlertOpen(true);
     });
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
 
@@ -182,12 +182,12 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         parents: updated.parents,
         children: updated.children,
       });
-      Toast.success({
-        content: intl.formatMessage(
+      Toast.success(
+        intl.formatMessage(
           { id: "toast.updated_entity" },
           { entity: intl.formatMessage({ id: "tag" }).toLocaleLowerCase() }
-        ),
-      });
+        )
+      );
     }
   }
 
@@ -195,9 +195,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
     if (!tag.id) return;
     try {
       await mutateMetadataAutoTag({ tags: [tag.id] });
-      Toast.success({
-        content: intl.formatMessage({ id: "toast.started_auto_tagging" }),
-      });
+      Toast.success(intl.formatMessage({ id: "toast.started_auto_tagging" }));
     } catch (e) {
       Toast.error(e);
     }
@@ -539,7 +537,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
           <div className="detail-header-image">
             {encodingImage ? (
               <LoadingIndicator
-                message={`${intl.formatMessage({ id: "encoding_image" })}...`}
+                message={intl.formatMessage({ id: "actions.encoding_image" })}
               />
             ) : (
               renderImage()
