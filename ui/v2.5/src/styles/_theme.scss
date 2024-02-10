@@ -28,7 +28,7 @@ $pre-color: $text-color;
 $navbar-dark-color: $text-color;
 $popover-bg: $secondary;
 $dark-text: #000;
-$textfield-bg: rgba(16, 22, 26, 0.3);
+$textfield-bg: $menu-gray;
 $card-bg: $menu-gray;
 $card-cap-bg: rgba(#000, 0.03);
 
@@ -75,8 +75,8 @@ $dark-gray5: #394b59;
       order: 3!important;
       position: absolute !important;
       left: 0 !important;
-      top: 3.8rem !important;
-    border-bottom-right-radius: .75rem !important;
+      top: 3rem !important;
+      border-bottom-right-radius: .75rem !important;
   }
   .navbar-buttons>.mr-2 {
     position: absolute !important;
