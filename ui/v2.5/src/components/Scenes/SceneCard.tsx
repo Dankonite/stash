@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, ButtonGroup } from "react-bootstrap";
+import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
@@ -33,6 +33,7 @@ import {
 import { objectPath, objectTitle } from "src/core/files";
 import { PreviewScrubber } from "./PreviewScrubber";
 import ScreenUtils from "src/utils/screen";
+import { PatchComponent } from "src/pluginApi";
 
 interface IScenePreviewProps {
   isPortrait: boolean;
@@ -135,11 +136,11 @@ const SceneCardPopovers = PatchComponent(
         </HoverPopover>
       );
     }
-
+    
     function maybeRenderPerformerPopoverButton() {
       if (props.scene.performers.length <= 0) return;
-
-      return <PerformerPopoverButton performers={props.scene.performers} />;
+      return null
+      // return <PerformerPopoverButton performers={props.scene.performers} />;
     }
 
     function maybeRenderMoviePopoverButton() {
@@ -244,11 +245,7 @@ const SceneCardPopovers = PatchComponent(
             overlay={<Tooltip id="organised-tooltip">{"Organized"}</Tooltip>}
             placement="bottom"
           >
-            <div className="organized">
-              <Button className="minimal">
-                <Icon icon={faBox} />
-              </Button>
-            </div>
+            <></>
           </OverlayTrigger>
         );
       }
@@ -287,7 +284,11 @@ const SceneCardPopovers = PatchComponent(
         return (
           <>
             <hr />
-            <ButtonGroup className="card-popovers">
+            <ButtonGroup className="card-popovers" style={{
+              position: "absolute",
+              right: 0,
+              bottom: 10.5
+            }}>
               {maybeRenderTagPopoverButton()}
               {maybeRenderPerformerPopoverButton()}
               {maybeRenderMoviePopoverButton()}
@@ -303,25 +304,6 @@ const SceneCardPopovers = PatchComponent(
     }
 
     return <>{maybeRenderPopoverButtonGroup()}</>;
-  }
-);
-
-const SceneCardDetails = PatchComponent(
-  "SceneCard.Details",
-  (props: ISceneCardProps) => {
-    return (
-      <div className="scene-card__details">
-        <span className="scene-card__date">{props.scene.date}</span>
-        <span className="file-path extra-scene-info">
-          {objectPath(props.scene)}
-        </span>
-        <TruncatedText
-          className="scene-card__description"
-          text={props.scene.details}
-          lineCount={3}
-        />
-      </div>
-    );
   }
 );
 
@@ -539,16 +521,17 @@ export const SceneCard = PatchComponent(
           start: timestamp,
         })
       : `/scenes/${props.scene.id}?t=${timestamp}`;
-
-    history.push(link);
   }
-
+  function maybeRenderPerformerStringPopoverButton() {
+    return <PerformerNameButton performers={props.scene.performers} />
+  }
+  
   return (
     <GridCard
       className={`scene-card ${zoomIndex()} ${filelessClass()}`}
       url={sceneLink}
       title={objectTitle(props.scene)}
-        width={cardWidth}
+      width={cardWidth}
       linkClassName="scene-card-link"
       thumbnailSectionClassName="video-section"
       resumeTime={props.scene.resume_time ?? undefined}
@@ -558,43 +541,27 @@ export const SceneCard = PatchComponent(
           ? props.scene.paths.interactive_heatmap ?? undefined
           : undefined
       }
-      image={
-        <>
-          <ScenePreview
-            image={props.scene.paths.screenshot ?? undefined}
-            video={props.scene.paths.preview ?? undefined}
-            isPortrait={isPortrait()}
-            soundActive={configuration?.interface?.soundOnPreview ?? false}
-            vttPath={props.scene.paths.vtt ?? undefined}
-            onScrubberClick={onScrubberClick}
-          />
-          <RatingBanner rating={props.scene.rating100} />
-          {maybeRenderSceneSpecsOverlay()}
-          {maybeRenderInteractiveSpeedOverlay()}
-        </>
-      }
-      overlays={maybeRenderSceneStudioOverlay()}
+      image={<SceneCardImage {...props} />}
+      overlays={<SceneCardOverlays {...props} />}
       details={
         <div className="scene-card__details">
           {maybeRenderPerformerStringPopoverButton()}
-          <div className="date_then_popovers">
-            <span className="scene-card__date">{props.scene.date}</span>
-            {maybeRenderPopoverButtonGroup()}
-          </div>
-          
+          <br></br>
+          <span className="scene-card__date">{props.scene.date}</span>
           <span className="file-path extra-scene-info">
-            {objectPath(props.scene)}
+          {objectPath(props.scene)}
           </span>
           <TruncatedText
-            className="scene-card__description"
-            text={props.scene.details}
-            lineCount={3}
-          />
+          className="scene-card__description"
+          text={props.scene.details}
+          lineCount={3}
+        />
         </div>
       }
+      popovers={<SceneCardPopovers {...props} />}
       selected={props.selected}
       selecting={props.selecting}
       onSelectedChanged={props.onSelectedChanged}
     />
   );
-};
+})
