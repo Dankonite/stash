@@ -162,7 +162,7 @@
 #tasks-panel {
   @media (min-width: 576px) and (min-height: 600px) {
     .tasks-panel-queue {
-      background-color: #202b33;
+      background-color: $bg-color;
       margin-top: -1rem;
       padding-bottom: 0.25rem;
       padding-top: 1rem;

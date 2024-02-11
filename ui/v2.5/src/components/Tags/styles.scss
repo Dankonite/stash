@@ -18,9 +18,12 @@
     min-width: 6rem;
   }
 }
-
+.thumbnail-section {
+  width: auto;
+}
 .tag-card {
-  padding: 0.5rem;
+  padding: 0!important;
+  width: auto!important;
 
   @media (max-width: 576px) {
     width: 100%;

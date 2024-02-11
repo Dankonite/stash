@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, ButtonGroup } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
@@ -18,6 +18,7 @@ import TextUtils from "src/utils/text";
 import { SceneQueue } from "src/models/sceneQueue";
 import { ConfigurationContext } from "src/hooks/Config";
 import { PerformerPopoverButton } from "../Shared/PerformerPopoverButton";
+import { PerformerNameButton } from  "../Shared/PerformerNameButton";
 import { GridCard, calculateCardWidth } from "../Shared/GridCard";
 import { RatingBanner } from "../Shared/RatingBanner";
 import { FormattedNumber } from "react-intl";
@@ -31,7 +32,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { objectPath, objectTitle } from "src/core/files";
 import { PreviewScrubber } from "./PreviewScrubber";
-import { PatchComponent } from "src/pluginApi";
 import ScreenUtils from "src/utils/screen";
 
 interface IScenePreviewProps {
@@ -470,6 +470,11 @@ export const SceneCard = PatchComponent(
       () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
       [props.scene]
     );
+  function isPortrait() {
+    const width = file?.width ? file.width : 0;
+    const height = file?.height ? file.height : 0;
+    return height > width;
+  }
 
     function zoomIndex() {
       if (!props.compact && props.zoomIndex !== undefined) {
@@ -484,8 +489,8 @@ export const SceneCard = PatchComponent(
         return "fileless";
       }
 
-      return "";
-    }
+    return "";
+  }
 
     useEffect(() => {
       if (
@@ -526,29 +531,70 @@ export const SceneCard = PatchComponent(
         })
       : `/scenes/${props.scene.id}`;
 
-    return (
-      <GridCard
-        className={`scene-card ${zoomIndex()} ${filelessClass()}`}
-        url={sceneLink}
-        title={objectTitle(props.scene)}
-        width={cardWidth}
-        linkClassName="scene-card-link"
-        thumbnailSectionClassName="video-section"
-        resumeTime={props.scene.resume_time ?? undefined}
-        duration={file?.duration ?? undefined}
-        interactiveHeatmap={
-          props.scene.interactive_speed
-            ? props.scene.paths.interactive_heatmap ?? undefined
-            : undefined
-        }
-        image={<SceneCardImage {...props} />}
-        overlays={<SceneCardOverlays {...props} />}
-        details={<SceneCardDetails {...props} />}
-        popovers={<SceneCardPopovers {...props} />}
-        selected={props.selected}
-        selecting={props.selecting}
-        onSelectedChanged={props.onSelectedChanged}
-      />
-    );
+  function onScrubberClick(timestamp: number) {
+    const link = props.queue
+      ? props.queue.makeLink(props.scene.id, {
+          sceneIndex: props.index,
+          continue: cont,
+          start: timestamp,
+        })
+      : `/scenes/${props.scene.id}?t=${timestamp}`;
+
+    history.push(link);
   }
-);
+
+  return (
+    <GridCard
+      className={`scene-card ${zoomIndex()} ${filelessClass()}`}
+      url={sceneLink}
+      title={objectTitle(props.scene)}
+        width={cardWidth}
+      linkClassName="scene-card-link"
+      thumbnailSectionClassName="video-section"
+      resumeTime={props.scene.resume_time ?? undefined}
+      duration={file?.duration ?? undefined}
+      interactiveHeatmap={
+        props.scene.interactive_speed
+          ? props.scene.paths.interactive_heatmap ?? undefined
+          : undefined
+      }
+      image={
+        <>
+          <ScenePreview
+            image={props.scene.paths.screenshot ?? undefined}
+            video={props.scene.paths.preview ?? undefined}
+            isPortrait={isPortrait()}
+            soundActive={configuration?.interface?.soundOnPreview ?? false}
+            vttPath={props.scene.paths.vtt ?? undefined}
+            onScrubberClick={onScrubberClick}
+          />
+          <RatingBanner rating={props.scene.rating100} />
+          {maybeRenderSceneSpecsOverlay()}
+          {maybeRenderInteractiveSpeedOverlay()}
+        </>
+      }
+      overlays={maybeRenderSceneStudioOverlay()}
+      details={
+        <div className="scene-card__details">
+          {maybeRenderPerformerStringPopoverButton()}
+          <div className="date_then_popovers">
+            <span className="scene-card__date">{props.scene.date}</span>
+            {maybeRenderPopoverButtonGroup()}
+          </div>
+          
+          <span className="file-path extra-scene-info">
+            {objectPath(props.scene)}
+          </span>
+          <TruncatedText
+            className="scene-card__description"
+            text={props.scene.details}
+            lineCount={3}
+          />
+        </div>
+      }
+      selected={props.selected}
+      selecting={props.selecting}
+      onSelectedChanged={props.onSelectedChanged}
+    />
+  );
+};
