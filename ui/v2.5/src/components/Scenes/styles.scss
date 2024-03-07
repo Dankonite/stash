@@ -16,13 +16,20 @@
 .video-section {
   position: relative;
 }
-
+a:visited {
+  color: inherit;
+}
 .card-section {
-  margin-top:auto;
+  height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   margin-bottom: 0;
   padding: 0 .75rem 0 .75rem;
 }
-
+.TruncatedText {
+  -webkit-line-clamp: 1!important;
+}
 .performer-tag-container,
 .movie-tag-container {
   display: inline-block;
@@ -248,8 +255,42 @@ textarea.scene-description {
     }
   }
 }
+.perfname-list .comma-list li span::after {
+  content: ", ";
+}
+.perfname-list .comma-list li:last-child span::after {
+  content: "";
+}
+.perfname-list:hover .comma-list.overflowable {
+  max-height: unset!important;
+}
 
+.perfname-list:hover {
+  position: absolute;
+  display: block;
+  z-index: 100;
+  background: #202020;
+  margin-right: unset!important;
+  border-bottom-right-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+.perfname-list:hover .comma-list.overflowable {
+  padding-bottom: .3rem!important;
+}
+.perfname-list:hover li span {
+  display: inline!important;
+}
+.scene-card.card:hover {
+  overflow: visible!important;
+}
+.perfname-list {
+  margin-left: -.75rem;
+  margin-right: -.75rem;
+  padding-left: .75rem;
+  padding-right: .75rem;
+}
 .scene-card.card {
+  // height: fit-content;
   overflow: hidden;
   padding: 0;
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, ButtonGroup, ModalBody, ModalFooter, ModalTitle, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
@@ -24,6 +24,7 @@ import { RatingBanner } from "../Shared/RatingBanner";
 import { FormattedNumber } from "react-intl";
 import {
   faBox,
+  faVideo,
   faCopy,
   faFilm,
   faImages,
@@ -34,7 +35,8 @@ import { objectPath, objectTitle } from "src/core/files";
 import { PreviewScrubber } from "./PreviewScrubber";
 import ScreenUtils from "src/utils/screen";
 import { PatchComponent } from "src/pluginApi";
-
+import { TagDialog } from "./TagDialog";
+import { MarkerDialog } from "./MarkerDialog";
 interface IScenePreviewProps {
   isPortrait: boolean;
   image?: string;
@@ -122,18 +124,27 @@ const SceneCardPopovers = PatchComponent(
       const popoverContent = props.scene.tags.map((tag) => (
         <TagLink key={tag.id} tag={tag} />
       ));
-
+      const [tagModal, setTagModal] = useState(false);
+      function onCancelTagDialog() {
+        setTagModal(false)
+      }
       return (
+      <>
+        {tagModal ? <TagDialog scene={props.scene} onCancel={onCancelTagDialog}/> : <></>}
         <HoverPopover
           className="tag-count"
           placement="bottom"
           content={popoverContent}
-        >
-          <Button className="minimal">
+          > 
+          <Button 
+            className="minimal"
+            onClick={() => setTagModal(true)}
+            >
             <Icon icon={faTag} />
             <span>{props.scene.tags.length}</span>
           </Button>
         </HoverPopover>
+      </>
       );
     }
     
@@ -187,18 +198,27 @@ const SceneCardPopovers = PatchComponent(
         const markerWithScene = { ...marker, scene: { id: props.scene.id } };
         return <SceneMarkerLink key={marker.id} marker={markerWithScene} />;
       });
-
+      const [markerModal, setMarkerModal] = useState(false);
+      function onCancelMarkerDialog() {
+        setMarkerModal(false)
+      }
       return (
+        <>
+        {markerModal ? <MarkerDialog scene={props.scene} onCancel={onCancelMarkerDialog}/> : <></>}
         <HoverPopover
           className="marker-count"
           placement="bottom"
           content={popoverContent}
         >
-          <Button className="minimal">
+          <Button 
+            className="minimal"
+            onClick={() => setMarkerModal(true)}
+            >
             <Icon icon={faMapMarkerAlt} />
             <span>{props.scene.scene_markers.length}</span>
           </Button>
         </HoverPopover>
+        </>
       );
     }
 
@@ -525,7 +545,30 @@ export const SceneCard = PatchComponent(
   function maybeRenderPerformerStringPopoverButton() {
     return <PerformerNameButton performers={props.scene.performers} />
   }
-  
+  function maybeRenderStudioString() {
+    const fw = {
+      fontWeight: "500",
+      fontSize: "1.1rem",
+    };
+    const mw = {
+      maxWidth: "70%"
+    }
+    return (props.scene.studio ? (
+    <>
+    <hr></hr>
+    <div className="d-inline-block mr-2" style={mw}>
+      <Link
+      to={`/studios/${props.scene.studio?.id}?sortby=date`}
+      className="studio-name col p-0"
+      >
+      {/* <Icon icon={faVideo} /> */}
+      <span style={fw}>{props.scene.studio?.name}</span>
+      </Link>
+    </div>
+    </>
+    ) : (null)
+    );
+  }
   return (
     <GridCard
       className={`scene-card ${zoomIndex()} ${filelessClass()}`}
@@ -542,20 +585,33 @@ export const SceneCard = PatchComponent(
           : undefined
       }
       image={<SceneCardImage {...props} />}
-      overlays={<SceneCardOverlays {...props} />}
+      // overlays={<SceneCardOverlays {...props} />}
       details={
-        <div className="scene-card__details">
+        <div className="scene-card__details" style={{
+          marginBottom: "0.75rem",
+          display: "flex",
+          height: "-webkit-fill-available",
+          flexDirection: "column"
+        }}>          
           {maybeRenderPerformerStringPopoverButton()}
-          <br></br>
+          <div style={{
+            marginTop: "auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            height: "100%"
+            }}>
           <span className="scene-card__date">{props.scene.date}</span>
+          {maybeRenderStudioString()}
           <span className="file-path extra-scene-info">
           {objectPath(props.scene)}
           </span>
           <TruncatedText
           className="scene-card__description"
           text={props.scene.details}
-          lineCount={3}
-        />
+          lineCount={3}     
+          />
+          </div>
         </div>
       }
       popovers={<SceneCardPopovers {...props} />}
