@@ -1,5 +1,5 @@
 import { Tabs, Tab, Dropdown, Button } from "react-bootstrap";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useHistory, Redirect, RouteComponentProps } from "react-router-dom";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Helmet } from "react-helmet";
@@ -44,7 +44,7 @@ import { useScrollToTopOnMount } from "src/hooks/scrollToTop";
 
 interface IProps {
   tag: GQL.TagDataFragment;
-  tabKey: TabKey;
+  tabKey?: TabKey;
 }
 
 interface ITagParams {
@@ -61,8 +61,6 @@ const validTabs = [
   "performers",
 ] as const;
 type TabKey = (typeof validTabs)[number];
-
-const defaultTab: TabKey = "default";
 
 function isTabKey(tab: string): tab is TabKey {
   return validTabs.includes(tab as TabKey);
@@ -127,20 +125,23 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
     return ret;
   }, [sceneCount, imageCount, galleryCount, sceneMarkerCount, performerCount]);
 
-  if (tabKey === defaultTab) {
-    tabKey = populatedDefaultTab;
-  }
+  const setTabKey = useCallback(
+    (newTabKey: string | null) => {
+      if (!newTabKey) newTabKey = populatedDefaultTab;
+      if (newTabKey === tabKey) return;
 
-  function setTabKey(newTabKey: string | null) {
-    if (!newTabKey || newTabKey === defaultTab) newTabKey = populatedDefaultTab;
-    if (newTabKey === tabKey) return;
+      if (isTabKey(newTabKey)) {
+        history.replace(`/tags/${tag.id}/${newTabKey}`);
+      }
+    },
+    [populatedDefaultTab, tabKey, history, tag.id]
+  );
 
-    if (newTabKey === populatedDefaultTab) {
-      history.replace(`/tags/${tag.id}`);
-    } else if (isTabKey(newTabKey)) {
-      history.replace(`/tags/${tag.id}/${newTabKey}`);
+  useEffect(() => {
+    if (!tabKey) {
+      setTabKey(populatedDefaultTab);
     }
-  }
+  }, [setTabKey, populatedDefaultTab, tabKey]);
 
   // set up hotkeys
   useEffect(() => {
@@ -393,6 +394,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
           onImageChange={() => {}}
           onClearImage={() => {}}
           onAutoTag={onAutoTag}
+          autoTagDisabled={tag.ignore_auto_tag}
           onDelete={onDelete}
           classNames="mb-2"
           customButtons={renderMergeButton()}
@@ -587,11 +589,7 @@ const TagLoader: React.FC<RouteComponentProps<ITagParams>> = ({
   if (!data?.findTag)
     return <ErrorMessage error={`No tag found with id ${id}.`} />;
 
-  if (!tab) {
-    return <TagPage tag={data.findTag} tabKey={defaultTab} />;
-  }
-
-  if (!isTabKey(tab)) {
+  if (tab && !isTabKey(tab)) {
     return (
       <Redirect
         to={{
@@ -602,7 +600,7 @@ const TagLoader: React.FC<RouteComponentProps<ITagParams>> = ({
     );
   }
 
-  return <TagPage tag={data.findTag} tabKey={tab} />;
+  return <TagPage tag={data.findTag} tabKey={tab as TabKey | undefined} />;
 };
 
 export default TagLoader;

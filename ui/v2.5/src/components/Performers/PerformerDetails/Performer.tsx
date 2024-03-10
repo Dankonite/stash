@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Tabs, Tab } from "react-bootstrap";
 import { useIntl } from "react-intl";
 import { useHistory, Redirect, RouteComponentProps } from "react-router-dom";
@@ -49,7 +49,7 @@ import { ExternalLink } from "src/components/Shared/ExternalLink";
 
 interface IProps {
   performer: GQL.PerformerDataFragment;
-  tabKey: TabKey;
+  tabKey?: TabKey;
 }
 
 interface IPerformerParams {
@@ -66,8 +66,6 @@ const validTabs = [
   "appearswith",
 ] as const;
 type TabKey = (typeof validTabs)[number];
-
-const defaultTab: TabKey = "default";
 
 function isTabKey(tab: string): tab is TabKey {
   return validTabs.includes(tab as TabKey);
@@ -137,20 +135,23 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     return ret;
   }, [performer]);
 
-  if (tabKey === defaultTab) {
-    tabKey = populatedDefaultTab;
-  }
+  const setTabKey = useCallback(
+    (newTabKey: string | null) => {
+      if (!newTabKey) newTabKey = populatedDefaultTab;
+      if (newTabKey === tabKey) return;
 
-  function setTabKey(newTabKey: string | null) {
-    if (!newTabKey || newTabKey === defaultTab) newTabKey = populatedDefaultTab;
-    if (newTabKey === tabKey) return;
+      if (isTabKey(newTabKey)) {
+        history.replace(`/performers/${performer.id}/${newTabKey}`);
+      }
+    },
+    [populatedDefaultTab, tabKey, history, performer.id]
+  );
 
-    if (newTabKey === populatedDefaultTab) {
-      history.replace(`/performers/${performer.id}`);
-    } else if (isTabKey(newTabKey)) {
-      history.replace(`/performers/${performer.id}/${newTabKey}`);
+  useEffect(() => {
+    if (!tabKey) {
+      setTabKey(populatedDefaultTab);
     }
-  }
+  }, [setTabKey, populatedDefaultTab, tabKey]);
 
   async function onAutoTag() {
     try {
@@ -410,6 +411,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
               onToggleEdit={() => toggleEditing()}
               onDelete={onDelete}
               onAutoTag={onAutoTag}
+              autoTagDisabled={performer.ignore_auto_tag}
               isNew={false}
               isEditing={false}
               onSave={() => {}}
@@ -435,7 +437,6 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
       return (
         <PerformerDetailsPanel
           performer={performer}
-          tabKey={tabKey}
           collapsed={collapsed}
           fullWidth={!collapsed && !compactExpandedDetails}
         />
@@ -445,7 +446,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
 
   function maybeRenderCompressedDetails() {
     if (!isEditing && loadStickyHeader) {
-      return <CompressedPerformerDetailsPanel performer={performer} tabKey={tabKey} />;
+      return <CompressedPerformerDetailsPanel performer={performer} />;
     }
   }
 
@@ -658,11 +659,7 @@ const PerformerLoader: React.FC<RouteComponentProps<IPerformerParams>> = ({
   if (!data?.findPerformer)
     return <ErrorMessage error={`No performer found with id ${id}.`} />;
 
-  if (!tab) {
-    return <PerformerPage performer={data.findPerformer} tabKey={defaultTab} />;
-  }
-
-  if (!isTabKey(tab)) {
+  if (tab && !isTabKey(tab)) {
     return (
       <Redirect
         to={{
@@ -673,7 +670,12 @@ const PerformerLoader: React.FC<RouteComponentProps<IPerformerParams>> = ({
     );
   }
 
-  return <PerformerPage performer={data.findPerformer} tabKey={tab} />;
+  return (
+    <PerformerPage
+      performer={data.findPerformer}
+      tabKey={tab as TabKey | undefined}
+    />
+  );
 };
 
 export default PerformerLoader;
