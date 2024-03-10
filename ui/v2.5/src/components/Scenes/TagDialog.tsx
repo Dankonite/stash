@@ -3,25 +3,26 @@ import * as GQL from "src/core/generated-graphql";
 import { Button, Modal } from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
 import { Link } from "react-router-dom";
+import { queryFindTagsByIDForSelect } from "src/core/StashService";
 interface IProps {
     scene: GQL.SlimSceneDataFragment;
-    onCancel: () => void; 
+    onCancel: () => void;
 }
+
 export const TagDialog: React.FC<IProps> = ({
     scene,
     onCancel,
 }) => {
-    const { data, loading, error } = GQL.useFindSceneQuery({
-        variables: {
-           id: scene.id
-        },
-      });
-
-
-    const tagContent = data?.findScene?.tags.map((tag) => (
-        <div className="TagDialog" key={tag.id}>
+    const ids: number[] = []
+    scene.tags.forEach((tag) => {ids.push(Number(tag.id))})
+    // console.info(ids)
+    const {data} = GQL.useFindTagsQuery({variables: {ids: ids}})
+    // console.info(data?.findTags.tags)
+    const tagContent = data?.findTags.tags.map( (tag) => (
+            <>
+            <div className="TagDialog" key={tag.id}>
             <Link
-            to={`/tag/${tag.id}`}
+            to={`/tags/${tag.id}?sortby=random`}
             style={{
                 display: "flex",
                 flexDirection: "column",
@@ -49,11 +50,15 @@ export const TagDialog: React.FC<IProps> = ({
                 {tag.name}
             </span>
             </Link>
-        </div>
+            </div>
+            </>
     ))
     return (
         <>
-        <Modal show onHide={() => onCancel()} className="tags-dialog">
+        <Modal show onHide={() => onCancel()} className="tags-dialog" style={{
+            maxHeight: "90vh",
+            height: "fit-content"
+        }}>
             <Modal.Header style={{
                 borderTopLeftRadius: "1rem",
                 borderTopRightRadius: "1rem"
@@ -65,7 +70,11 @@ export const TagDialog: React.FC<IProps> = ({
                     <FormattedMessage id="actions.close" />
                 </Button>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body style={{
+                overflowY: "scroll",
+                maxHeight: "75vh",
+                height: "fit-content"
+            }}>
             <div
             key={scene.id}
             style={{
@@ -74,7 +83,7 @@ export const TagDialog: React.FC<IProps> = ({
                 justifyContent: "center",
             }}
             >
-                {tagContent}
+                {tagContent}     
             </div>
             </Modal.Body>
             <Modal.Footer style={{

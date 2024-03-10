@@ -12,7 +12,16 @@
     margin-right: .4rem;
   }
 }
-
+.tags-dialog {
+  padding-right: 0!important;
+  display: flex!important;
+  justify-content: center!important;
+}
+.tags-dialog>* {
+  width: 900px;
+  max-width: 90vw;
+  display: flex;
+}
 .video-section {
   position: relative;
 }
