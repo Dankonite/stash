@@ -26,10 +26,10 @@ export const SceneDetailPanel: React.FC<ISceneDetailProps> = (props) => {
     if (!props.scene.details || props.scene.details === "") return;
     return (
       <>
-        <h6>
+        {/* <h6>
           <FormattedMessage id="details" />:{" "}
         </h6>
-        <p className="pre">{props.scene.details}</p>
+        <p className="pre">{props.scene.details}</p> */}
       </>
     );
   }

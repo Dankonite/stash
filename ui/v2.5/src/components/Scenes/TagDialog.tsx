@@ -13,8 +13,8 @@ export const TagDialog: React.FC<IProps> = ({
     scene,
     onCancel,
 }) => {
-    const ids: number[] = []
-    scene.tags.forEach((tag) => {ids.push(Number(tag.id))})
+    const ids: string[] = []
+    scene.tags.forEach((tag) => {ids.push(tag.id)})
     // console.info(ids)
     const {data} = GQL.useFindTagsQuery({variables: {ids: ids}})
     // console.info(data?.findTags.tags)
