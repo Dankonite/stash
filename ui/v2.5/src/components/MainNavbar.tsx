@@ -49,6 +49,10 @@ const messages = defineMessages({
     id: "home",
     defaultMessage: "Home",
   },
+  recommendations: {
+    id: "recomend",
+    defaultMessage: "Recommendations"
+  },
   scenes: {
     id: "scenes",
     defaultMessage: "Scenes",
@@ -103,6 +107,13 @@ const allMenuItems: IMenuItem[] = [
     icon: faHome,
     hotkey: "g hx",
     userCreatable: false,
+  },
+  {
+    name: "recomendations",
+    message: messages.recommendations,
+    href: "/recommendations",
+    icon: faPlayCircle,
+    hotkey: "g hr",
   },
   {
     name: "scenes",
