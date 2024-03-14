@@ -45,6 +45,7 @@ import {
 import { defaultMaxOptionsShown } from "src/core/config";
 const allMenuItems = [
   { id: "home", headingID: "home" },
+  { id: "recommendations", headingID: "recommendations"},
   { id: "scenes", headingID: "scenes" },
   { id: "images", headingID: "images" },
   { id: "movies", headingID: "movies" },
