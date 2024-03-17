@@ -4,10 +4,11 @@ import { faGear, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { RecommendsGrid } from "./RecommendsGrid";
 import { Button, Form, Modal } from "react-bootstrap";
 import { Icon } from "../Shared/Icon";
+import { RecommendsTags } from "./RecommendsTags";
+
 
 interface IProps {
 }
-
 export const RecommendationList: React.FC<IProps> = ({
 }) => {
     const defaultCount:string = "15"
@@ -17,6 +18,7 @@ export const RecommendationList: React.FC<IProps> = ({
     const [useFromFavorited, setUseFromFavorited] = useState(true)
     const [useLastStudio, setUseLastStudio] = useState(true)
     const [count, setCount] = useState(defaultCount)
+    const [tagSeed, setTagSeed] = useState(Math.random())
     const [lastStudio, setLastStudio] = useState(String(""))
     const [settingsModal, setSettingsModalShow] = useState(false)
     function onCancelSettings() {
@@ -25,6 +27,7 @@ export const RecommendationList: React.FC<IProps> = ({
     const [lastWatchWeight, setLastWatchWeight] = useState(5)
     const [favPerfWeight, setFavPerfWeight] = useState(5)
     const [lastStudioWeight, setLastStudioWeight] = useState(5)
+    const [scenesToCheck, setScenesToCheck] = useState(30)
     function totalWeight() {
         var total = (useFromLastWatched ? lastWatchWeight : 0) + (useFromFavorited ? favPerfWeight : 0) + (useLastStudio ? lastStudioWeight : 0)
         return total
@@ -172,13 +175,60 @@ export const RecommendationList: React.FC<IProps> = ({
             value: o,
         }
     })
+    
     // setCount(defaultCount)
     const RecCountSelect = useRef(null);
     const scenes:GQL.SlimSceneDataFragment[] = []
+    const countObject = (array:string[], item:string) => {
+        return array.filter((currentItem) => currentItem == item).length;
+    }
+    const calcScore = (totalCount:number, rarity:number, percent:number) => {
+        var score = 2 * (percent + (totalCount - rarity)/totalCount)
+        return score;
+    }
+    function checkRw() {
+        var {data} = GQL.useFindScenesQuery({
+            variables: {
+                filter: {
+                    per_page: scenesToCheck,
+                    sort: "last_played_at",
+                    direction: GQL.SortDirectionEnum.Desc
+                }
+            }
+        })
+        return data
+    }
+    const scenesRw = checkRw()
+    const tagsRw:string[] = []
+        scenesRw?.findScenes.scenes.map((scene) => {
+            scene.tags.map((tag) => tagsRw.push(tag.id))
+        })
+    function getAllTagsBySceneCount() {
+        var {data} = GQL.useFindTagsQuery({
+            variables: {
+                filter: {
+                    per_page: -1,
+                    sort: "scenes_count",
+                    direction: GQL.SortDirectionEnum.Asc
+                }
+            }
+        })
+        return data ? data : undefined
+    }
+    const allTags = getAllTagsBySceneCount()
+    // console.info(allTags)
+    function isNotNull(value:string) {
+        return value != ""
+    }
+    const tagsToRec = allTags?.findTags.tags.map(
+        (tag, index) => (countObject(tagsRw, tag.id) > 3 && calcScore(allTags?.findTags.count!, index, countObject(tagsRw, tag.id)/scenesToCheck) > 1? tag.id : "")
+    ).filter(isNotNull)
+    console.info(tagsToRec)
     function generateContent(value:string) {
         var count = Number(value)
         var lastwatchedperformers:string[] = []
         const LastWatchedStudios:string[] = []
+
         function getLastWatchedPerformer() {
             var {data} = GQL.useFindScenesQuery({
                 variables: {
@@ -258,6 +308,7 @@ export const RecommendationList: React.FC<IProps> = ({
         randomFromLastWatched()
         getFavoritedPerformerScenes()
         randomFromLastStudio()
+
         var shuffledScenes = scenes.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value)
         return shuffle ? shuffledScenes.slice(0,count) : scenes.slice(0,count)
     }
@@ -268,12 +319,30 @@ export const RecommendationList: React.FC<IProps> = ({
         zoomIndex={2}
         />
     )
+    function tagBoolsTest() {
+        const {data, loading} = GQL.useFindTagsQuery({variables: {ids: tagsToRec}})
+        const tagBools = data?.findTags?.tags.map((tag) => (
+            [tag, true]
+        ))
+        return tagBools
+    }
+    const tagBools = tagBoolsTest()
+    var tagsToDisplayCont = (
+        <RecommendsTags 
+        key={tagSeed}
+        // onChange={() => {}}
+        onChange={(index:number) => {
+            setTagSeed(Math.random())
+        }}
+        tagBools={tagBools}
+        />
+    )
     function render() {
         return (
             <>
                 <div>
-                    <div className="mb-2 mr-2 d-flex flex-row">
-                        <div className="mb-2 d-flex flex-row">
+                    <div className="mb-2 d-flex flex-row">
+                        <div className="ml-2 mb-2 d-flex flex-row" style={{width: "-webkit-fill-available"}}>
                         <Form.Control 
                             as="select"
                             ref={RecCountSelect}
@@ -313,6 +382,8 @@ export const RecommendationList: React.FC<IProps> = ({
                         >
                             <Icon icon={faShuffle} />
                         </Button>
+                        <div style={{flexGrow: 1}}></div>
+                        {tagsToDisplayCont}
                         </div>
                     </div>
                 </div>
