@@ -321,19 +321,15 @@ export const RecommendationList: React.FC<IProps> = ({
     )
     function tagBoolsTest() {
         const {data, loading} = GQL.useFindTagsQuery({variables: {ids: tagsToRec}})
-        const tagBools = data?.findTags?.tags.map((tag) => (
+        const tagBools = data?.findTags?.tags.map((tag, index) => (
             [tag, true]
         ))
         return tagBools
     }
     const tagBools = tagBoolsTest()
-    var tagsToDisplayCont = (
+    const tagsToDisplayCont = (
         <RecommendsTags 
         key={tagSeed}
-        // onChange={() => {}}
-        onChange={(index:number) => {
-            setTagSeed(Math.random())
-        }}
         tagBools={tagBools}
         />
     )
