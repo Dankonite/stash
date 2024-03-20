@@ -1,10 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as GQL from "src/core/generated-graphql";
 import { faGear, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { RecommendsGrid } from "./RecommendsGrid";
 import { Button, Form, Modal } from "react-bootstrap";
 import { Icon } from "../Shared/Icon";
 import { RecommendsTags } from "./RecommendsTags";
+import { includes } from "lodash-es";
+import { useStats } from "src/core/StashService";
 
 
 interface IProps {
@@ -12,14 +14,12 @@ interface IProps {
 export const RecommendationList: React.FC<IProps> = ({
 }) => {
     const defaultCount:string = "15"
-    const [randomSeed, setRandomSeed] = useState(123456789)
+    const [randomSeed, setRandomSeed] = useState(Math.random()*10000000)
     const [shuffle, setShuffled] = useState(true)
     const [useFromLastWatched, setUseFromLastWatched] = useState(true)
     const [useFromFavorited, setUseFromFavorited] = useState(true)
     const [useLastStudio, setUseLastStudio] = useState(true)
     const [count, setCount] = useState(defaultCount)
-    const [tagSeed, setTagSeed] = useState(Math.random())
-    const [lastStudio, setLastStudio] = useState(String(""))
     const [settingsModal, setSettingsModalShow] = useState(false)
     function onCancelSettings() {
         setSettingsModalShow(false)
@@ -28,6 +28,7 @@ export const RecommendationList: React.FC<IProps> = ({
     const [favPerfWeight, setFavPerfWeight] = useState(5)
     const [lastStudioWeight, setLastStudioWeight] = useState(5)
     const [scenesToCheck, setScenesToCheck] = useState(30)
+    const [includeAll, setIncludeAll] = useState(true)
     function totalWeight() {
         var total = (useFromLastWatched ? lastWatchWeight : 0) + (useFromFavorited ? favPerfWeight : 0) + (useLastStudio ? lastStudioWeight : 0)
         return total
@@ -182,9 +183,18 @@ export const RecommendationList: React.FC<IProps> = ({
     const countObject = (array:string[], item:string) => {
         return array.filter((currentItem) => currentItem == item).length;
     }
-    const calcScore = (totalCount:number, rarity:number, percent:number) => {
-        var score = 2 * (percent + (totalCount - rarity)/totalCount)
-        return score;
+    const calcScore = (scMax:number, scCheck:number, percent:number, tag?:any) => {
+        function score() {
+            return (1.57 * percent) + (.6*(scMax - scCheck)/scMax)
+        }
+        percent > .25 ?
+        console.info(
+            tag.name + 
+            " Percent: " + Math.round(percent*100) + 
+            " Rarity Score: " + Math.round(50*(scMax - scCheck)/scMax) + 
+            " Total Score: " + score() + "   " +(score() > 1)
+            ) : ""
+        return score()
     }
     function checkRw() {
         var {data} = GQL.useFindScenesQuery({
@@ -217,13 +227,30 @@ export const RecommendationList: React.FC<IProps> = ({
     }
     const allTags = getAllTagsBySceneCount()
     // console.info(allTags)
-    function isNotNull(value:string) {
+    function isNotNull(value:any) {
         return value != ""
     }
+    const totalSceneCount = useStats().data?.stats.scene_count
+    console.info(totalSceneCount)
     const tagsToRec = allTags?.findTags.tags.map(
-        (tag, index) => (countObject(tagsRw, tag.id) > 3 && calcScore(allTags?.findTags.count!, index, countObject(tagsRw, tag.id)/scenesToCheck) > 1? tag.id : "")
+        (tag, index) => (countObject(tagsRw, tag.id) > 5 && calcScore(totalSceneCount!, tag.scene_count_all, countObject(tagsRw, tag.id)/scenesToCheck, tag) > 1? tag.id : "")
     ).filter(isNotNull)
-    console.info(tagsToRec)
+    function tagBoolsTestDataFunc(){
+        const {data} = GQL.useFindTagsQuery({variables: {ids: tagsToRec}})
+        return data
+    }
+    const tagBoolsData = tagBoolsTestDataFunc()
+    function tagBoolsFunc() {
+        const data = tagBoolsData
+        const tagBools = data?.findTags?.tags.map((tag, index) => (
+            [tag, false] 
+        ))
+        return tagBools
+    }
+    const [tagBools, setTagBools] = useState(tagBoolsFunc())
+    tagBools == undefined ? setTimeout(function(){
+        setTagBools(tagBoolsFunc())
+    }, 200) : ""
     function generateContent(value:string) {
         var count = Number(value)
         var lastwatchedperformers:string[] = []
@@ -251,6 +278,8 @@ export const RecommendationList: React.FC<IProps> = ({
             }
         }
         function randomFromLastStudio() {
+            const tagsToUsePre = tagBools?.map((tag, index) => (tagBools[index][1] ? tagBools[index][0] : "")).filter(isNotNull)
+            const tagsToUse = tagsToUsePre?.map((tag) => (tag as any).id)
             var {data} = GQL.useFindScenesQuery({
                 variables: {
                     filter: {
@@ -261,6 +290,10 @@ export const RecommendationList: React.FC<IProps> = ({
                         studios: {
                             modifier: GQL.CriterionModifier.Includes,
                             value: LastWatchedStudios
+                        },
+                        tags: {
+                            modifier: includeAll ? GQL.CriterionModifier.IncludesAll : GQL.CriterionModifier.Includes,
+                            value: tagsToUse
                         }
                     }
                 }
@@ -268,6 +301,8 @@ export const RecommendationList: React.FC<IProps> = ({
             useLastStudio ? scenes.push.apply(scenes, data?.findScenes.scenes!) : ""
         }
         function randomFromLastWatched() {
+            const tagsToUsePre = tagBools?.map((tag, index) => (tagBools[index][1] ? tagBools[index][0] : "")).filter(isNotNull)
+            const tagsToUse = tagsToUsePre?.map((tag) => (tag as any).id)
             var {data} = GQL.useFindScenesQuery({
                 variables: {
                     filter: {
@@ -278,6 +313,10 @@ export const RecommendationList: React.FC<IProps> = ({
                         performers: {
                             modifier: GQL.CriterionModifier.Includes,
                             value: lastwatchedperformers
+                        },
+                        tags: {
+                            modifier: includeAll ? GQL.CriterionModifier.IncludesAll : GQL.CriterionModifier.Includes,
+                            value: tagsToUse
                         }
                     }
                 }
@@ -285,6 +324,8 @@ export const RecommendationList: React.FC<IProps> = ({
             useFromLastWatched ? scenes.push.apply(scenes, data?.findScenes.scenes!) : ""
         }
         function getFavoritedPerformerScenes() {
+            const tagsToUsePre = tagBools?.map((tag, index) => (tagBools[index][1] ? tagBools[index][0] : "")).filter(isNotNull)
+            const tagsToUse = tagsToUsePre?.map((tag) => (tag as any).id)
             var {data} = GQL.useFindScenesQuery({
                 variables: {
                     filter: {
@@ -294,9 +335,9 @@ export const RecommendationList: React.FC<IProps> = ({
                     },
                     scene_filter: {
                         performer_favorite: true,
-                        play_count: {
-                            modifier: GQL.CriterionModifier.Equals,
-                            value: 0
+                        tags: {
+                            modifier: includeAll ? GQL.CriterionModifier.IncludesAll : GQL.CriterionModifier.Includes,
+                            value: tagsToUse
                         }
                     }
                 }
@@ -308,28 +349,32 @@ export const RecommendationList: React.FC<IProps> = ({
         randomFromLastWatched()
         getFavoritedPerformerScenes()
         randomFromLastStudio()
-
-        var shuffledScenes = scenes.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value)
-        return shuffle ? shuffledScenes.slice(0,count) : scenes.slice(0,count)
+        function removeDuplicates(scenes: GQL.SlimSceneDataFragment[]) {
+            var uniqueNum:number[] = [];
+            var uniqueScenes: GQL.SlimSceneDataFragment[] = [];
+            for (var i = 0; i < scenes.length; i++) {
+                if (uniqueNum.indexOf(Number(scenes[i].id)) === -1) {
+                    uniqueNum.push(Number(scenes[i].id));
+                    uniqueScenes.push(scenes[i])
+                }
+            }
+            return uniqueScenes;
+        }
+        const scenesUniqued = removeDuplicates(scenes)
+        var shuffledScenes = scenesUniqued?.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value)
+        return shuffle ? shuffledScenes.slice(0,count) : scenesUniqued.slice(0,count)
     }
     var content = (
-        <RecommendsGrid
-        key={Math.random()}
-        scenes={generateContent(count)}
-        zoomIndex={2}
-        />
+            <RecommendsGrid
+            key={Math.random()}
+            scenes={generateContent(count)}
+            zoomIndex={2}
+            />
     )
-    function tagBoolsTest() {
-        const {data, loading} = GQL.useFindTagsQuery({variables: {ids: tagsToRec}})
-        const tagBools = data?.findTags?.tags.map((tag, index) => (
-            [tag, true]
-        ))
-        return tagBools
-    }
-    const tagBools = tagBoolsTest()
     const tagsToDisplayCont = (
-        <RecommendsTags 
-        key={tagSeed}
+        <RecommendsTags
+        includeAll={includeAll}
+        setIncludeAll={setIncludeAll}
         tagBools={tagBools}
         />
     )
@@ -337,13 +382,13 @@ export const RecommendationList: React.FC<IProps> = ({
         return (
             <>
                 <div>
-                    <div className="mb-2 d-flex flex-row">
-                        <div className="ml-2 mb-2 d-flex flex-row" style={{width: "-webkit-fill-available"}}>
+                    <div className="d-flex flex-row">
+                        <div className="ml-21 d-flex flex-row mt-1" style={{width: "-webkit-fill-available"}}>
                         <Form.Control 
                             as="select"
                             ref={RecCountSelect}
                             value={count}
-                            className="btn-secondary mr-2"
+                            className="btn-secondary mr-2 mb-2"
                             onChange={(e) => {
                                 setCount(e.target.value)
                             }}
@@ -359,7 +404,7 @@ export const RecommendationList: React.FC<IProps> = ({
                         </Form.Control>
                         {settingsModal ? settingsPopup : ""}
                         <Button 
-                        className="btn-primary mr-2"
+                        className="btn-primary mr-2 mb-2"
                         onClick={() => {setSettingsModalShow(true)}}
                         style={{
                             height: "fit-content"
@@ -368,7 +413,7 @@ export const RecommendationList: React.FC<IProps> = ({
                             <Icon icon={faGear} />
                         </Button>
                         <Button
-                        className="btn-secondary mr-2"
+                        className="btn-secondary mr-2 mb-2"
                         style={{
                             height: "fit-content"
                         }}
@@ -378,7 +423,7 @@ export const RecommendationList: React.FC<IProps> = ({
                         >
                             <Icon icon={faShuffle} />
                         </Button>
-                        <div style={{flexGrow: 1}}></div>
+                        <div style={{flexGrow: 1}} className=""></div>
                         {tagsToDisplayCont}
                         </div>
                     </div>
