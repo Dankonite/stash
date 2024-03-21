@@ -13,6 +13,9 @@
     margin-right: .4rem;
   }
 }
+.card, img, video, .video-js {
+  filter:blur(20px)
+}
 .tags-dialog {
   padding-right: 0!important;
   display: flex!important;

@@ -811,51 +811,37 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
 
   return (
     <div className="row">
-      <div className="the-vert">
-        <div className="scene-player-container mb-3">
-          <ScenePlayer
-            key="ScenePlayer"
-            scene={scene}
-            hideScrubberOverride={hideScrubber}
-            autoplay={autoplay}
-            permitLoop={!continuePlaylist}
-            initialTimestamp={initialTimestamp}
-            sendSetTimestamp={getSetTimestamp}
-            onComplete={onComplete}
-            onNext={() => queueNext(true)}
-            onPrevious={() => queuePrevious(true)}
-          />
-        </div>
-        <div className="the-deets" style={{margin: "0 15px"}}>
-          <div className="top-row d-flex flex-row justify-content-between">
-            <div className="left-side">
-              <h3>{scene.title}</h3>
-              <div className="smol-row" >
-                <div className="studio-row">
-                  <Link to={`studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
-                      <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}}></img>
-                      <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <div className="right-side">
-              
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="rec-row" style={{
-        width: "25vw",
-        paddingRight: "15px"
-      }}>
-        <div style={{
-          background: "white",
-          width: "100%",
-          height: "100%"
-        }}>
-
-        </div>
+      <ScenePage
+        scene={scene}
+        setTimestamp={setTimestamp}
+        queueScenes={queueScenes}
+        queueStart={queueStart}
+        onDelete={onDelete}
+        onQueueNext={() => queueNext(autoPlayOnSelected)}
+        onQueuePrevious={() => queuePrevious(autoPlayOnSelected)}
+        onQueueRandom={() => queueRandom(autoPlayOnSelected)}
+        onQueueSceneClicked={onQueueSceneClicked}
+        continuePlaylist={continuePlaylist}
+        queueHasMoreScenes={queueHasMoreScenes}
+        onQueueLessScenes={onQueueLessScenes}
+        onQueueMoreScenes={onQueueMoreScenes}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        setContinuePlaylist={setContinuePlaylist}
+      />
+      <div className={`scene-player-container ${collapsed ? "expanded" : ""}`}>
+        <ScenePlayer
+          key="ScenePlayer"
+          scene={scene}
+          hideScrubberOverride={hideScrubber}
+          autoplay={autoplay}
+          permitLoop={!continuePlaylist}
+          initialTimestamp={initialTimestamp}
+          sendSetTimestamp={getSetTimestamp}
+          onComplete={onComplete}
+          onNext={() => queueNext(true)}
+          onPrevious={() => queuePrevious(true)}
+        />
       </div>
     </div>
   );
