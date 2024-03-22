@@ -13,9 +13,13 @@
     margin-right: .4rem;
   }
 }
-.card, img, video, .video-js {
-  filter:blur(20px)
+// .card, img, video, .video-js {
+//   filter:blur(20px)
+// }
+.h-fc {
+  height: fit-content;
 }
+
 .tags-dialog {
   padding-right: 0!important;
   display: flex!important;
