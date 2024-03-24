@@ -522,9 +522,9 @@ $sceneTabWidth: 450px;
 }
 .btn-1l {
   text-wrap: nowrap;
-  max-width: calc(10rem);
-  overflow: hidden;
-  white-space:nowrap;
+}
+.side-bar a {
+  text-decoration: none;
 }
 @media (max-width: 1199px) {
   .scene-tabs {
@@ -543,6 +543,9 @@ $sceneTabWidth: 450px;
     margin-left: 5px;
     margin-right: 5px;
   }
+}
+.flex-col {
+  flex-direction: column!important;
 }
 @media (min-width: 1200px) {
   .scene-tabs {

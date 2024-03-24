@@ -19,7 +19,7 @@ export const TagButtons: React.FC<IProps> = ({
     // console.info(data?.findTags.tags)
     const tagContent = data?.findTags.tags.map( (tag) => (
             <>
-            <div className="TagDialog h-fc" key={tag.id}>
+            <div className="h-fc" key={tag.id}>
             <Link
             to={`/tags/${tag.id}?sortby=random`}
             style={{
@@ -32,18 +32,9 @@ export const TagButtons: React.FC<IProps> = ({
                 color: "#fff",
                 borderRadius: ".2rem",
                 backgroundColor: "#202020",
-                margin: ".3rem"
+                margin: "0 .2rem .4rem"
             }}
             >
-            {/* <img
-                style={{
-                    height: "80px",
-                    aspectRatio: "auto",
-                    borderRadius: ".75rem",
-                }}
-                src={tag.image_path ?? ""}
-            >
-            </img> */}
             <span
                 style={{
                     textAlign: "center",
@@ -55,22 +46,9 @@ export const TagButtons: React.FC<IProps> = ({
             </div>
             </>
     ))
-    const tags = scene.tags.map((tag) => (
-        <TagLink key={tag.id} tag={tag} />
-      ));
     return (
         <>
-            <div
-            key={scene.id}
-            style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                alignContent: "flex-start"
-            }}
-            >
                 {tagContent}     
-            </div>
         </>
     );
 }

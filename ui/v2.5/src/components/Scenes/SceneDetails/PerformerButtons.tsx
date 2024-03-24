@@ -13,28 +13,36 @@ export const PerformerButtons: React.FC<IProps> = ({
 }) => {
     const PerfContent = scene.performers.map( (performer) => (
             <>
-            <div className="TagDialog" key={performer.id}>
+            <div className="" key={performer.id} style={{
+            width: "120px",
+            }}>
             <Link
             to={`/performers/${performer.id}?sortby=random`}
             style={{
                 display: "flex",
                 flexDirection: "column",
-                width: "fit-content",
+                // width: "fit-content",
                 padding: "0 .75rem",
                 paddingBottom: "0.25rem",
                 textDecoration: "none",
                 color: "#fff"
             }}
             >
-            <img
+            <div style={{
+            height: "125px",
+            width: "100px",
+            overflow: "hidden",
+            borderRadius: ".5rem",
+            }}>
+                <img
                 style={{
-                    height: "350px",
-                    aspectRatio: "auto",
-                    borderRadius: ".75rem",
+                    height: "auto",
+                    width: "100%",
                 }}
                 src={performer.image_path ?? ""}
-            >
-            </img>
+                >
+                </img>
+            </div>
             <span
                 style={{
                     textAlign: "center"
@@ -48,16 +56,7 @@ export const PerformerButtons: React.FC<IProps> = ({
     ))
     return (
         <>
-            <div
-            key={scene.id}
-            style={{
-                display: "flex",
-                flexWrap: "nowrap",
-                justifyContent: "center",
-            }}
-            >
                 {PerfContent}     
-            </div>
         </>
     );
 }

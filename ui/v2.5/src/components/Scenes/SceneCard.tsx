@@ -570,11 +570,6 @@ export const SceneCard = PatchComponent(
           <span className="file-path extra-scene-info">
           {objectPath(props.scene)}
           </span>
-          <TruncatedText
-          className="scene-card__description"
-          text={props.scene.details}
-          lineCount={3}     
-          />
           </div>
         </div>
       }

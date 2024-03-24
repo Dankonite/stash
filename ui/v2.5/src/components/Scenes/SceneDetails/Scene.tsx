@@ -313,14 +313,6 @@ const QueueBar: React.FC<IProps> = ({
 
   const renderTabs = () => (
   <>
-    <Button
-    className="btn-secondary ml-1 mb-2 mr-2"
-    style={{width: "-webkit-fill-available"}}
-    onClick={()=> setCollapsed(!collapsed)}
-    >
-      Queue
-    </Button>
-    <div style={{maxHeight: collapsed ? "calc(40vh - 2rem)" : "0", overflow: "scroll"}}>   
       <QueueViewer
         scenes={queueScenes}
         currentID={scene.id}
@@ -335,7 +327,6 @@ const QueueBar: React.FC<IProps> = ({
         onLessScenes={onQueueLessScenes}
         onMoreScenes={onQueueMoreScenes}
     />
-    </div>
   </>
 
   );
@@ -622,35 +613,33 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   }
   function maybeRenderTags() {
     return scene!.tags.length != 0 ? (
-      <TagButtons scene={scene!}/>
+      <div
+      className="d-flex flex-wrap justify-content-end align-items-start align-content-start" 
+      style={{
+        maxWidth: "360px"
+      }}
+      >
+        <TagButtons scene={scene!}/>
+      </div>
     ) : ("")
   }
   function maybeRenderPerformers() {
     return scene!.performers.length != 0 ? (
-      <PerformerButtons scene={scene!}/>
+      <div className="d-flex flex-wrap justify-content-end" style={{
+      maxWidth: String(scene?.performers.length! > 5 ? "360px" : "240px")
+      }} key={scene!.id}><PerformerButtons scene={scene!}/></div>
     ) : ("")
   }
   const sbStuff = 
-  <div className="rec-row d-flex flex-collumn" style={{
+  <div className="rec-row d-flex flex-col" style={{
     width: sBCollapsed ? "0" : "calc(20vw + 15px)",
     
   }}>
-    <Button
-    onClick={() => setSBCollapsed(!sBCollapsed)}
-    style={{padding: "0.1rem"}}
-    className={`btn-secondary ${sBCollapsed ? "": "mr-1 pr-0"}`}
-    >
-      <Icon icon={getCollapseButtonIcon()}/>
-    </Button>
-    <div 
-      style={{
-      width: "100%",
-      height: "100%",
-      overflow: "scroll"
-      }}
-      className="side-bar"
-    >
-      <QueueBar
+      <SceneRecs 
+      key={Math.random()}
+      scene={scene}
+      queue={
+        <QueueBar
         scene={scene}
         setTimestamp={setTimestamp}
         queueScenes={queueScenes}
@@ -668,68 +657,78 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
         setCollapsed={setCollapsed}
         setContinuePlaylist={setContinuePlaylist}
       />
-      <SceneRecs 
-      key={Math.random()}
-      scene={scene}/>
-    </div>
+      }
+      />
   </div>
   return (
-    <div className="d-flex flex-row" style={{maxHeight: "calc(100vh - 4rem)"}}>
-      <div className={`the-vert h-fc ${sBCollapsed || wideMode ? "expand": ""}`}>
-        <div className="scene-player-container mb-3">
-          <ScenePlayer
-            key="ScenePlayer"
-            scene={scene}
-            hideScrubberOverride={hideScrubber}
-            autoplay={autoplay}
-            permitLoop={!continuePlaylist}
-            initialTimestamp={initialTimestamp}
-            sendSetTimestamp={getSetTimestamp}
-            onComplete={onComplete}
-            onNext={() => queueNext(true)}
-            onPrevious={() => queuePrevious(true)}
-            />
-        </div>
-        <div className="d-flex flex-row">
-        <div className="the-deets" style={{margin: "0 15px"}}>
-          <div className="top-row d-flex flex-row justify-content-between">
-            <div className="left-side">
-              <h3>{scene.title}</h3>
-              <div className="studio-row">
-                <Link to={`studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
-                    <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
-                    <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
-                </Link>
-              </div>
-              <div className="date-row">
-                <h6>{scene.date}</h6>
-                {file?.width && file?.height && (
-                <h6>
-                  <FormattedMessage id="resolution" />:{" "}
-                  {TextUtils.resolution(file.width, file.height)}
-                </h6>
-                )}
-              </div>
-            </div>
-            <div className="right-side d-flex flex-row">
-              <UtilityBar 
+    <div 
+    className="the-window"
+    style={{
+    height: "calc(100vh - 4rem)"
+    }}>
+      <div className="d-flex flex-row" style={{height: "100%"}}>
+        <div className={`the-vert h-fc h-100 ${sBCollapsed || wideMode ? "expand": ""}`}>
+          <div className="scene-player-container mb-3">
+            <ScenePlayer
+              key="ScenePlayer"
               scene={scene}
-              setWideMode={() => setWideMode(!wideMode)}
+              hideScrubberOverride={hideScrubber}
+              autoplay={autoplay}
+              permitLoop={!continuePlaylist}
+              initialTimestamp={initialTimestamp}
+              sendSetTimestamp={getSetTimestamp}
+              onComplete={onComplete}
+              onNext={() => queueNext(true)}
+              onPrevious={() => queuePrevious(true)}
               />
+          </div>
+          <div className="d-flex flex-row">
+          <div className="the-deets" style={{margin: "0 15px", width: "-webkit-fill-available"}}>
+            <div className="top-row d-flex flex-row justify-content-between">
+
+              <div className="left-side">
+                <h3>{scene.title}</h3>
+                <div className="studio-row">
+                  <Link to={`studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
+                      <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
+                      <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
+                  </Link>
+                </div>
+                <div className="date-row">
+                  <h6>{scene.date}</h6>
+                  {file?.width && file?.height && (
+                  <h6>
+                    <FormattedMessage id="resolution" />:{" "}
+                    {TextUtils.resolution(file.width, file.height)}
+                  </h6>
+                  )}
+                </div>
+                
+              </div>
+
+              <div className="right-side d-flex flex-col"> 
+                <div className="d-flex flex-row mb-3" >
+                  <UtilityBar 
+                  scene={scene}
+                  setWideMode={() => setWideMode(!wideMode)}
+                  />
+                </div>
+                <div className="d-flex flex-row">
+                  {maybeRenderTags()}
+                  {maybeRenderPerformers()}
+                </div>
+                
+              </div>
             </div>
+
           </div>
-          <div className="perf-tag d-flex flex-row mt-2" >
-            {maybeRenderPerformers()}
-            {maybeRenderTags()}
-            
+          {wideMode ? sbStuff : ""}
           </div>
         </div>
-        {wideMode ? sbStuff : ""}
-        </div>
+        {!wideMode ? 
+          sbStuff : ""
+        }
       </div>
-      {!wideMode ? 
-        sbStuff : ""
-      }
     </div>
   );
 };

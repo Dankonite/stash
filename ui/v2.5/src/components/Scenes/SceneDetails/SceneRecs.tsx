@@ -4,13 +4,38 @@ import * as GQL from "src/core/generated-graphql";
 import { RecommendsCol } from "./RecommendsGrid";
 import { remove } from "lodash-es";
 import { Button } from "react-bootstrap";
+import { MarkerWallPanel } from "src/components/Wall/WallPanel copy";
 interface IProps {
-    scene: GQL.SlimSceneDataFragment;
-
+    scene: GQL.SceneDataFragment;
+    queue: JSX.Element
 }
-
+interface markersProps {
+scene:GQL.SceneDataFragment
+}
+const MarkerView: React.FC<markersProps> = ({
+scene,
+}) => {
+const { data, loading } = GQL.useFindSceneMarkerTagsQuery({
+    variables: { id: scene.id },
+    });
+const sceneMarkers = (
+    data?.sceneMarkerTags.map((tag) => tag.scene_markers) ?? []
+    ).reduce((prev, current) => [...prev, ...current], []);
+const markers = 
+<MarkerWallPanel
+markers={sceneMarkers}
+clickHandler={(e, marker) => {
+  e.preventDefault();
+  window.scrollTo(0, 0);
+}}
+/>
+return (
+<>{markers}</>
+)
+}
 export const SceneRecs: React.FC<IProps> = ({
     scene,
+    queue
 }) => {
     const perfIds = scene.performers.map((performer) => performer.id)
     function getSameStudioPerf(id: string):GQL.SlimSceneDataFragment[] {
@@ -88,7 +113,7 @@ export const SceneRecs: React.FC<IProps> = ({
         const content = 
             <RecommendsCol
                 key={Math.random()}
-                scenes={uniqued.slice(0, 10)}
+                scenes={uniqued.slice(0, 40)}
                 />
         return content
     }
@@ -105,82 +130,63 @@ export const SceneRecs: React.FC<IProps> = ({
         const content = 
             <RecommendsCol 
                 key={Math.random()}
-                scenes={uniqued.slice(0,10)}
+                scenes={uniqued.slice(0,40)}
                 />
         return content
     }
-    function hasStudio() {
-        const combined:GQL.SlimSceneDataFragment[] = []
-        const dummy:GQL.SlimSceneDataFragment[] = []
-        perfIds.map((id) => combined.push.apply(combined, getSameStudio(id)))
-        perfIds.map((id) => dummy.push.apply(dummy, getSamePerf(id)))
-        perfIds.map((id) => dummy.push.apply(dummy, getSamePerf(id)))
-        console.info("Only displaying " + scene.studio!.name)
-        const uniqued = removeDuplicates(combined)
-        const sceneIds = uniqued.map((item) => item.id)
-        uniqued.splice(sceneIds.indexOf(scene.id), 1)
+    function markers() {
         const content = 
-            <RecommendsCol 
-                key={Math.random()}
-                scenes={uniqued.slice(0,10)}
-                />
+            <MarkerView scene={scene}/>
         return content
     }
     function isNotNull(value:any) {
         return value != ""
     }
-    const [isAll, setIsAll] = useState(true)
-    const [isPerformers, setIsPerformers] = useState(false)
-    const [isStudio, setIsStudio] = useState(false)
+    const [isRecommended, setIsRecommended] = useState(true)
+    const [isMarkers, setIsMarkers] = useState(false)
     const [isQueue, setIsQueue] = useState(false)
+    const recContent = hasStudioAndPerf()
+    const markerContent = markers()
     function render() {
-        const performersFemale = scene.performers.map((performer) => performer.gender === "FEMALE" ? performer.name : "").filter(isNotNull)
-        var content = scene.performers.length != 0 && scene.studio && isAll ? hasStudioAndPerf()
-                    : scene.performers.length > 0 && isPerformers ? hasPerf()
-                    : scene.studio && isStudio ? hasStudio()
+        var content = scene.performers.length != 0 && scene.studio && isRecommended ? recContent
+                    : scene.performers.length > 0 && isQueue ? queue
+                    : scene.studio && isMarkers ? markerContent
                     : undefined
         const display = 
         <>
-            <div className="d-flex flex-row ml-1">
-                {performersFemale.length != 0 && scene.studio ?
-                    <Button 
-                    className={`${isAll ? "btn-dc" : "btn-secondary"} btn-1l mr-2`}
-                    onClick={() => {
-                        setIsStudio(false)
-                        setIsAll(true)
-                        setIsPerformers(false)
-                    }}
-                    >
-                    All
-                    </Button>
-                    : ""
-                }
-                {scene.performers.length != 0 ? 
-                    <Button 
-                    className={`${isPerformers ? "btn-dc" : "btn-secondary"} btn-1l mr-2`}
-                    onClick={() => {
-                        setIsStudio(false)
-                        setIsAll(false)
-                        setIsPerformers(true)
-                    }}
-                    >
-                    {performersFemale.length > 1 ? "Performers" : performersFemale[0]}
-                    </Button>
-                    : ""
-                }
-                {scene.studio ? 
-                    <Button 
-                    className={`${isStudio ? "btn-dc" : "btn-secondary"} btn-1l mr-2`}
-                    onClick={() => {
-                        setIsStudio(true)
-                        setIsAll(false)
-                        setIsPerformers(false)
-                    }}
-                    >
-                    {scene.studio!.name}
-                    </Button>
-                    : ""
-                }
+            <div className="d-flex flex-row ml-1 mb-2" key={Math.random()}>
+
+                <Button 
+                className={`${isRecommended ? "btn-dc" : "btn-secondary"} btn-1l`}
+                onClick={() => {
+                    setIsMarkers(false)
+                    setIsRecommended(true)
+                    setIsQueue(false)
+                }}
+                >
+                Recommended
+                </Button>
+                <div className="flex-grow-1"></div>
+                <Button 
+                className={`${isQueue ? "btn-dc" : "btn-secondary"} btn-1l mr-2`}
+                onClick={() => {
+                    setIsMarkers(false)
+                    setIsRecommended(false)
+                    setIsQueue(true)
+                }}
+                >
+                Queue
+                </Button>
+                <Button 
+                className={`${isMarkers ? "btn-dc" : "btn-secondary"} btn-1l`}
+                onClick={() => {
+                    setIsMarkers(true)
+                    setIsRecommended(false)
+                    setIsQueue(false)
+                }}
+                >
+                Markers
+                </Button>
             </div>
             {content}
         </>
