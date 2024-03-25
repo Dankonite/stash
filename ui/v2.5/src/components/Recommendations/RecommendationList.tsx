@@ -228,7 +228,7 @@ export const RecommendationList: React.FC<IProps> = ({
     const allTags = getAllTagsBySceneCount()
     // console.info(allTags)
     function isNotNull(value:any) {
-        return value != ""
+        return value != "" || undefined
     }
     const totalSceneCount = useStats().data?.stats.scene_count
     console.info(totalSceneCount)

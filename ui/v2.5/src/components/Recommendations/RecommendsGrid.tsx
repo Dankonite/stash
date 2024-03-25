@@ -5,7 +5,7 @@ import { useContainerDimensions } from "../Shared/GridCard/GridCard";
 import { SceneCard } from "../Scenes/SceneCard";
 
 interface ISceneCardsGrid {
-  scenes: GQL.SlimSceneDataFragment[];
+  scenes: GQL.SlimSceneDataFragment[] | undefined;
   queue?: SceneQueue;
   zoomIndex: number;
 }
@@ -16,7 +16,7 @@ export const RecommendsGrid: React.FC<ISceneCardsGrid> = ({
   zoomIndex,
 }) => {
   const [componentRef, { width }] = useContainerDimensions();
-  return (
+  if (scenes) {return (
     <div className="row justify-content-center" ref={componentRef}>
       {scenes.map((scene, index) => (
         <SceneCard
@@ -29,5 +29,5 @@ export const RecommendsGrid: React.FC<ISceneCardsGrid> = ({
         />
       ))}
     </div>
-  );
+  )} else return null
 };

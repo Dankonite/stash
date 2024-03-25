@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RecommendsGrid } from "src/components/Recommendations/RecommendsGrid";
 import * as GQL from "src/core/generated-graphql";
 import { RecommendsCol } from "./RecommendsGrid";
 import { remove } from "lodash-es";
 import { Button } from "react-bootstrap";
 import { MarkerWallPanel } from "src/components/Wall/WallPanel copy";
+import { useStats } from "src/core/StashService";
+import { TypeKind } from "graphql";
 interface IProps {
     scene: GQL.SceneDataFragment;
     queue: JSX.Element
@@ -12,83 +14,150 @@ interface IProps {
 interface markersProps {
 scene:GQL.SceneDataFragment
 }
+
 const MarkerView: React.FC<markersProps> = ({
-scene,
+    scene,
 }) => {
-const { data, loading } = GQL.useFindSceneMarkerTagsQuery({
-    variables: { id: scene.id },
-    });
-const sceneMarkers = (
-    data?.sceneMarkerTags.map((tag) => tag.scene_markers) ?? []
-    ).reduce((prev, current) => [...prev, ...current], []);
-const markers = 
-<MarkerWallPanel
-markers={sceneMarkers}
-clickHandler={(e, marker) => {
-  e.preventDefault();
-  window.scrollTo(0, 0);
-}}
-/>
+    const { data, loading } = GQL.useFindSceneMarkerTagsQuery({
+        variables: { id: scene.id },
+        });
+    const sceneMarkers = (
+        data?.sceneMarkerTags.map((tag) => tag.scene_markers) ?? []
+        ).reduce((prev, current) => [...prev, ...current], []);
+    const markers = 
+        <MarkerWallPanel
+        markers={sceneMarkers}
+        clickHandler={(e, marker) => {
+        e.preventDefault();
+        window.scrollTo(0, 0);
+        }}
+        />
 return (
-<>{markers}</>
+    <>{markers}</>
 )
 }
 export const SceneRecs: React.FC<IProps> = ({
     scene,
     queue
 }) => {
-    const perfIds = scene.performers.map((performer) => performer.id)
-    function getSameStudioPerf(id: string):GQL.SlimSceneDataFragment[] {
-        const {data} = GQL.useFindScenesQuery({
+    const totalSceneCount = useStats().data?.stats.scene_count
+    const thisScenesPerf:string[] = scene.performers.map((perf) => perf.id)
+    const thisScenesTags:string[] = scene.tags.map((tag) => tag.id)
+    const scenesFound: GQL.SlimSceneDataFragment[] = []
+    var lastwatchedperformers:string[] = []
+    function queryCheck() {
+        const {data, loading} = GQL.useFindScenesQuery({
             variables: {
                 filter: {
-                    sort: "random"
-                },
-                scene_filter: {
-                    performers: {
-                        value: [id],
-                        modifier: GQL.CriterionModifier.Includes
-                    },
-                    studios: {
-                        value: [scene.studio!.id],
-                        modifier: GQL.CriterionModifier.Includes
-                    }
+                    sort: "random",
+                    per_page: 1000, 
                 }
             }
         })
-        return data?.findScenes?.scenes!
+        data?.findScenes.scenes ? scenesFound.push.apply(scenesFound, data?.findScenes.scenes) : ""
+
     }
-    function getSameStudio(id: string):GQL.SlimSceneDataFragment[] {
-        const {data} = GQL.useFindScenesQuery({
+    queryCheck()
+    function checkRw() {
+        var {data} = GQL.useFindScenesQuery({
             variables: {
                 filter: {
-                    sort: "random"
-                },
-                scene_filter: {
-                    studios: {
-                        value: [scene.studio!.id],
-                        modifier: GQL.CriterionModifier.Includes
-                    }
+                    per_page: 30,
+                    sort: "last_played_at",
+                    direction: GQL.SortDirectionEnum.Desc
                 }
             }
         })
-        return data?.findScenes?.scenes!
+        data?.findScenes.scenes.map((scene) => {
+            if (scene.performers.length < 4) scene.performers.map((performer) => {
+                if (performer.gender === "FEMALE") lastwatchedperformers.push(performer.id)
+            })
+            
+        })
+        return data
     }
-    function getSamePerf (id: string) {
-        const {data} = GQL.useFindScenesQuery({
+    const scenesRw = checkRw()
+    const tagsRw:string[] = []
+        scenesRw?.findScenes.scenes.map((scene) => {
+            scene.tags.map((tag) => tagsRw.push(tag.id))
+        })
+    const studiosRW:string[] = []
+        scenesRw?.findScenes.scenes.map((s) => {
+            if (s.studio) studiosRW.push(s.studio.id)
+            return
+        })
+    function getAllTagsBySceneCount() {
+        var {data} = GQL.useFindTagsQuery({
             variables: {
                 filter: {
-                    sort: "random"
-                },
-                scene_filter: {
-                    performers: {
-                        value: [id],
-                        modifier: GQL.CriterionModifier.Includes
-                    }
+                    per_page: -1,
+                    sort: "scenes_count",
+                    direction: GQL.SortDirectionEnum.Asc
                 }
             }
         })
-        return data?.findScenes?.scenes!
+        return data ? data : undefined
+    }
+    const allTags = getAllTagsBySceneCount()
+    const countObject = (array:string[], item:string) => {
+        return array.filter((currentItem) => currentItem == item).length;
+    }
+    function isNotNull(value:any) {
+        return value != ""
+    }
+    function isNotUndef(value:any) {
+        return value != undefined
+    }
+    const tagScores = allTags?.findTags.tags.map((tag) => {
+        return {
+            tag: tag,
+            score: countObject(tagsRw, tag.id)/10 + 2 * countObject(thisScenesTags, tag.id) // max of 2 points for the first thing based on recent 2 points for matching a tag on this scene
+        }
+    }).filter(isNotUndef)
+    function sortScenes( a:any, b:any ){
+        if ( a.score < b.score ){
+            return 1;
+          }
+        if ( a.score > b.score ){
+        return -1;
+        }
+        return 0;
+    }
+    function getAllScenesToCheck() {
+        if (scenesFound.length > 0 && tagScores?.length) {
+            const sceneWscores = scenesFound.map((scene) => calcScenesScore(scene)).sort(sortScenes)
+            const scenes = sceneWscores.map((item) => item.scene)
+            // console.info(sceneWscores)
+            // console.info(scenes)
+            return scenes.slice(0,30)
+        }
+    }
+    
+    function calcScenesScore(sceneTC:GQL.SlimSceneDataFragment) {
+        var score = 0
+        const Tscores = sceneTC.tags.map((tag) => tagScores![tagScores!.findIndex(x => x?.tag.id === tag.id)]?.score).filter(isNotUndef)
+        Tscores.map((scoreItem) => score = score + scoreItem!)       // Adds score for every matching tag (0-4 range) 2 based on tags freq in rwScenes; 2 based on matching a tag on this scene (having LOTS of tags can skew toward tag matching)
+        if (sceneTC.studio && scene.studio) {                       // Adds 4 to the score if SceneTC's Studio Matches the current video
+            if (sceneTC.studio.id == scene.studio.id) {
+                score = score + 4
+            }
+        }
+        if (sceneTC.studio) { // Adds 1 score each time sceneTC's studio appeared in RW Studios (0-15 possible if you are only watching one specific studio consistently/mostly it will weight heavier)
+            score = score + countObject(studiosRW, sceneTC.studio.id)/2
+            // console.info(countObject(studiosRW, sceneTC.studio.id))
+        }
+        if (sceneTC.performers.length > 0) {
+            sceneTC.performers.map((perf) => score = score + 2 * countObject(lastwatchedperformers, perf.id)) // 2 score for count of performer in last watched performers (0-60 per perfomrer depending on freq in RW)
+            sceneTC.performers.map((perf) => score = score + 4 * countObject(thisScenesPerf, perf.id)) // 4 score for mathing a performer on this scene
+        }
+        if (score > 15) {
+            // console.info(sceneTC.title + " " + score)
+        }
+        score = score * (.85 + (Math.random() * .3)) // multiplies final scores by (.85-1.15) to make it a little more random
+        return {
+            scene: sceneTC,
+            score: score,
+        }
     }
     function removeDuplicates(scenes: GQL.SlimSceneDataFragment[]) {
         var uniqueNum:number[] = [];
@@ -101,51 +170,23 @@ export const SceneRecs: React.FC<IProps> = ({
         }
         return uniqueScenes;
     }
-    function hasStudioAndPerf() {
-        const combined:GQL.SlimSceneDataFragment[] = []
-        perfIds.map((id) => combined.push.apply(combined, getSameStudioPerf(id)))
-        perfIds.map((id) => combined.push.apply(combined, getSamePerf(id)))
-        perfIds.map((id) => combined.push.apply(combined, getSameStudio(id)))
-        console.info("Displaying all")
-        const uniqued = removeDuplicates(combined)
-        const sceneIds = uniqued.map((item) => item.id)
-        uniqued.splice(sceneIds.indexOf(scene.id), 1)
+    function recommendedContent() {
         const content = 
             <RecommendsCol
                 key={Math.random()}
-                scenes={uniqued.slice(0, 40)}
-                />
-        return content
-    }
-    function hasPerf() {
-        const combined:GQL.SlimSceneDataFragment[] = []
-        const dummy:GQL.SlimSceneDataFragment[] = []
-        perfIds.map((id) => combined.push.apply(combined, getSamePerf(id)))
-        perfIds.map((id) => dummy.push.apply(dummy, getSamePerf(id)))
-        perfIds.map((id) => dummy.push.apply(dummy, getSamePerf(id)))
-        console.info("Only displaying performers")
-        const uniqued = removeDuplicates(combined)
-        const sceneIds = uniqued.map((item) => item.id)
-        uniqued.splice(sceneIds.indexOf(scene.id), 1)
-        const content = 
-            <RecommendsCol 
-                key={Math.random()}
-                scenes={uniqued.slice(0,40)}
+                scenes={getAllScenesToCheck()}
                 />
         return content
     }
     function markers() {
-        const content = 
-            <MarkerView scene={scene}/>
+        const content =
+        <MarkerView scene={scene}/>
         return content
-    }
-    function isNotNull(value:any) {
-        return value != ""
     }
     const [isRecommended, setIsRecommended] = useState(true)
     const [isMarkers, setIsMarkers] = useState(false)
     const [isQueue, setIsQueue] = useState(false)
-    const recContent = hasStudioAndPerf()
+    const recContent = recommendedContent()
     const markerContent = markers()
     function render() {
         var content = scene.performers.length != 0 && scene.studio && isRecommended ? recContent
@@ -177,7 +218,7 @@ export const SceneRecs: React.FC<IProps> = ({
                 >
                 Queue
                 </Button>
-                <Button 
+                {scene.scene_markers.length > 0 ? <Button 
                 className={`${isMarkers ? "btn-dc" : "btn-secondary"} btn-1l`}
                 onClick={() => {
                     setIsMarkers(true)
@@ -186,7 +227,7 @@ export const SceneRecs: React.FC<IProps> = ({
                 }}
                 >
                 Markers
-                </Button>
+                </Button> : <></>}
             </div>
             {content}
         </>

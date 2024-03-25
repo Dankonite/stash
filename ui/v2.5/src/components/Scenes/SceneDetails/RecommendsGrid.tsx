@@ -10,7 +10,7 @@ import cx from "classnames";
 import { ConfigurationContext } from "src/hooks/Config";
 
 interface ISceneCardsGrid {
-  scenes: GQL.SlimSceneDataFragment[];
+  scenes: GQL.SlimSceneDataFragment[] | undefined;
   queue?: SceneQueue;
   zoomIndex?: number;
 }
@@ -91,7 +91,7 @@ export const RecommendsCol: React.FC<ISceneCardsGrid> = ({
 
     history.push(link);
   }
-  return (
+  if (scenes) {return (
     <div id="queue-viewer">
     <div className="justify-content-center queue-content" ref={componentRef}>
       {scenes.map((scene, index) => (
@@ -126,5 +126,5 @@ export const RecommendsCol: React.FC<ISceneCardsGrid> = ({
       ))}
     </div>
     </div>
-  );
+  )} else return null
 };
