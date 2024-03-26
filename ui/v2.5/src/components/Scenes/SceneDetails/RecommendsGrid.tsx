@@ -68,7 +68,6 @@ export const ScenePreview: React.FC<IScenePreviewProps> = ({
         ref={videoEl}
         src={video}
       />
-      <PreviewScrubber vttPath={vttPath} onClick={onScrubberClick} />
     </div>
   );
 };
@@ -98,7 +97,7 @@ export const RecommendsCol: React.FC<ISceneCardsGrid> = ({
         <Link
         to={`/scenes/${scene.id}`}
         >
-          <div className="ml-1 d-flex align-items-center">
+          <div className="ml-1 d-flex align-items-start">
             <div className="thumbnail-container">
             <ScenePreview
               image={scene.paths.screenshot ?? undefined}
@@ -106,7 +105,6 @@ export const RecommendsCol: React.FC<ISceneCardsGrid> = ({
               isPortrait={true}
               soundActive={configuration?.interface?.soundOnPreview ?? false}
               vttPath={scene.paths.vtt ?? undefined}
-              onScrubberClick={onScrubberClick}
             />
             </div>
             <div className="queue-scene-details d-flex flex-col">

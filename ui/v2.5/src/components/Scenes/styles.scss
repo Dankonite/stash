@@ -627,7 +627,7 @@ input[type="range"].blue-slider {
     .queue-scene-performers,
     .queue-scene-date {
       margin-right: auto;
-      min-width: 245px;
+      min-width: 190px;
       overflow: hidden;
       position: relative;
       transform: translateX(0);
@@ -639,7 +639,7 @@ input[type="range"].blue-slider {
     .queue-scene-studio:hover,
     .queue-scene-performers:hover,
     .queue-scene-date:hover {
-      transform: translateX(calc(245px - 100%));
+      transform: translateX(calc(190px - 100%));
     }
   }
 }

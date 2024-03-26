@@ -7,6 +7,7 @@ import { Button } from "react-bootstrap";
 import { MarkerWallPanel } from "src/components/Wall/WallPanel copy";
 import { useStats } from "src/core/StashService";
 import { TypeKind } from "graphql";
+import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
 interface IProps {
     scene: GQL.SceneDataFragment;
     queue: JSX.Element
@@ -50,12 +51,18 @@ export const SceneRecs: React.FC<IProps> = ({
             variables: {
                 filter: {
                     sort: "random",
-                    per_page: 1000, 
+                    per_page: 3000, 
+                },
+                scene_filter: {
+                    tags: {
+                        value: thisScenesTags,
+                        modifier: GQL.CriterionModifier.Includes,
+                    }
                 }
             }
         })
-        data?.findScenes.scenes ? scenesFound.push.apply(scenesFound, data?.findScenes.scenes) : ""
-
+        if (data?.findScenes.scenes) scenesFound.push.apply(scenesFound, data?.findScenes.scenes)
+        console.info(data?.findScenes.scenes.length)
     }
     queryCheck()
     function checkRw() {
@@ -127,6 +134,8 @@ export const SceneRecs: React.FC<IProps> = ({
         if (scenesFound.length > 0 && tagScores?.length) {
             const sceneWscores = scenesFound.map((scene) => calcScenesScore(scene)).sort(sortScenes)
             const scenes = sceneWscores.map((item) => item.scene)
+            const sceneIds = scenes.map((item) => item.id)
+            scenes.splice(sceneIds.indexOf(scene.id), 1)
             // console.info(sceneWscores)
             // console.info(scenes)
             return scenes.slice(0,30)
@@ -139,11 +148,11 @@ export const SceneRecs: React.FC<IProps> = ({
         Tscores.map((scoreItem) => score = score + scoreItem!)       // Adds score for every matching tag (0-4 range) 2 based on tags freq in rwScenes; 2 based on matching a tag on this scene (having LOTS of tags can skew toward tag matching)
         if (sceneTC.studio && scene.studio) {                       // Adds 4 to the score if SceneTC's Studio Matches the current video
             if (sceneTC.studio.id == scene.studio.id) {
-                score = score + 4
+                score = score + 6
             }
         }
         if (sceneTC.studio) { // Adds 1 score each time sceneTC's studio appeared in RW Studios (0-15 possible if you are only watching one specific studio consistently/mostly it will weight heavier)
-            score = score + countObject(studiosRW, sceneTC.studio.id)/2
+            score = score + countObject(studiosRW, sceneTC.studio.id)
             // console.info(countObject(studiosRW, sceneTC.studio.id))
         }
         if (sceneTC.performers.length > 0) {
@@ -158,17 +167,6 @@ export const SceneRecs: React.FC<IProps> = ({
             scene: sceneTC,
             score: score,
         }
-    }
-    function removeDuplicates(scenes: GQL.SlimSceneDataFragment[]) {
-        var uniqueNum:number[] = [];
-        var uniqueScenes: GQL.SlimSceneDataFragment[] = [];
-        for (var i = 0; i < scenes.length; i++) {
-            if (uniqueNum.indexOf(Number(scenes[i].id)) === -1) {
-                uniqueNum.push(Number(scenes[i].id));
-                uniqueScenes.push(scenes[i])
-            }
-        }
-        return uniqueScenes;
     }
     function recommendedContent() {
         const content = 
@@ -189,10 +187,11 @@ export const SceneRecs: React.FC<IProps> = ({
     const recContent = recommendedContent()
     const markerContent = markers()
     function render() {
-        var content = scene.performers.length != 0 && scene.studio && isRecommended ? recContent
-                    : scene.performers.length > 0 && isQueue ? queue
-                    : scene.studio && isMarkers ? markerContent
+        var content = isRecommended ? recContent
+                    : isQueue ? queue
+                    : isMarkers ? markerContent
                     : undefined
+        
         const display = 
         <>
             <div className="d-flex flex-row ml-1 mb-2" key={Math.random()}>
@@ -229,7 +228,8 @@ export const SceneRecs: React.FC<IProps> = ({
                 Markers
                 </Button> : <></>}
             </div>
-            {content}
+            {content ? content : <LoadingIndicator />}
+            
         </>
         return content ? display : null
     }

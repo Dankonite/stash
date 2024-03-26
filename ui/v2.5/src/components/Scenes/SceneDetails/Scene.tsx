@@ -614,7 +614,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   function maybeRenderTags() {
     return scene!.tags.length != 0 ? (
       <div
-      className="d-flex flex-wrap justify-content-end align-items-start align-content-start" 
+      className="d-flex flex-wrap justify-content-end align-items-start align-content-start h-fc" 
       style={{
         maxWidth: "360px"
       }}
@@ -625,8 +625,8 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   }
   function maybeRenderPerformers() {
     return scene!.performers.length != 0 ? (
-      <div className="d-flex flex-wrap justify-content-end" style={{
-      maxWidth: String(scene?.performers.length! > 5 ? "360px" : "240px")
+      <div className="d-flex flex-wrap justify-content-end align-content-start" style={{
+      maxWidth: String(scene?.performers.length! > 2 ? "360px" : "480px")
       }} key={scene!.id}><PerformerButtons scene={scene!}/></div>
     ) : ("")
   }

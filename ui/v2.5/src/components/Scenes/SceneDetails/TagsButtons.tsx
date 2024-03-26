@@ -13,11 +13,22 @@ export const TagButtons: React.FC<IProps> = ({
     scene,
 }) => {
     const ids: string[] = []
+    function sortBySceneCount( a:any, b:any ){
+        if ( a.scene_count_all < b.scene_count_all ){
+            return 1;
+          }
+        if ( a.scene_count_all > b.scene_count_all ){
+        return -1;
+        }
+        return 0;
+    }
     scene.tags.forEach((tag) => {ids.push(tag.id)})
     // console.info(ids)
     const {data} = GQL.useFindTagsQuery({variables: {ids: ids}})
     // console.info(data?.findTags.tags)
-    const tagContent = data?.findTags.tags.map( (tag) => (
+    const tagsSorted = data?.findTags.tags.map((tag) => tag).sort(sortBySceneCount)
+    // console.info(tagsSorted)
+    const tagContent = tagsSorted?.map( (tag) => (
             <>
             <div className="h-fc" key={tag.id}>
             <Link

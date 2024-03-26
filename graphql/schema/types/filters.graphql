@@ -411,6 +411,9 @@ input TagFilterType {
   "Filter by tag aliases"
   aliases: StringCriterionInput
 
+  "Filter by favorite"
+  favorite: Boolean
+
   "Filter by tag description"
   description: StringCriterionInput
 

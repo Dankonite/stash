@@ -11,10 +11,13 @@ interface IProps {
 export const PerformerButtons: React.FC<IProps> = ({
     scene,
 }) => {
+    const cWidth = scene.performers.length < 3 ? "200px" : "100px"
+    const iWidth = scene.performers.length < 3 ? "calc(200px - .75rem)" : "calc(100px - .75rem)"
+    const iHeight = scene.performers.length < 3 ? "240px" : "120px"
     const PerfContent = scene.performers.map( (performer) => (
             <>
             <div className="" key={performer.id} style={{
-            width: "120px",
+            width: cWidth,
             }}>
             <Link
             to={`/performers/${performer.id}?sortby=random`}
@@ -23,14 +26,15 @@ export const PerformerButtons: React.FC<IProps> = ({
                 flexDirection: "column",
                 // width: "fit-content",
                 padding: "0 .75rem",
+                overflow: "hidden",
                 paddingBottom: "0.25rem",
                 textDecoration: "none",
                 color: "#fff"
             }}
             >
             <div style={{
-            height: "125px",
-            width: "100px",
+            height: iHeight,
+            width: iWidth,
             overflow: "hidden",
             borderRadius: ".5rem",
             }}>
