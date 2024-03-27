@@ -19,12 +19,9 @@
     min-width: 6rem;
   }
 }
-.thumbnail-section {
-  width: auto;
-}
+
 .tag-card {
-  padding: 0!important;
-  width: auto!important;
+  padding: 0.5rem;
 
   @media (max-width: 576px) {
     width: 100%;
@@ -67,6 +64,7 @@
       box-shadow: none;
     }
   }
+  
   &:hover button.btn.favorite-button.not-favorite {
     opacity: 1;
   }
