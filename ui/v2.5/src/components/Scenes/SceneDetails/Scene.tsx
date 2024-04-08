@@ -84,6 +84,7 @@ import TextUtils from "src/utils/text";
 interface UBarProps {
   scene: GQL.SceneDataFragment;
   setWideMode: () => void;
+  setEditMode: () => void;
 }
 interface ISceneParams {
   id: string;
@@ -109,7 +110,8 @@ interface IProps {
 }
 const UtilityBar: React.FC<UBarProps> = ({
   scene,
-  setWideMode
+  setWideMode,
+  setEditMode
 }) => {
   const Toast = useToast();
   const intl = useIntl();
@@ -287,6 +289,16 @@ const UtilityBar: React.FC<UBarProps> = ({
         <Icon icon={faArrowsLeftRightToLine}/>
       </Button>
     </Nav.Item>
+    <Nav.Item>
+      <Button
+      className="btn-clear"
+      onClick={() => {
+
+      }}
+      >
+        <FormattedMessage id="actions.edit"/>
+      </Button>
+    </Nav.Item>
     <Nav.Item>{renderOperations()}</Nav.Item>
   </ButtonGroup>
   )
@@ -364,6 +376,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   );
   const [sBCollapsed, setSBCollapsed] = useState(false)
   const [wideMode, setWideMode] = useState(false)
+  const [editMode, setEditMode] = useState(false)
   function getCollapseButtonIcon() {
     return !sBCollapsed ? faChevronRight : faChevronLeft;
   }
@@ -660,6 +673,26 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
       }
       />
   </div>
+  const [updateScene] = useSceneUpdate();
+  const Toast = useToast();
+  const intl = useIntl();
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
+  async function onSave(input: GQL.SceneCreateInput) {
+    await updateScene({
+      variables: {
+        input: {
+          id: scene!.id,
+          ...input,
+        },
+      },
+    });
+    Toast.success(
+      intl.formatMessage(
+        { id: "toast.updated_entity" },
+        { entity: intl.formatMessage({ id: "scene" }).toLocaleLowerCase() }
+      )
+    );
+  }
   return (
     <div 
     className="the-window"
@@ -682,47 +715,57 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
               onPrevious={() => queuePrevious(true)}
               />
           </div>
-          <div className="d-flex flex-row">
-          <div className="the-deets" style={{margin: "0 15px", width: "-webkit-fill-available"}}>
-            <div className="top-row d-flex flex-row justify-content-between">
+          <div className="d-flex flex-row under-player">
+            {editMode ? 
+              <div className="the-deets" style={{margin: "0 15px", width: "-webkit-fill-available"}}>
+              <div className="top-row d-flex flex-row justify-content-between">
 
-              <div className="left-side">
-                <h3>{scene.title}</h3>
-                <div className="studio-row">
-                  <Link to={`studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
-                      <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
-                      <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
-                  </Link>
+                <div className="left-side">
+                  <h3>{scene.title}</h3>
+                  <div className="studio-row">
+                    <Link to={`studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
+                        <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
+                        <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
+                    </Link>
+                  </div>
+                  <div className="date-row">
+                    <h6>{scene.date}</h6>
+                    {file?.width && file?.height && (
+                    <h6>
+                      <FormattedMessage id="resolution" />:{" "}
+                      {TextUtils.resolution(file.width, file.height)}
+                    </h6>
+                    )}
+                  </div>
+                  
                 </div>
-                <div className="date-row">
-                  <h6>{scene.date}</h6>
-                  {file?.width && file?.height && (
-                  <h6>
-                    <FormattedMessage id="resolution" />:{" "}
-                    {TextUtils.resolution(file.width, file.height)}
-                  </h6>
-                  )}
+
+                <div className="right-side d-flex flex-col"> 
+                  <div className="d-flex flex-row mb-3" >
+                    <UtilityBar 
+                    scene={scene}
+                    setWideMode={() => setWideMode(!wideMode)}
+                    setEditMode={() => setEditMode(!editMode)}
+                    />
+                  </div>
+                  <div className="d-flex flex-row">
+                    {maybeRenderTags()}
+                    {maybeRenderPerformers()}
+                  </div>
+                  
                 </div>
-                
               </div>
 
-              <div className="right-side d-flex flex-col"> 
-                <div className="d-flex flex-row mb-3" >
-                  <UtilityBar 
-                  scene={scene}
-                  setWideMode={() => setWideMode(!wideMode)}
-                  />
-                </div>
-                <div className="d-flex flex-row">
-                  {maybeRenderTags()}
-                  {maybeRenderPerformers()}
-                </div>
-                
-              </div>
             </div>
-
-          </div>
-          {wideMode ? sbStuff : ""}
+            : 
+            <SceneEditPanel 
+              scene={scene}
+              isVisible={editMode}
+              onSubmit={onSave}
+              onDelete={() => setIsDeleteAlertOpen(true)}
+            />
+            }
+            {wideMode ? sbStuff : ""}
           </div>
         </div>
         {!wideMode ? 
