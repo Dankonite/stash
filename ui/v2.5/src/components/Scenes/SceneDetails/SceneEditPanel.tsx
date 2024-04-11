@@ -61,6 +61,7 @@ interface IProps {
   isVisible: boolean;
   onSubmit: (input: GQL.SceneCreateInput) => Promise<void>;
   onDelete?: () => void;
+  setEditMode: () => void;
 }
 
 export const SceneEditPanel: React.FC<IProps> = ({
@@ -70,6 +71,7 @@ export const SceneEditPanel: React.FC<IProps> = ({
   isVisible,
   onSubmit,
   onDelete,
+  setEditMode,
 }) => {
   const intl = useIntl();
   const Toast = useToast();
@@ -825,7 +827,7 @@ export const SceneEditPanel: React.FC<IProps> = ({
       {renderScrapeQueryModal()}
       {maybeRenderScrapeDialog()}
       <Form noValidate onSubmit={formik.handleSubmit}>
-        <Row className="form-container edit-buttons-container px-3 pt-3">
+        <div className="form-container edit-buttons-container px-3 pt-3 mr-2 d-flex">
           <div className="edit-buttons mb-3 pl-0">
             <Button
               className="edit-button"
@@ -833,7 +835,10 @@ export const SceneEditPanel: React.FC<IProps> = ({
               disabled={
                 (!isNew && !formik.dirty) || !isEqual(formik.errors, {})
               }
-              onClick={() => formik.submitForm()}
+              onClick={() => {
+                formik.submitForm()
+                setEditMode()
+              }}
             >
               <FormattedMessage id="actions.save" />
             </Button>
@@ -848,15 +853,15 @@ export const SceneEditPanel: React.FC<IProps> = ({
             )}
           </div>
           {!isNew && (
-            <div className="ml-auto text-right d-flex">
+            <div className="ml-auto text-right d-flex mb-3">
               <ButtonGroup className="scraper-group">
                 {renderScraperMenu()}
                 {renderScrapeQueryMenu()}
               </ButtonGroup>
             </div>
           )}
-        </Row>
-        <Row className="form-container px-3">
+        </div>
+        <div className="form-container px-3">
           <Col lg={7} xl={12}>
             {renderInputField("title")}
             {renderInputField("code", "text", "scene_code")}
@@ -894,7 +899,7 @@ export const SceneEditPanel: React.FC<IProps> = ({
               />
             </Form.Group>
           </Col>
-        </Row>
+        </div>
       </Form>
     </div>
   );

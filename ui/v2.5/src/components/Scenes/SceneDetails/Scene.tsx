@@ -292,9 +292,7 @@ const UtilityBar: React.FC<UBarProps> = ({
     <Nav.Item>
       <Button
       className="btn-clear"
-      onClick={() => {
-
-      }}
+      onClick={() => setEditMode()}
       >
         <FormattedMessage id="actions.edit"/>
       </Button>
@@ -406,7 +404,10 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   }, [configuration?.interface.continuePlaylistDefault, queryParams]);
 
   const [queueScenes, setQueueScenes] = useState<QueuedScene[]>([]);
-
+  const [updateScene] = useSceneUpdate();
+  const Toast = useToast();
+  const intl = useIntl();
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
   const [collapsed, setCollapsed] = useState(false);
   const [continuePlaylist, setContinuePlaylist] = useState(queryContinue);
   const [hideScrubber, setHideScrubber] = useState(
@@ -673,10 +674,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
       }
       />
   </div>
-  const [updateScene] = useSceneUpdate();
-  const Toast = useToast();
-  const intl = useIntl();
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
+
   async function onSave(input: GQL.SceneCreateInput) {
     await updateScene({
       variables: {
@@ -716,7 +714,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
               />
           </div>
           <div className="d-flex flex-row under-player">
-            {editMode ? 
+            {!editMode ? 
               <div className="the-deets" style={{margin: "0 15px", width: "-webkit-fill-available"}}>
               <div className="top-row d-flex flex-row justify-content-between">
 
@@ -763,6 +761,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
               isVisible={editMode}
               onSubmit={onSave}
               onDelete={() => setIsDeleteAlertOpen(true)}
+              setEditMode={() => setEditMode(false)}
             />
             }
             {wideMode ? sbStuff : ""}
