@@ -851,6 +851,12 @@ export const SceneEditPanel: React.FC<IProps> = ({
                 <FormattedMessage id="actions.delete" />
               </Button>
             )}
+            <Button
+              className="edit-button"
+              onClick={() => setEditMode()}
+            >
+              <FormattedMessage id="actions.cancel" />
+            </Button>
           </div>
           {!isNew && (
             <div className="ml-auto text-right d-flex mb-3">
