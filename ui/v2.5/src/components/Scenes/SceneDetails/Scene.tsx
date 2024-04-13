@@ -716,7 +716,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
               <div className="the-deets" style={{margin: "0 15px", width: "-webkit-fill-available"}}>
               <div className="top-row d-flex flex-row justify-content-between">
 
-                <div className="left-side">
+                <div className="left-side w-100">
                   <div className="d-flex">
                     <h3>{scene.title}</h3>
                     <div className="flex-grow-1"></div>
@@ -754,9 +754,13 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
                 </span>
                 </div>
                 <div>
+                  {scene.performers.length > 0 ?
                   <h5
                     className="text-right"
-                  >Performers</h5>
+                  >
+                    Performers
+                  </h5> : ""
+                  }
                   {maybeRenderPerformers()}
                 </div>
                 </div>

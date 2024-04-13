@@ -3,7 +3,7 @@ import * as GQL from "src/core/generated-graphql";
 import { Button, Modal } from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
 import { Link } from "react-router-dom";
-import { queryFindTagsByIDForSelect } from "src/core/StashService";
+import { performerMutationImpactedQueries, queryFindTagsByIDForSelect } from "src/core/StashService";
 interface IProps {
     scene: GQL.SceneDataFragment;
 }
@@ -14,7 +14,26 @@ export const PerformerButtons: React.FC<IProps> = ({
     const cWidth = "200px"
     const iWidth = "calc(200px - .75rem)"
     const iHeight = "240px"
-    const PerfContent = scene.performers.map( (performer) => (
+    const PerfContent = scene.performers.map( (performer) => {
+        function maybeRenderAltImage() {
+            const {data} = GQL.useFindImagesQuery({variables: {
+                image_filter: {
+                    performers: {
+                        modifier: GQL.CriterionModifier.Includes,
+                        value: [performer.id]
+                    },
+                    tags: {
+                        modifier: GQL.CriterionModifier.Includes,
+                        value: ["1736"]
+                    }
+                }
+            }})
+
+            console.info(data?.findImages)
+
+            return data?.findImages.count != 0 ? data?.findImages.images[0].paths.image : performer.image_path
+        }
+        return (
             <>
             <div className="" key={performer.id} style={{
             width: cWidth,
@@ -39,11 +58,12 @@ export const PerformerButtons: React.FC<IProps> = ({
             borderRadius: ".5rem",
             }}>
                 <img
+                className="performer"
                 style={{
                     height: "auto",
                     width: "100%",
                 }}
-                src={performer.image_path ?? ""}
+                src={maybeRenderAltImage() ?? ""}
                 >
                 </img>
             </div>
@@ -57,7 +77,8 @@ export const PerformerButtons: React.FC<IProps> = ({
             </Link>
             </div>
             </>
-    ))
+    )
+    })
     return (
         <>
                 {PerfContent}     
