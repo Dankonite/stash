@@ -11,9 +11,9 @@ interface IProps {
 export const PerformerButtons: React.FC<IProps> = ({
     scene,
 }) => {
-    const cWidth = scene.performers.length < 3 ? "200px" : "100px"
-    const iWidth = scene.performers.length < 3 ? "calc(200px - .75rem)" : "calc(100px - .75rem)"
-    const iHeight = scene.performers.length < 3 ? "240px" : "120px"
+    const cWidth = "200px"
+    const iWidth = "calc(200px - .75rem)"
+    const iHeight = "240px"
     const PerfContent = scene.performers.map( (performer) => (
             <>
             <div className="" key={performer.id} style={{

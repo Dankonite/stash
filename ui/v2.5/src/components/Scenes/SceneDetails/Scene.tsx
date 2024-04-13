@@ -637,7 +637,8 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   function maybeRenderPerformers() {
     return scene!.performers.length != 0 ? (
       <div className="d-flex flex-wrap justify-content-start align-content-start" style={{
-      maxWidth: String(scene?.performers.length! > 2 ? "200px" : "400px")
+      minWidth: scene!.performers.length > 1 ? "400px" : "",
+      maxWidth: "400px"
       }} key={scene!.id}><PerformerButtons scene={scene!}/></div>
     ) : ("")
   }
@@ -728,7 +729,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
                     </div>
                   </div>
                   <div className="studio-row">
-                    <Link to={`/studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
+                    <Link to={`/studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link w-fc">
                         <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
                         <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
                     </Link>
@@ -744,17 +745,23 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
                     )}
                 <div className="tags-performers">
                 
+                <div>
+                {scene.tags.length > 0 ? <h5>Tags</h5> : ""}
                 {maybeRenderTags()}
-                {maybeRenderPerformers()}
-                </div>
-                </div>
-              </div>
-              <div className="description"> 
+                {scene.details? <h5>Description</h5> : ""}
                 <span>
                   {scene.details}
                 </span>
+                </div>
+                <div>
+                  <h5
+                    className="text-right"
+                  >Performers</h5>
+                  {maybeRenderPerformers()}
+                </div>
+                </div>
+                </div>
               </div>
-
             </div>
             : 
             <SceneEditPanel 
