@@ -33,17 +33,14 @@ export const TagButtons: React.FC<IProps> = ({
             <div className="h-fc" key={tag.id}>
             <Link
             to={`/tags/${tag.id}?sortby=random`}
+            className="mb-2 mr-2 justify-content-center d-flex flex-column w-fc"
             style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "fit-content",
                 padding: "0 .75rem",
                 paddingBottom: "0.25rem",
                 textDecoration: "none",
                 color: "#fff",
                 borderRadius: ".2rem",
                 backgroundColor: "#202020",
-                margin: "0 .2rem .4rem"
             }}
             >
             <span

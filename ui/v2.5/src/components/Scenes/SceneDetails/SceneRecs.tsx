@@ -208,7 +208,7 @@ export const SceneRecs: React.FC<IProps> = ({
                 </Button>
                 <div className="flex-grow-1"></div>
                 <Button 
-                className={`${isQueue ? "btn-dc" : "btn-secondary"} btn-1l mr-2`}
+                className={`${isQueue ? "btn-dc" : "btn-secondary"} btn-1l`}
                 onClick={() => {
                     setIsMarkers(false)
                     setIsRecommended(false)

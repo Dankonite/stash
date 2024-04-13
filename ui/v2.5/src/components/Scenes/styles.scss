@@ -13,9 +13,18 @@
     margin-right: .4rem;
   }
 }
-// .card, img, video, .video-js {
-//   filter:blur(20px)
-// }
+
+.scene-card-preview {
+  overflow: hidden;
+}
+
+.card, img, video, .video-js {
+  filter:blur(10px)
+}
+
+.w-fc {
+  width: fit-content;
+}
 .h-fc {
   height: fit-content;
 }
@@ -572,8 +581,9 @@ input[type="range"].blue-slider {
   .edit-buttons-container {
     background-color: $bg-color;
     position: sticky;
-    top: 0;
+    top: 3rem;
     z-index: 3;
+    margin-top: -1rem;
 
     @media (min-width: 575px) and (max-width: 1199px) {
       top: 3rem;

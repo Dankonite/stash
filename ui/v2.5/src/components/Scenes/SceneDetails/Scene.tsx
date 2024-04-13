@@ -628,10 +628,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   function maybeRenderTags() {
     return scene!.tags.length != 0 ? (
       <div
-      className="d-flex flex-wrap justify-content-end align-items-start align-content-start h-fc" 
-      style={{
-        maxWidth: "360px"
-      }}
+      className="d-flex flex-wrap justify-content-start align-items-start align-content-start h-fc" 
       >
         <TagButtons scene={scene!}/>
       </div>
@@ -639,8 +636,8 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   }
   function maybeRenderPerformers() {
     return scene!.performers.length != 0 ? (
-      <div className="d-flex flex-wrap justify-content-end align-content-start" style={{
-      maxWidth: String(scene?.performers.length! > 2 ? "360px" : "480px")
+      <div className="d-flex flex-wrap justify-content-start align-content-start" style={{
+      maxWidth: String(scene?.performers.length! > 2 ? "200px" : "400px")
       }} key={scene!.id}><PerformerButtons scene={scene!}/></div>
     ) : ("")
   }
@@ -719,39 +716,43 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
               <div className="top-row d-flex flex-row justify-content-between">
 
                 <div className="left-side">
-                  <h3>{scene.title}</h3>
+                  <div className="d-flex">
+                    <h3>{scene.title}</h3>
+                    <div className="flex-grow-1"></div>
+                    <div className="d-flex flex-row mb-3" >
+                      <UtilityBar 
+                      scene={scene}
+                      setWideMode={() => setWideMode(!wideMode)}
+                      setEditMode={() => setEditMode(!editMode)}
+                      />
+                    </div>
+                  </div>
                   <div className="studio-row">
-                    <Link to={`studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
+                    <Link to={`/studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link">
                         <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
                         <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
                     </Link>
                   </div>
                   <div className="date-row">
                     <h6>{scene.date}</h6>
+                  </div>
                     {file?.width && file?.height && (
                     <h6>
                       <FormattedMessage id="resolution" />:{" "}
                       {TextUtils.resolution(file.width, file.height)}
                     </h6>
                     )}
-                  </div>
-                  
+                <div className="tags-performers">
+                
+                {maybeRenderTags()}
+                {maybeRenderPerformers()}
                 </div>
-
-                <div className="right-side d-flex flex-col"> 
-                  <div className="d-flex flex-row mb-3" >
-                    <UtilityBar 
-                    scene={scene}
-                    setWideMode={() => setWideMode(!wideMode)}
-                    setEditMode={() => setEditMode(!editMode)}
-                    />
-                  </div>
-                  <div className="d-flex flex-row">
-                    {maybeRenderTags()}
-                    {maybeRenderPerformers()}
-                  </div>
-                  
                 </div>
+              </div>
+              <div className="description"> 
+                <span>
+                  {scene.details}
+                </span>
               </div>
 
             </div>
