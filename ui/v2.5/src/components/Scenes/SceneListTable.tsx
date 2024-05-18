@@ -78,6 +78,7 @@ export const SceneListTable: React.FC<ISceneListTableProps> = (
     <RatingSystem
       value={scene.rating100}
       onSetRating={(value) => setRating(value, scene.id)}
+      clickToRate
     />
   );
 
@@ -334,7 +335,7 @@ export const SceneListTable: React.FC<ISceneListTableProps> = (
     },
     {
       value: "o_counter",
-      label: intl.formatMessage({ id: "o_counter" }),
+      label: intl.formatMessage({ id: "o_count" }),
       render: (s) => <>{s.o_counter}</>,
     },
     {

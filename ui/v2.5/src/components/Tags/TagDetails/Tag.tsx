@@ -33,6 +33,7 @@ import { TagMergeModal } from "./TagMergeDialog";
 import {
   faChevronDown,
   faChevronUp,
+  faHeart,
   faPenToSquare,
   faSignInAlt,
   faSignOutAlt,
@@ -143,6 +144,19 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
     }
   }, [setTabKey, populatedDefaultTab, tabKey]);
 
+  function setFavorite(v: boolean) {
+    if (tag.id) {
+      updateTag({
+        variables: {
+          input: {
+            id: tag.id,
+            favorite: v,
+          },
+        },
+      });
+    }
+  }
+
   // set up hotkeys
   useEffect(() => {
     Mousetrap.bind("e", () => toggleEditing());
@@ -150,6 +164,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
       setIsDeleteAlertOpen(true);
     });
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
+    Mousetrap.bind("f", () => setFavorite(!tag.favorite));
 
     return () => {
       if (isEditing) {
@@ -159,6 +174,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
       Mousetrap.unbind("e");
       Mousetrap.unbind("d d");
       Mousetrap.unbind(",");
+      Mousetrap.unbind("f");
     };
   });
 
@@ -300,6 +316,17 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
       return <DetailImage className="logo" alt={tag.name} src={tagImage} />;
     }
   }
+
+  const renderClickableIcons = () => (
+    <span className="name-icons">
+      <Button
+        className={cx("minimal", tag.favorite ? "favorite" : "not-favorite")}
+        onClick={() => setFavorite(!tag.favorite)}
+      >
+        <Icon icon={faHeart} />
+      </Button>
+    </span>
+  );
 
   function renderMergeButton() {
     return (
@@ -549,10 +576,11 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
             )}
           </div>
           <div className="row">
-            <div className="studio-head col">
+            <div className="tag-head col">
               <h2>
                 <span className="tag-name">{tag.name}</span>
                 {maybeRenderShowCollapseButton()}
+                {renderClickableIcons()}
                 {maybeRenderEditToggleButton()}
                 {maybeRenderEditPanel()}
               </h2>

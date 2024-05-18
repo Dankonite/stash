@@ -1613,6 +1613,11 @@ func createStudioFromModel(ctx context.Context, sqb *sqlite.StudioStore, studio 
 	return nil
 }
 
+func getStudioBoolValue(index int) bool {
+	index = index % 2
+	return index == 1
+}
+
 // createStudios creates n studios with plain Name and o studios with camel cased NaMe included
 func createStudios(ctx context.Context, n int, o int) error {
 	sqb := db.Studio
@@ -1633,6 +1638,7 @@ func createStudios(ctx context.Context, n int, o int) error {
 		studio := models.Studio{
 			Name:          name,
 			URL:           getStudioStringValue(index, urlField),
+			Favorite:      getStudioBoolValue(index),
 			IgnoreAutoTag: getIgnoreAutoTag(i),
 		}
 		// only add aliases for some scenes
