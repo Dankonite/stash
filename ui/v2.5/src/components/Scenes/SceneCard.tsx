@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import { Button, ButtonGroup } from "react-bootstrap";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Button, ButtonGroup, ModalBody, ModalFooter, ModalTitle, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
@@ -19,11 +19,12 @@ import { SceneQueue } from "src/models/sceneQueue";
 import { ConfigurationContext } from "src/hooks/Config";
 import { PerformerPopoverButton } from "../Shared/PerformerPopoverButton";
 import { PerformerNameButton } from  "../Shared/PerformerNameButton";
-import { GridCard } from "../Shared/GridCard";
+import { GridCard, calculateCardWidth } from "../Shared/GridCard/GridCard";
 import { RatingBanner } from "../Shared/RatingBanner";
 import { FormattedNumber } from "react-intl";
 import {
   faBox,
+  faVideo,
   faCopy,
   faFilm,
   faImages,
@@ -32,7 +33,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { objectPath, objectTitle } from "src/core/files";
 import { PreviewScrubber } from "./PreviewScrubber";
-
+import ScreenUtils from "src/utils/screen";
+import { PatchComponent } from "src/patch";
+import { TagDialog } from "./TagDialog";
+import { MarkerDialog } from "./MarkerDialog";
+import { StudioOverlay } from "../Shared/GridCard/StudioOverlay";
 interface IScenePreviewProps {
   isPortrait: boolean;
   image?: string;
@@ -72,7 +77,12 @@ export const ScenePreview: React.FC<IScenePreviewProps> = ({
 
   return (
     <div className={cx("scene-card-preview", { portrait: isPortrait })}>
-      <img className="scene-card-preview-image" src={image} alt="" />
+      <img
+        className="scene-card-preview-image"
+        loading="lazy"
+        src={image}
+        alt=""
+      />
       <video
         disableRemotePlayback
         playsInline
@@ -90,6 +100,8 @@ export const ScenePreview: React.FC<IScenePreviewProps> = ({
 
 interface ISceneCardProps {
   scene: GQL.SlimSceneDataFragment;
+  containerWidth?: number;
+  previewHeight?: number;
   index?: number;
   queue?: SceneQueue;
   compact?: boolean;
@@ -99,307 +111,393 @@ interface ISceneCardProps {
   onSelectedChanged?: (selected: boolean, shiftKey: boolean) => void;
 }
 
-export const SceneCard: React.FC<ISceneCardProps> = (
-  props: ISceneCardProps
-) => {
-  const history = useHistory();
-  const { configuration } = React.useContext(ConfigurationContext);
-
-  const file = useMemo(
-    () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
-    [props.scene]
-  );
-
-  function maybeRenderSceneSpecsOverlay() {
-    let sizeObj = null;
-    if (file?.size) {
-      sizeObj = TextUtils.fileSize(file.size);
-    }
-    return (
-      <div className="scene-specs-overlay">
-        {sizeObj != null ? (
-          <span className="overlay-filesize extra-scene-info">
-            <FormattedNumber
-              value={sizeObj.size}
-              maximumFractionDigits={TextUtils.fileSizeFractionalDigits(
-                sizeObj.unit
-              )}
-            />
-            {TextUtils.formatFileSizeUnit(sizeObj.unit)}
-          </span>
-        ) : (
-          ""
-        )}
-        {file?.width && file?.height ? (
-          <span className="overlay-resolution">
-            {" "}
-            {TextUtils.resolution(file?.width, file?.height)}
-          </span>
-        ) : (
-          ""
-        )}
-        {(file?.duration ?? 0) >= 1
-          ? TextUtils.secondsToTimestamp(file?.duration ?? 0)
-          : ""}
-      </div>
+const SceneCardPopovers = PatchComponent(
+  "SceneCard.Popovers",
+  (props: ISceneCardProps) => {
+    const file = useMemo(
+      () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
+      [props.scene]
     );
-  }
 
-  function maybeRenderInteractiveSpeedOverlay() {
-    return (
-      <div className="scene-interactive-speed-overlay">
-        {props.scene.interactive_speed ?? ""}
-      </div>
-    );
-  }
+    function maybeRenderTagPopoverButton() {
+      if (props.scene.tags.length <= 0) return;
 
-  function renderStudioThumbnail() {
-    const studioImage = props.scene.studio?.image_path;
-    const studioName = props.scene.studio?.name;
-
-    if (configuration?.interface.showStudioAsText || !studioImage) {
-      return studioName;
-    }
-
-    const studioImageURL = new URL(studioImage);
-    if (studioImageURL.searchParams.get("default") === "true") {
-      return studioName;
-    }
-
-    return (
-      <img className="image-thumbnail" alt={studioName} src={studioImage} />
-    );
-  }
-
-  function maybeRenderSceneStudioOverlay() {
-    if (!props.scene.studio) return;
-
-    return (
-      <div className="scene-studio-overlay">
-        <Link to={`/studios/${props.scene.studio.id}`}>
-          {renderStudioThumbnail()}
-        </Link>
-      </div>
-    );
-  }
-
-  function maybeRenderTagPopoverButton() {
-    if (props.scene.tags.length <= 0) return;
-
-    const popoverContent = props.scene.tags.map((tag) => (
-      <TagLink key={tag.id} tag={tag} />
-    ));
-
-    return (
-      <HoverPopover
-        className="tag-count"
-        placement="bottom"
-        content={popoverContent}
-      >
-        <Button className="minimal">
-          <Icon icon={faTag} />
-          <span>{props.scene.tags.length}</span>
-        </Button>
-      </HoverPopover>
-    );
-  }
-  function maybeRenderPerformerStringPopoverButton() {
-    return <PerformerNameButton performers={props.scene.performers} />
-  }
-  function maybeRenderPerformerPopoverButton() {
-    if (props.scene.performers.length <= 0) return;
-    return null
-    // return <PerformerPopoverButton performers={props.scene.performers} />;
-  }
-
-  function maybeRenderMoviePopoverButton() {
-    if (props.scene.movies.length <= 0) return;
-
-    const popoverContent = props.scene.movies.map((sceneMovie) => (
-      <div className="movie-tag-container row" key="movie">
-        <Link
-          to={`/movies/${sceneMovie.movie.id}`}
-          className="movie-tag col m-auto zoom-2"
-        >
-          <img
-            className="image-thumbnail"
-            alt={sceneMovie.movie.name ?? ""}
-            src={sceneMovie.movie.front_image_path ?? ""}
-          />
-        </Link>
-        <MovieLink
-          key={sceneMovie.movie.id}
-          movie={sceneMovie.movie}
-          className="d-block"
-        />
-      </div>
-    ));
-
-    return (
-      <HoverPopover
-        placement="bottom"
-        content={popoverContent}
-        className="movie-count tag-tooltip"
-      >
-        <Button className="minimal">
-          <Icon icon={faFilm} />
-          <span>{props.scene.movies.length}</span>
-        </Button>
-      </HoverPopover>
-    );
-  }
-
-  function maybeRenderSceneMarkerPopoverButton() {
-    if (props.scene.scene_markers.length <= 0) return;
-
-    const popoverContent = props.scene.scene_markers.map((marker) => {
-      const markerWithScene = { ...marker, scene: { id: props.scene.id } };
-      return <SceneMarkerLink key={marker.id} marker={markerWithScene} />;
-    });
-
-    return (
-      <HoverPopover
-        className="marker-count"
-        placement="bottom"
-        content={popoverContent}
-      >
-        <Button className="minimal">
-          <Icon icon={faMapMarkerAlt} />
-          <span>{props.scene.scene_markers.length}</span>
-        </Button>
-      </HoverPopover>
-    );
-  }
-
-  function maybeRenderOCounter() {
-    if (props.scene.o_counter) {
+      const popoverContent = props.scene.tags.map((tag) => (
+        <TagLink key={tag.id} tag={tag} />
+      ));
+      const [tagModal, setTagModal] = useState(false);
+      function onCancelTagDialog() {
+        setTagModal(false)
+      }
       return (
-        <div className="o-count">
-          <Button className="minimal">
-            <span className="fa-icon">
-              <SweatDrops />
-            </span>
-            <span>{props.scene.o_counter}</span>
-          </Button>
-        </div>
-      );
-    }
-  }
-
-  function maybeRenderGallery() {
-    if (props.scene.galleries.length <= 0) return;
-
-    const popoverContent = props.scene.galleries.map((gallery) => (
-      <GalleryLink key={gallery.id} gallery={gallery} />
-    ));
-
-    return (
-      <HoverPopover
-        className="gallery-count"
-        placement="bottom"
-        content={popoverContent}
-      >
-        <Button className="minimal">
-          <Icon icon={faImages} />
-          <span>{props.scene.galleries.length}</span>
-        </Button>
-      </HoverPopover>
-    );
-  }
-
-  function maybeRenderOrganized() {
-    if (props.scene.organized) {
-      return (
-        <div className="organized">
-          <Button className="minimal">
-            <Icon icon={faBox} />
-          </Button>
-        </div>
-      );
-    }
-  }
-
-  function maybeRenderDupeCopies() {
-    const phash = file
-      ? file.fingerprints.find((fp) => fp.type === "phash")
-      : undefined;
-
-    if (phash) {
-      return (
-        <div className="other-copies extra-scene-info">
-          <Button
-            href={NavUtils.makeScenesPHashMatchUrl(phash.value)}
+      <>
+        {tagModal ? <TagDialog scene={props.scene} onCancel={onCancelTagDialog}/> : <></>}
+        <HoverPopover
+          className="tag-count"
+          placement="bottom"
+          content={popoverContent}
+          > 
+          <Button 
             className="minimal"
-          >
-            <Icon icon={faCopy} />
+            onClick={() => setTagModal(true)}
+            >
+            <Icon icon={faTag} />
+            <span>{props.scene.tags.length}</span>
           </Button>
-        </div>
+        </HoverPopover>
+      </>
       );
     }
-  }
+    
+    function maybeRenderPerformerPopoverButton() {
+      if (props.scene.performers.length <= 0) return;
+      return null
+      // return <PerformerPopoverButton performers={props.scene.performers} />;
+    }
 
-  function maybeRenderPopoverButtonGroup() {
-    if (
-      !props.compact &&
-      (props.scene.tags.length > 0 ||
-        props.scene.performers.length > 0 ||
-        props.scene.movies.length > 0 ||
-        props.scene.scene_markers.length > 0 ||
-        props.scene?.o_counter ||
-        props.scene.galleries.length > 0 ||
-        props.scene.organized)
-    ) {
+    function maybeRenderMoviePopoverButton() {
+      if (props.scene.movies.length <= 0) return;
+
+      const popoverContent = props.scene.movies.map((sceneMovie) => (
+        <div className="movie-tag-container row" key="movie">
+          <Link
+            to={`/movies/${sceneMovie.movie.id}`}
+            className="movie-tag col m-auto zoom-2"
+          >
+            <img
+              className="image-thumbnail"
+              alt={sceneMovie.movie.name ?? ""}
+              src={sceneMovie.movie.front_image_path ?? ""}
+            />
+          </Link>
+          <MovieLink
+            key={sceneMovie.movie.id}
+            movie={sceneMovie.movie}
+            className="d-block"
+          />
+        </div>
+      ));
+
+      return (
+        <HoverPopover
+          placement="bottom"
+          content={popoverContent}
+          className="movie-count tag-tooltip"
+        >
+          <Button className="minimal">
+            <Icon icon={faFilm} />
+            <span>{props.scene.movies.length}</span>
+          </Button>
+        </HoverPopover>
+      );
+    }
+
+    function maybeRenderSceneMarkerPopoverButton() {
+      if (props.scene.scene_markers.length <= 0) return;
+
+      const popoverContent = props.scene.scene_markers.map((marker) => {
+        const markerWithScene = { ...marker, scene: { id: props.scene.id } };
+        return <SceneMarkerLink key={marker.id} marker={markerWithScene} />;
+      });
+      const [markerModal, setMarkerModal] = useState(false);
+      function onCancelMarkerDialog() {
+        setMarkerModal(false)
+      }
       return (
         <>
-          <ButtonGroup className="card-popovers" style={{
-            position: "absolute",
-            right: 0,
-            bottom:10.5
-          }}>
-            {maybeRenderTagPopoverButton()}
-            {maybeRenderPerformerPopoverButton()}
-            {maybeRenderMoviePopoverButton()}
-            {maybeRenderSceneMarkerPopoverButton()}
-            {maybeRenderOCounter()}
-            {maybeRenderGallery()}
-            {maybeRenderOrganized()}
-            {maybeRenderDupeCopies()}
-          </ButtonGroup>
+        {markerModal ? <MarkerDialog scene={props.scene} onCancel={onCancelMarkerDialog}/> : <></>}
+        <HoverPopover
+          className="marker-count"
+          placement="bottom"
+          content={popoverContent}
+        >
+          <Button 
+            className="minimal"
+            onClick={() => setMarkerModal(true)}
+            >
+            <Icon icon={faMapMarkerAlt} />
+            <span>{props.scene.scene_markers.length}</span>
+          </Button>
+        </HoverPopover>
         </>
       );
     }
-  }
 
+    function maybeRenderOCounter() {
+      if (props.scene.o_counter) {
+        return (
+          <div className="o-count">
+            <Button className="minimal">
+              <span className="fa-icon">
+                <SweatDrops />
+              </span>
+              <span>{props.scene.o_counter}</span>
+            </Button>
+          </div>
+        );
+      }
+    }
+
+    function maybeRenderGallery() {
+      if (props.scene.galleries.length <= 0) return;
+
+      const popoverContent = props.scene.galleries.map((gallery) => (
+        <GalleryLink key={gallery.id} gallery={gallery} />
+      ));
+
+      return (
+        <HoverPopover
+          className="gallery-count"
+          placement="bottom"
+          content={popoverContent}
+        >
+          <Button className="minimal">
+            <Icon icon={faImages} />
+            <span>{props.scene.galleries.length}</span>
+          </Button>
+        </HoverPopover>
+      );
+    }
+
+    function maybeRenderOrganized() {
+      if (props.scene.organized) {
+        return (
+          <OverlayTrigger
+            overlay={<Tooltip id="organised-tooltip">{"Organized"}</Tooltip>}
+            placement="bottom"
+          >
+            <></>
+          </OverlayTrigger>
+        );
+      }
+    }
+
+    function maybeRenderDupeCopies() {
+      const phash = file
+        ? file.fingerprints.find((fp) => fp.type === "phash")
+        : undefined;
+
+      if (phash) {
+        return (
+          <div className="other-copies extra-scene-info">
+            <Button
+              href={NavUtils.makeScenesPHashMatchUrl(phash.value)}
+              className="minimal"
+            >
+              <Icon icon={faCopy} />
+            </Button>
+          </div>
+        );
+      }
+    }
+
+    function maybeRenderPopoverButtonGroup() {
+      if (
+        !props.compact &&
+        (props.scene.tags.length > 0 ||
+          props.scene.performers.length > 0 ||
+          props.scene.movies.length > 0 ||
+          props.scene.scene_markers.length > 0 ||
+          props.scene?.o_counter ||
+          props.scene.galleries.length > 0 ||
+          props.scene.organized)
+      ) {
+        return (
+          <>
+            <hr />
+            <ButtonGroup className="card-popovers" 
+            // style={{
+            //   position: "absolute",
+            //   right: 0,
+            //   bottom: 10.5
+            // }}
+            >
+              {maybeRenderTagPopoverButton()}
+              {maybeRenderPerformerPopoverButton()}
+              {maybeRenderMoviePopoverButton()}
+              {maybeRenderSceneMarkerPopoverButton()}
+              {maybeRenderOCounter()}
+              {maybeRenderGallery()}
+              {maybeRenderOrganized()}
+              {maybeRenderDupeCopies()}
+            </ButtonGroup>
+          </>
+        );
+      }
+    }
+
+    return <>{maybeRenderPopoverButtonGroup()}</>;
+  }
+);
+
+const SceneCardOverlays = PatchComponent(
+  "SceneCard.Overlays",
+  (props: ISceneCardProps) => {
+    return <StudioOverlay studio={props.scene.studio} />;
+  }
+);
+
+const SceneCardImage = PatchComponent(
+  "SceneCard.Image",
+  (props: ISceneCardProps) => {
+    const history = useHistory();
+    const { configuration } = React.useContext(ConfigurationContext);
+    const cont = configuration?.interface.continuePlaylistDefault ?? false;
+
+    const file = useMemo(
+      () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
+      [props.scene]
+    );
+
+    function maybeRenderSceneSpecsOverlay() {
+      let sizeObj = null;
+      if (file?.size) {
+        sizeObj = TextUtils.fileSize(file.size);
+      }
+      return (
+        <div className="scene-specs-overlay">
+          {sizeObj != null ? (
+            <span className="overlay-filesize extra-scene-info">
+              <FormattedNumber
+                value={sizeObj.size}
+                maximumFractionDigits={TextUtils.fileSizeFractionalDigits(
+                  sizeObj.unit
+                )}
+              />
+              {TextUtils.formatFileSizeUnit(sizeObj.unit)}
+            </span>
+          ) : (
+            ""
+          )}
+          {file?.width && file?.height ? (
+            <span className="overlay-resolution">
+              {" "}
+              {TextUtils.resolution(file?.width, file?.height)}
+            </span>
+          ) : (
+            ""
+          )}
+          {(file?.duration ?? 0) >= 1
+            ? TextUtils.secondsToTimestamp(file?.duration ?? 0)
+            : ""}
+        </div>
+      );
+    }
+
+    function maybeRenderInteractiveSpeedOverlay() {
+      return (
+        <div className="scene-interactive-speed-overlay">
+          {props.scene.interactive_speed ?? ""}
+        </div>
+      );
+    }
+
+    function onScrubberClick(timestamp: number) {
+      const link = props.queue
+        ? props.queue.makeLink(props.scene.id, {
+            sceneIndex: props.index,
+            continue: cont,
+            start: timestamp,
+          })
+        : `/scenes/${props.scene.id}?t=${timestamp}`;
+
+      history.push(link);
+    }
+
+    function isPortrait() {
+      const width = file?.width ? file.width : 0;
+      const height = file?.height ? file.height : 0;
+      return height > width;
+    }
+
+    return (
+      <>
+        <ScenePreview
+          image={props.scene.paths.screenshot ?? undefined}
+          video={props.scene.paths.preview ?? undefined}
+          isPortrait={isPortrait()}
+          soundActive={configuration?.interface?.soundOnPreview ?? false}
+          vttPath={props.scene.paths.vtt ?? undefined}
+          onScrubberClick={onScrubberClick}
+        />
+        <RatingBanner rating={props.scene.rating100} />
+        {maybeRenderSceneSpecsOverlay()}
+        {maybeRenderInteractiveSpeedOverlay()}
+      </>
+    );
+  }
+);
+
+export const SceneCard = PatchComponent(
+  "SceneCard",
+  (props: ISceneCardProps) => {
+    const { configuration } = React.useContext(ConfigurationContext);
+    const [cardWidth, setCardWidth] = useState<number>();
+
+    const file = useMemo(
+      () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
+      [props.scene]
+    );
   function isPortrait() {
     const width = file?.width ? file.width : 0;
     const height = file?.height ? file.height : 0;
     return height > width;
   }
 
-  function zoomIndex() {
-    if (!props.compact && props.zoomIndex !== undefined) {
-      return `zoom-${props.zoomIndex}`;
+    function zoomIndex() {
+      if (!props.compact && props.zoomIndex !== undefined) {
+        return `zoom-${props.zoomIndex}`;
+      }
+
+      return "";
     }
+
+    function filelessClass() {
+      if (!props.scene.files.length) {
+        return "fileless";
+      }
 
     return "";
   }
 
-  function filelessClass() {
-    if (!props.scene.files.length) {
-      return "fileless";
-    }
+    useEffect(() => {
+      if (
+        !props.containerWidth ||
+        props.zoomIndex === undefined ||
+        ScreenUtils.isMobile()
+      )
+        return;
 
-    return "";
-  }
+      let zoomValue = props.zoomIndex;
+      let preferredCardWidth: number;
+      switch (zoomValue) {
+        case 0:
+          preferredCardWidth = 240;
+          break;
+        case 1:
+          preferredCardWidth = 340; // this value is intentionally higher than 320
+          break;
+        case 2:
+          preferredCardWidth = 480;
+          break;
+        case 3:
+          preferredCardWidth = 640;
+      }
+      let fittedCardWidth = calculateCardWidth(
+        props.containerWidth,
+        preferredCardWidth!
+      );
+      setCardWidth(fittedCardWidth);
+    }, [props, props.containerWidth, props.zoomIndex]);
 
-  const cont = configuration?.interface.continuePlaylistDefault ?? false;
+    const cont = configuration?.interface.continuePlaylistDefault ?? false;
 
-  const sceneLink = props.queue
-    ? props.queue.makeLink(props.scene.id, {
-        sceneIndex: props.index,
-        continue: cont,
-      })
-    : `/scenes/${props.scene.id}`;
+    const sceneLink = props.queue
+      ? props.queue.makeLink(props.scene.id, {
+          sceneIndex: props.index,
+          continue: cont,
+        })
+      : `/scenes/${props.scene.id}`;
 
   function onScrubberClick(timestamp: number) {
     const link = props.queue
@@ -409,15 +507,40 @@ export const SceneCard: React.FC<ISceneCardProps> = (
           start: timestamp,
         })
       : `/scenes/${props.scene.id}?t=${timestamp}`;
-
-    history.push(link);
   }
-
+  function maybeRenderPerformerStringPopoverButton() {
+    return <PerformerNameButton performers={props.scene.performers} />
+  }
+  function maybeRenderStudioString() {
+    const fw = {
+      fontWeight: "500",
+      fontSize: "1.1rem",
+    };
+    const mw = {
+      maxWidth: "70%"
+    }
+    return (props.scene.studio ? (
+    <>
+    <hr></hr>
+    <div className="d-inline-block mr-2" style={mw}>
+      <Link
+      to={`/studios/${props.scene.studio?.id}?sortby=date`}
+      className="studio-name col p-0"
+      >
+      {/* <Icon icon={faVideo} /> */}
+      <span style={fw}>{props.scene.studio?.name}</span>
+      </Link>
+    </div>
+    </>
+    ) : (null)
+    );
+  }
   return (
     <GridCard
       className={`scene-card ${zoomIndex()} ${filelessClass()}`}
       url={sceneLink}
       title={objectTitle(props.scene)}
+      width={cardWidth}
       linkClassName="scene-card-link"
       thumbnailSectionClassName="video-section"
       resumeTime={props.scene.resume_time ?? undefined}
@@ -427,43 +550,44 @@ export const SceneCard: React.FC<ISceneCardProps> = (
           ? props.scene.paths.interactive_heatmap ?? undefined
           : undefined
       }
-      image={
-        <>
-          <ScenePreview
-            image={props.scene.paths.screenshot ?? undefined}
-            video={props.scene.paths.preview ?? undefined}
-            isPortrait={isPortrait()}
-            soundActive={configuration?.interface?.soundOnPreview ?? false}
-            vttPath={props.scene.paths.vtt ?? undefined}
-            onScrubberClick={onScrubberClick}
-          />
-          <RatingBanner rating={props.scene.rating100} />
-          {maybeRenderSceneSpecsOverlay()}
-          {maybeRenderInteractiveSpeedOverlay()}
-        </>
-      }
-      overlays={maybeRenderSceneStudioOverlay()}
+      image={<SceneCardImage {...props} />}
+      // overlays={<SceneCardOverlays {...props} />}
       details={
-        <div className="scene-card__details">
+        <div className="scene-card__details" style={{
+          marginBottom: "0.75rem",
+          display: "flex",
+          height: "-webkit-fill-available",
+          flexDirection: "column"
+        }}>          
           {maybeRenderPerformerStringPopoverButton()}
-          <div className="date_then_popovers">
+          <div style={{
+            marginTop: "auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            height: "100%"
+            }}>
+          <div className="d-flex">
             <span className="scene-card__date">{props.scene.date}</span>
-            {maybeRenderPopoverButtonGroup()}
+            <div className="flex-grow-1"></div>
+            <SceneCardPopovers {...props} />
           </div>
-          
+          {maybeRenderStudioString()}
           <span className="file-path extra-scene-info">
-            {objectPath(props.scene)}
+          {objectPath(props.scene)}
           </span>
           <TruncatedText
-            className="scene-card__description"
-            text={props.scene.details}
-            lineCount={3}
+          className="scene-card__description"
+          text={props.scene.details}
+          lineCount={3}
           />
+          </div>
         </div>
       }
+      // popovers={<SceneCardPopovers {...props} />}
       selected={props.selected}
       selecting={props.selecting}
       onSelectedChanged={props.onSelectedChanged}
     />
   );
-};
+})

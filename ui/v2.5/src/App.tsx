@@ -36,19 +36,20 @@ import { ConfigurationProvider } from "./hooks/Config";
 import { ManualProvider } from "./components/Help/context";
 import { InteractiveProvider } from "./hooks/Interactive/context";
 import { ReleaseNotesDialog } from "./components/Dialogs/ReleaseNotesDialog";
-import { IUIConfig } from "./core/config";
 import { releaseNotes } from "./docs/en/ReleaseNotes";
 import { getPlatformURL } from "./core/createClient";
 import { lazyComponent } from "./utils/lazyComponent";
 import { isPlatformUniquelyRenderedByApple } from "./utils/apple";
 import useScript, { useCSS } from "./hooks/useScript";
 import { useMemoOnce } from "./hooks/state";
+import Event from "./hooks/event";
 import { uniq } from "lodash-es";
 
 import { PluginRoutes } from "./plugins";
 
 // import plugin_api to run code
 import "./pluginApi";
+import { ConnectionMonitor } from "./ConnectionMonitor";
 
 const Performers = lazyComponent(
   () => import("./components/Performers/Performers")
@@ -56,6 +57,9 @@ const Performers = lazyComponent(
 const FrontPage = lazyComponent(
   () => import("./components/FrontPage/FrontPage")
 );
+const RecPage = lazyComponent(
+  () => import("./components/Recommendations/Recommendations")
+)
 const Scenes = lazyComponent(() => import("./components/Scenes/Scenes"));
 const Settings = lazyComponent(() => import("./components/Settings/Settings"));
 const Stats = lazyComponent(() => import("./components/Stats"));
@@ -250,6 +254,11 @@ export const App: React.FC = () => {
   const history = useHistory();
   const setupMatch = useRouteMatch(["/setup", "/migrate"]);
 
+  // dispatch event when location changes
+  useEffect(() => {
+    Event.dispatch("location", "", { location });
+  }, [location]);
+
   // redirect to setup or migrate as needed
   useEffect(() => {
     if (!systemStatusData) {
@@ -271,7 +280,7 @@ export const App: React.FC = () => {
       status === GQL.SystemStatusEnum.NeedsMigration
     ) {
       // redirect to migrate page
-      history.push("/migrate");
+      history.replace("/migrate");
     }
   }, [systemStatusData, setupMatch, history, location]);
 
@@ -292,6 +301,7 @@ export const App: React.FC = () => {
         <Suspense fallback={<LoadingIndicator />}>
           <Switch>
             <Route exact path="/" component={FrontPage} />
+            <Route path="/recommendations" component={RecPage} />
             <Route path="/scenes" component={Scenes} />
             <Route path="/images" component={Images} />
             <Route path="/galleries" component={Galleries} />
@@ -324,8 +334,7 @@ export const App: React.FC = () => {
       return;
     }
 
-    const lastNoteSeen = (config.data?.configuration.ui as IUIConfig)
-      ?.lastNoteSeen;
+    const lastNoteSeen = config.data?.configuration.ui.lastNoteSeen;
     const notes = releaseNotes.filter((n) => {
       return !lastNoteSeen || n.date > lastNoteSeen;
     });
@@ -365,6 +374,7 @@ export const App: React.FC = () => {
           >
             {maybeRenderReleaseNotes()}
             <ToastProvider>
+              <ConnectionMonitor />
               <Suspense fallback={<LoadingIndicator />}>
                 <LightboxProvider>
                   <ManualProvider>

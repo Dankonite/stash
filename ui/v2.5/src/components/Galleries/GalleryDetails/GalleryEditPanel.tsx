@@ -18,20 +18,12 @@ import {
   useListGalleryScrapers,
   mutateReloadScrapers,
 } from "src/core/StashService";
-import {
-  TagSelect,
-  SceneSelect,
-  StudioSelect,
-} from "src/components/Shared/Select";
 import { Icon } from "src/components/Shared/Icon";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
 import { useToast } from "src/hooks/Toast";
 import { useFormik } from "formik";
 import { GalleryScrapeDialog } from "./GalleryScrapeDialog";
 import { faSyncAlt } from "@fortawesome/free-solid-svg-icons";
-import { galleryTitle } from "src/core/galleries";
-import { useRatingKeybinds } from "src/hooks/keybinds";
-import { ConfigurationContext } from "src/hooks/Config";
 import isEqual from "lodash-es/isEqual";
 import { handleUnsavedChanges } from "src/utils/navigation";
 import {
@@ -44,6 +36,9 @@ import {
   yupUniqueStringList,
 } from "src/utils/yup";
 import { formikUtils } from "src/utils/form";
+import { Tag, TagSelect } from "src/components/Tags/TagSelect";
+import { Studio, StudioSelect } from "src/components/Studios/StudioSelect";
+import { Scene, SceneSelect } from "src/components/Scenes/SceneSelect";
 
 interface IProps {
   gallery: Partial<GQL.GalleryDataFragment>;
@@ -60,17 +55,13 @@ export const GalleryEditPanel: React.FC<IProps> = ({
 }) => {
   const intl = useIntl();
   const Toast = useToast();
-  const [scenes, setScenes] = useState<{ id: string; title: string }[]>(
-    (gallery?.scenes ?? []).map((s) => ({
-      id: s.id,
-      title: galleryTitle(s),
-    }))
-  );
+  const [scenes, setScenes] = useState<Scene[]>([]);
 
   const [performers, setPerformers] = useState<Performer[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [studio, setStudio] = useState<Studio | null>(null);
 
   const isNew = gallery.id === undefined;
-  const { configuration: stashConfig } = React.useContext(ConfigurationContext);
 
   const Scrapers = useListGalleryScrapers();
   const [queryableScrapers, setQueryableScrapers] = useState<GQL.Scraper[]>([]);
@@ -90,7 +81,6 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     urls: yupUniqueStringList(intl),
     date: yupDateString(intl),
     photographer: yup.string().ensure(),
-    rating100: yup.number().integer().nullable().defined(),
     studio_id: yup.string().required().nullable(),
     performer_ids: yup.array(yup.string().required()).defined(),
     tag_ids: yup.array(yup.string().required()).defined(),
@@ -104,7 +94,6 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     urls: gallery?.urls ?? [],
     date: gallery?.date ?? "",
     photographer: gallery?.photographer ?? "",
-    rating100: gallery?.rating100 ?? null,
     studio_id: gallery?.studio?.id ?? null,
     performer_ids: (gallery?.performers ?? []).map((p) => p.id),
     tag_ids: (gallery?.tags ?? []).map((t) => t.id),
@@ -121,16 +110,7 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     onSubmit: (values) => onSave(schema.cast(values)),
   });
 
-  function setRating(v: number) {
-    formik.setFieldValue("rating100", v);
-  }
-
-  interface ISceneSelectValue {
-    id: string;
-    title: string;
-  }
-
-  function onSetScenes(items: ISceneSelectValue[]) {
+  function onSetScenes(items: Scene[]) {
     setScenes(items);
     formik.setFieldValue(
       "scene_ids",
@@ -146,15 +126,34 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     );
   }
 
-  useRatingKeybinds(
-    isVisible,
-    stashConfig?.ui?.ratingSystemOptions?.type,
-    setRating
-  );
+  function onSetTags(items: Tag[]) {
+    setTags(items);
+    formik.setFieldValue(
+      "tag_ids",
+      items.map((item) => item.id)
+    );
+  }
+
+  function onSetStudio(item: Studio | null) {
+    setStudio(item);
+    formik.setFieldValue("studio_id", item ? item.id : null);
+  }
 
   useEffect(() => {
     setPerformers(gallery.performers ?? []);
   }, [gallery.performers]);
+
+  useEffect(() => {
+    setTags(gallery.tags ?? []);
+  }, [gallery.tags]);
+
+  useEffect(() => {
+    setStudio(gallery.studio ?? null);
+  }, [gallery.studio]);
+
+  useEffect(() => {
+    setScenes(gallery.scenes ?? []);
+  }, [gallery.scenes]);
 
   useEffect(() => {
     if (isVisible) {
@@ -242,6 +241,8 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     return (
       <GalleryScrapeDialog
         gallery={currentGallery}
+        galleryStudio={studio}
+        galleryTags={tags}
         galleryPerformers={performers}
         scraped={scrapedGallery}
         onClose={(data) => {
@@ -313,7 +314,11 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     }
 
     if (galleryData.studio?.stored_id) {
-      formik.setFieldValue("studio_id", galleryData.studio.stored_id);
+      onSetStudio({
+        id: galleryData.studio.stored_id,
+        name: galleryData.studio.name ?? "",
+        aliases: [],
+      });
     }
 
     if (galleryData.performers?.length) {
@@ -340,8 +345,15 @@ export const GalleryEditPanel: React.FC<IProps> = ({
       });
 
       if (idTags.length > 0) {
-        const newIds = idTags.map((t) => t.stored_id);
-        formik.setFieldValue("tag_ids", newIds as string[]);
+        onSetTags(
+          idTags.map((p) => {
+            return {
+              id: p.stored_id!,
+              name: p.name ?? "",
+              aliases: [],
+            };
+          })
+        );
       }
     }
   }
@@ -386,19 +398,14 @@ export const GalleryEditPanel: React.FC<IProps> = ({
       xl: 12,
     },
   };
-  const {
-    renderField,
-    renderInputField,
-    renderDateField,
-    renderRatingField,
-    renderURLListField,
-  } = formikUtils(intl, formik, splitProps);
+  const { renderField, renderInputField, renderDateField, renderURLListField } =
+    formikUtils(intl, formik, splitProps);
 
   function renderScenesField() {
     const title = intl.formatMessage({ id: "scenes" });
     const control = (
       <SceneSelect
-        selected={scenes}
+        values={scenes}
         onSelect={(items) => onSetScenes(items)}
         isMulti
       />
@@ -411,13 +418,8 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     const title = intl.formatMessage({ id: "studio" });
     const control = (
       <StudioSelect
-        onSelect={(items) =>
-          formik.setFieldValue(
-            "studio_id",
-            items.length > 0 ? items[0]?.id : null
-          )
-        }
-        ids={formik.values.studio_id ? [formik.values.studio_id] : []}
+        onSelect={(items) => onSetStudio(items.length > 0 ? items[0] : null)}
+        values={studio ? [studio] : []}
       />
     );
 
@@ -438,13 +440,8 @@ export const GalleryEditPanel: React.FC<IProps> = ({
     const control = (
       <TagSelect
         isMulti
-        onSelect={(items) =>
-          formik.setFieldValue(
-            "tag_ids",
-            items.map((item) => item.id)
-          )
-        }
-        ids={formik.values.tag_ids}
+        onSelect={onSetTags}
+        values={tags}
         hoverPlacement="right"
       />
     );
@@ -508,7 +505,6 @@ export const GalleryEditPanel: React.FC<IProps> = ({
 
             {renderDateField("date")}
             {renderInputField("photographer")}
-            {renderRatingField("rating100", "rating")}
 
             {renderScenesField()}
             {renderStudioField()}

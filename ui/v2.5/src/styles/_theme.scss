@@ -142,8 +142,10 @@ $dark-gray5: #394b59;
     margin-bottom: 38px;
   }
 }
-.btn.active:not(.disabled),
-.btn.active.minimal:not(.disabled) {
+.btn.active.btn-primary:not(.disabled),
+.btn.active.minimal:not(.disabled),
+.btn.active.btn-primary:not(.btn-success),
+.btn.active.btn-primary:not(.btn-danger) {
   background-color: $active;
   color: $text-color;
 }
@@ -279,11 +281,18 @@ div>.details-edit.mb-2 {
   box-shadow: none;
 }
 
-.btn-primary:focus, .btn-primary.focus {
+.btn-primary:focus,
+.btn-primary.focus {
   color: #fff;
   background-color: $active;
   border-color: transparent;
   box-shadow: none;
+}
+.btn-primary.btn-danger:focus {
+  background-color: $danger;
+}
+.btn-primary.btn-success:focus {
+  background-color: $success;
 }
 .scraper-table tr:nth-child(2n) {
   background-color: $bg-color!important;

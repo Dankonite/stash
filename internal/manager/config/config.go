@@ -38,6 +38,9 @@ const (
 	Password            = "password"
 	MaxSessionAge       = "max_session_age"
 
+	FFMpegPath  = "ffmpeg_path"
+	FFProbePath = "ffprobe_path"
+
 	BlobsStorage = "blobs_storage"
 
 	DefaultMaxSessionAge = 60 * 60 * 1 // 1 hours
@@ -156,7 +159,10 @@ const (
 
 	// UI directory. Overrides to serve the UI from a specific location
 	// rather than use the embedded UI.
-	CustomUILocation = "custom_ui_location"
+	UILocation = "ui_location"
+
+	// backwards compatible name
+	LegacyCustomUILocation = "custom_ui_location"
 
 	// Gallery Cover Regex
 	GalleryCoverRegex        = "gallery_cover_regex"
@@ -260,6 +266,9 @@ const (
 
 	// File upload options
 	MaxUploadSize = "max_upload_size"
+
+	// Developer options
+	ExtraBlobsPaths = "developer_options.extra_blob_paths"
 )
 
 // slice default values
@@ -561,6 +570,12 @@ func (i *Config) GetBlobsPath() string {
 	return i.getString(BlobsPath)
 }
 
+// GetExtraBlobsPaths returns extra blobs paths.
+// For developer/advanced use only.
+func (i *Config) GetExtraBlobsPaths() []string {
+	return i.getStringSlice(ExtraBlobsPaths)
+}
+
 func (i *Config) GetBlobsStorage() BlobsStorageType {
 	ret := BlobsStorageType(i.getString(BlobsStorage))
 
@@ -592,6 +607,18 @@ func (i *Config) GetBackupDirectoryPathOrDefault() string {
 	}
 
 	return ret
+}
+
+// GetFFMpegPath returns the path to the FFMpeg executable.
+// If empty, stash will attempt to resolve it from the path.
+func (i *Config) GetFFMpegPath() string {
+	return i.getString(FFMpegPath)
+}
+
+// GetFFProbePath returns the path to the FFProbe executable.
+// If empty, stash will attempt to resolve it from the path.
+func (i *Config) GetFFProbePath() string {
+	return i.getString(FFProbePath)
 }
 
 func (i *Config) GetJWTSignKey() []byte {
@@ -735,11 +762,11 @@ func (i *Config) GetPluginsPath() string {
 	return i.getString(PluginsPath)
 }
 
-func (i *Config) GetAllPluginConfiguration() map[string]interface{} {
+func (i *Config) GetAllPluginConfiguration() map[string]map[string]interface{} {
 	i.RLock()
 	defer i.RUnlock()
 
-	ret := make(map[string]interface{})
+	ret := make(map[string]map[string]interface{})
 
 	sub := i.viper(PluginsSetting).GetStringMap(PluginsSetting)
 	if sub == nil {
@@ -1033,8 +1060,12 @@ func (i *Config) GetCustomServedFolders() utils.URLMap {
 	return i.getStringMapString(CustomServedFolders)
 }
 
-func (i *Config) GetCustomUILocation() string {
-	return i.getString(CustomUILocation)
+func (i *Config) GetUILocation() string {
+	if ret := i.getString(UILocation); ret != "" {
+		return ret
+	}
+
+	return i.getString(LegacyCustomUILocation)
 }
 
 // Interface options

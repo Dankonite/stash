@@ -542,6 +542,9 @@ func getPathSearchClauseMany(pathColumn, basenameColumn, p string, addWildcards,
 func intCriterionHandler(c *models.IntCriterionInput, column string, addJoinFn func(f *filterBuilder)) criterionHandlerFunc {
 	return func(ctx context.Context, f *filterBuilder) {
 		if c != nil {
+			if addJoinFn != nil {
+				addJoinFn(f)
+			}
 			clause, args := getIntCriterionWhereClause(column, *c)
 			f.addWhere(clause, args...)
 		}
@@ -551,6 +554,9 @@ func intCriterionHandler(c *models.IntCriterionInput, column string, addJoinFn f
 func floatCriterionHandler(c *models.FloatCriterionInput, column string, addJoinFn func(f *filterBuilder)) criterionHandlerFunc {
 	return func(ctx context.Context, f *filterBuilder) {
 		if c != nil {
+			if addJoinFn != nil {
+				addJoinFn(f)
+			}
 			clause, args := getFloatCriterionWhereClause(column, *c)
 			f.addWhere(clause, args...)
 		}
@@ -765,28 +771,6 @@ func (m *countCriterionHandlerBuilder) handler(criterion *models.IntCriterionInp
 	return func(ctx context.Context, f *filterBuilder) {
 		if criterion != nil {
 			clause, args := getCountCriterionClause(m.primaryTable, m.joinTable, m.primaryFK, *criterion)
-
-			f.addWhere(clause, args...)
-		}
-	}
-}
-
-type joinedMultiSumCriterionHandlerBuilder struct {
-	primaryTable  string
-	foreignTable1 string
-	joinTable1    string
-	foreignTable2 string
-	joinTable2    string
-	primaryFK     string
-	foreignFK1    string
-	foreignFK2    string
-	sum           string
-}
-
-func (m *joinedMultiSumCriterionHandlerBuilder) handler(criterion *models.IntCriterionInput) criterionHandlerFunc {
-	return func(ctx context.Context, f *filterBuilder) {
-		if criterion != nil {
-			clause, args := getJoinedMultiSumCriterionClause(m.primaryTable, m.foreignTable1, m.joinTable1, m.foreignTable2, m.joinTable2, m.primaryFK, m.foreignFK1, m.foreignFK2, m.sum, *criterion)
 
 			f.addWhere(clause, args...)
 		}

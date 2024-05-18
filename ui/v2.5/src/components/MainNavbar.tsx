@@ -34,7 +34,7 @@ import {
   faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import { baseURL } from "src/core/createClient";
-import { PatchComponent } from "src/pluginApi";
+import { PatchComponent } from "src/patch";
 
 interface IMenuItem {
   name: string;
@@ -48,6 +48,10 @@ const messages = defineMessages({
   home: {
     id: "home",
     defaultMessage: "Home",
+  },
+  recommendations: {
+    id: "recommendations",
+    defaultMessage: "Recommendations"
   },
   scenes: {
     id: "scenes",
@@ -103,6 +107,13 @@ const allMenuItems: IMenuItem[] = [
     icon: faHome,
     hotkey: "g hx",
     userCreatable: false,
+  },
+  {
+    name: "recommendations",
+    message: messages.recommendations,
+    href: "/recommendations",
+    icon: faPlayCircle,
+    hotkey: "g hr",
   },
   {
     name: "scenes",

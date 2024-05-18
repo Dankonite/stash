@@ -24,6 +24,7 @@ import (
 	"github.com/stashapp/stash/pkg/models"
 	"github.com/stashapp/stash/pkg/scraper"
 	"github.com/stashapp/stash/pkg/scraper/stashbox/graphql"
+	"github.com/stashapp/stash/pkg/sliceutil"
 	"github.com/stashapp/stash/pkg/sliceutil/stringslice"
 	"github.com/stashapp/stash/pkg/txn"
 	"github.com/stashapp/stash/pkg/utils"
@@ -669,6 +670,15 @@ func performerFragmentToScrapedPerformer(p graphql.PerformerFragment) *models.Sc
 	}
 
 	if len(p.Aliases) > 0 {
+		// #4437 - stash-box may return aliases that are equal to the performer name
+		// filter these out
+		p.Aliases = sliceutil.Filter(p.Aliases, func(s string) bool {
+			return !strings.EqualFold(s, p.Name)
+		})
+
+		// #4596 - stash-box may return duplicate aliases. Filter these out
+		p.Aliases = stringslice.UniqueFold(p.Aliases)
+
 		alias := strings.Join(p.Aliases, ", ")
 		sp.Aliases = &alias
 	}
@@ -1126,10 +1136,9 @@ func (c Client) SubmitPerformerDraft(ctx context.Context, performer *models.Perf
 	if performer.Name != "" {
 		draft.Name = performer.Name
 	}
-	// stash-box does not support Disambiguation currently
-	// if performer.Disambiguation != "" {
-	// 	draft.Disambiguation = performer.Disambiguation
-	// }
+	if performer.Disambiguation != "" {
+		draft.Disambiguation = &performer.Disambiguation
+	}
 	if performer.Birthdate != nil {
 		d := performer.Birthdate.String()
 		draft.Birthdate = &d

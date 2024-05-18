@@ -6,8 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"github.com/stashapp/stash/pkg/plugin/hook"
 	"github.com/stashapp/stash/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
@@ -194,7 +196,7 @@ func (c Config) getPluginHooks(includePlugin bool) []*PluginHook {
 	return ret
 }
 
-func convertHooks(hooks []HookTriggerEnum) []string {
+func convertHooks(hooks []hook.TriggerEnum) []string {
 	var ret []string
 	for _, h := range hooks {
 		ret = append(ret, h.String())
@@ -206,7 +208,15 @@ func convertHooks(hooks []HookTriggerEnum) []string {
 func (c Config) getPluginSettings() []PluginSetting {
 	ret := []PluginSetting{}
 
-	for k, o := range c.Settings {
+	var keys []string
+	for k := range c.Settings {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		o := c.Settings[k]
 		t := o.Type
 		if t == "" {
 			t = PluginSettingTypeEnumString
@@ -248,6 +258,7 @@ func (c Config) toPlugin() *Plugin {
 			ExternalCSS:    c.UI.getExternalCSS(),
 			Javascript:     c.UI.getJavascriptFiles(c),
 			CSS:            c.UI.getCSSFiles(c),
+			CSP:            c.UI.CSP,
 			Assets:         c.UI.Assets,
 		},
 		Settings:   c.getPluginSettings(),
@@ -265,7 +276,7 @@ func (c Config) getTask(name string) *OperationConfig {
 	return nil
 }
 
-func (c Config) getHooks(hookType HookTriggerEnum) []*HookConfig {
+func (c Config) getHooks(hookType hook.TriggerEnum) []*HookConfig {
 	var ret []*HookConfig
 	for _, h := range c.Hooks {
 		for _, t := range h.TriggeredBy {
@@ -285,7 +296,9 @@ func (c Config) getConfigPath() string {
 func (c Config) getExecCommand(task *OperationConfig) []string {
 	ret := c.Exec
 
-	ret = append(ret, task.ExecArgs...)
+	if task != nil {
+		ret = append(ret, task.ExecArgs...)
+	}
 
 	if len(ret) > 0 {
 		_, err := exec.LookPath(ret[0])
@@ -387,7 +400,7 @@ type HookConfig struct {
 	OperationConfig `yaml:",inline"`
 
 	// A list of stash operations that will be used to trigger this hook operation.
-	TriggeredBy []HookTriggerEnum `yaml:"triggeredBy"`
+	TriggeredBy []hook.TriggerEnum `yaml:"triggeredBy"`
 }
 
 func loadPluginFromYAML(reader io.Reader) (*Config, error) {

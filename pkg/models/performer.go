@@ -56,8 +56,9 @@ func (e GenderEnum) MarshalGQL(w io.Writer) {
 }
 
 type GenderCriterionInput struct {
-	Value    *GenderEnum       `json:"value"`
-	Modifier CriterionModifier `json:"modifier"`
+	Value     GenderEnum        `json:"value"`
+	ValueList []GenderEnum      `json:"value_list"`
+	Modifier  CriterionModifier `json:"modifier"`
 }
 
 type CircumisedEnum string
@@ -159,6 +160,8 @@ type PerformerFilterType struct {
 	ImageCount *IntCriterionInput `json:"image_count"`
 	// Filter by gallery count
 	GalleryCount *IntCriterionInput `json:"gallery_count"`
+	// Filter by play count
+	PlayCount *IntCriterionInput `json:"play_count"`
 	// Filter by O count
 	OCounter *IntCriterionInput `json:"o_counter"`
 	// Filter by StashID

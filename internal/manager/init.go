@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/remeh/sizedwaitgroup"
 	"github.com/stashapp/stash/internal/desktop"
 	"github.com/stashapp/stash/internal/dlna"
 	"github.com/stashapp/stash/internal/log"
@@ -21,7 +21,6 @@ import (
 	"github.com/stashapp/stash/pkg/job"
 	"github.com/stashapp/stash/pkg/logger"
 	"github.com/stashapp/stash/pkg/models/paths"
-	"github.com/stashapp/stash/pkg/pkg"
 	"github.com/stashapp/stash/pkg/plugin"
 	"github.com/stashapp/stash/pkg/scene"
 	"github.com/stashapp/stash/pkg/scraper"
@@ -82,6 +81,8 @@ func Initialize(cfg *config.Config, l *log.Logger) (*Manager, error) {
 
 		Paths: mgrPaths,
 
+		ImageThumbnailGenerateWaitGroup: sizedwaitgroup.New(1),
+
 		JobManager:      initJobManager(cfg),
 		ReadLockManager: fsutil.NewReadLockManager(),
 
@@ -101,9 +102,6 @@ func Initialize(cfg *config.Config, l *log.Logger) (*Manager, error) {
 
 		scanSubs: &subscriptionManager{},
 	}
-
-	mgr.RefreshPluginSourceManager()
-	mgr.RefreshScraperSourceManager()
 
 	if !cfg.IsNewSystem() {
 		logger.Infof("using config file: %s", cfg.GetConfigFile())
@@ -133,25 +131,6 @@ func Initialize(cfg *config.Config, l *log.Logger) (*Manager, error) {
 
 	instance = mgr
 	return mgr, nil
-}
-
-func initialisePackageManager(localPath string, srcPathGetter pkg.SourcePathGetter) *pkg.Manager {
-	const timeout = 10 * time.Second
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-		},
-		Timeout: timeout,
-	}
-
-	return &pkg.Manager{
-		Local: &pkg.Store{
-			BaseDir:      localPath,
-			ManifestFile: pkg.ManifestFile,
-		},
-		PackagePathGetter: srcPathGetter,
-		Client:            httpClient,
-	}
 }
 
 func formatDuration(t time.Duration) string {
@@ -208,8 +187,11 @@ func (s *Manager) postInit(ctx context.Context) error {
 	s.PluginCache.RegisterSessionStore(s.SessionStore)
 
 	s.RefreshPluginCache()
+	s.RefreshPluginSourceManager()
+
 	s.RefreshScraperCache()
-	s.RefreshStreamManager()
+	s.RefreshScraperSourceManager()
+
 	s.RefreshDLNA()
 
 	s.SetBlobStoreOptions()
@@ -256,9 +238,8 @@ func (s *Manager) postInit(ctx context.Context) error {
 		logger.Info("Using HTTP proxy")
 	}
 
-	if err := s.initFFmpeg(ctx); err != nil {
-		return fmt.Errorf("error initializing FFmpeg subsystem: %v", err)
-	}
+	s.RefreshFFMpeg(ctx)
+	s.RefreshStreamManager()
 
 	return nil
 }
@@ -277,41 +258,48 @@ func (s *Manager) writeStashIcon() {
 	}
 }
 
-func (s *Manager) initFFmpeg(ctx context.Context) error {
+func (s *Manager) RefreshFFMpeg(ctx context.Context) {
 	// use same directory as config path
 	configDirectory := s.Config.GetConfigPath()
-	paths := []string{
-		configDirectory,
-		paths.GetStashHomeDirectory(),
-	}
-	ffmpegPath, ffprobePath := ffmpeg.GetPaths(paths)
+	stashHomeDir := paths.GetStashHomeDirectory()
 
-	if ffmpegPath == "" || ffprobePath == "" {
-		logger.Infof("couldn't find FFmpeg, attempting to download it")
-		if err := ffmpeg.Download(ctx, configDirectory); err != nil {
-			path, absErr := filepath.Abs(configDirectory)
-			if absErr != nil {
-				path = configDirectory
-			}
-			msg := `Unable to automatically download FFmpeg
+	// prefer the configured paths
+	ffmpegPath := s.Config.GetFFMpegPath()
+	ffprobePath := s.Config.GetFFProbePath()
 
-Check the readme for download links.
-The ffmpeg and ffprobe binaries should be placed in %s.
-
-`
-			logger.Errorf(msg, path)
-			return err
-		} else {
-			// After download get new paths for ffmpeg and ffprobe
-			ffmpegPath, ffprobePath = ffmpeg.GetPaths(paths)
+	// ensure the paths are valid
+	if ffmpegPath != "" {
+		if err := ffmpeg.ValidateFFMpeg(ffmpegPath); err != nil {
+			logger.Errorf("invalid ffmpeg path: %v", err)
+			return
 		}
+	} else {
+		ffmpegPath = ffmpeg.ResolveFFMpeg(configDirectory, stashHomeDir)
 	}
 
-	s.FFMpeg = ffmpeg.NewEncoder(ffmpegPath)
-	s.FFProbe = ffmpeg.FFProbe(ffprobePath)
+	if ffprobePath != "" {
+		if err := ffmpeg.ValidateFFProbe(ffmpegPath); err != nil {
+			logger.Errorf("invalid ffprobe path: %v", err)
+			return
+		}
+	} else {
+		ffprobePath = ffmpeg.ResolveFFProbe(configDirectory, stashHomeDir)
+	}
 
-	s.FFMpeg.InitHWSupport(ctx)
-	s.RefreshStreamManager()
+	if ffmpegPath == "" {
+		logger.Warn("Couldn't find FFmpeg")
+	}
+	if ffprobePath == "" {
+		logger.Warn("Couldn't find FFProbe")
+	}
 
-	return nil
+	if ffmpegPath != "" && ffprobePath != "" {
+		logger.Debugf("using ffmpeg: %s", ffmpegPath)
+		logger.Debugf("using ffprobe: %s", ffprobePath)
+
+		s.FFMpeg = ffmpeg.NewEncoder(ffmpegPath)
+		s.FFProbe = ffmpeg.FFProbe(ffprobePath)
+
+		s.FFMpeg.InitHWSupport(ctx)
+	}
 }

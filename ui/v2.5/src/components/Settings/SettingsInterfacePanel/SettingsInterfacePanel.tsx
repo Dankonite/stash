@@ -45,6 +45,7 @@ import {
 import { defaultMaxOptionsShown } from "src/core/config";
 const allMenuItems = [
   { id: "home", headingID: "home" },
+  { id: "recommendations", headingID: "recommendations"},
   { id: "scenes", headingID: "scenes" },
   { id: "images", headingID: "images" },
   { id: "movies", headingID: "movies" },
@@ -167,6 +168,7 @@ export const SettingsInterfacePanel: React.FC = () => {
           <option value="fi-FI">Suomi</option>
           <option value="fr-FR">Français (France)</option>
           <option value="hr-HR">Hrvatski (Preview)</option>
+          <option value="id-ID">Indonesian (Preview)</option>
           <option value="hu-HU">Magyar (Preview)</option>
           <option value="it-IT">Italiano</option>
           <option value="ja-JP">日本語 (日本)</option>
@@ -248,6 +250,7 @@ export const SettingsInterfacePanel: React.FC = () => {
         />
 
         <SelectSetting
+          advanced
           id="wall-preview"
           headingID="config.ui.preview_type.heading"
           subHeadingID="config.ui.preview_type.description"
@@ -287,6 +290,12 @@ export const SettingsInterfacePanel: React.FC = () => {
           onChange={(v) => saveUI({ enableChromecast: v })}
         />
         <BooleanSetting
+          id="disable-mobile-media-auto-rotate"
+          headingID="config.ui.scene_player.options.disable_mobile_media_auto_rotate"
+          checked={ui.disableMobileMediaAutoRotateEnabled ?? undefined}
+          onChange={(v) => saveUI({ disableMobileMediaAutoRotateEnabled: v })}
+        />
+        <BooleanSetting
           id="show-scrubber"
           headingID="config.ui.scene_player.options.show_scrubber"
           checked={iface.showScrubber ?? undefined}
@@ -301,7 +310,7 @@ export const SettingsInterfacePanel: React.FC = () => {
         <BooleanSetting
           id="track-activity"
           headingID="config.ui.scene_player.options.track_activity"
-          checked={ui.trackActivity ?? undefined}
+          checked={ui.trackActivity ?? true}
           onChange={(v) => saveUI({ trackActivity: v })}
         />
         <StringSetting
