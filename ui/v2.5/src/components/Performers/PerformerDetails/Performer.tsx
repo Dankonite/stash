@@ -225,15 +225,35 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     setImage(undefined);
   }
 
+  function maybeRenderAlt() {
+    const {data} = GQL.useFindImagesQuery({variables: {
+      image_filter: {
+          performers: {
+              modifier: GQL.CriterionModifier.Includes,
+              value: [performer.id]
+          },
+          tags: {
+              modifier: GQL.CriterionModifier.Includes,
+              value: ["1736"]
+          }
+      }
+  }})
+
+  return data?.findImages.count != 0 ? <img className="alt-hidden" src={data?.findImages.images[0].paths.image ?? ""}/> : ""
+  }
+
   function renderImage() {
     if (activeImage) {
       return (
         <Button variant="link" onClick={() => showLightbox()}>
+          <div className="perfbuttondiv">
           <DetailImage
             className="performer"
             src={activeImage}
             alt={performer.name}
           />
+          {maybeRenderAlt()}
+          </div>
         </Button>
       );
     }
