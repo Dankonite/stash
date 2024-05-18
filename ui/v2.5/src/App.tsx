@@ -57,6 +57,9 @@ const Performers = lazyComponent(
 const FrontPage = lazyComponent(
   () => import("./components/FrontPage/FrontPage")
 );
+const RecPage = lazyComponent(
+  () => import("./components/Recommendations/Recommendations")
+)
 const Scenes = lazyComponent(() => import("./components/Scenes/Scenes"));
 const Settings = lazyComponent(() => import("./components/Settings/Settings"));
 const Stats = lazyComponent(() => import("./components/Stats"));
@@ -298,6 +301,7 @@ export const App: React.FC = () => {
         <Suspense fallback={<LoadingIndicator />}>
           <Switch>
             <Route exact path="/" component={FrontPage} />
+            <Route path="/recommendations" component={RecPage} />
             <Route path="/scenes" component={Scenes} />
             <Route path="/images" component={Images} />
             <Route path="/galleries" component={Galleries} />

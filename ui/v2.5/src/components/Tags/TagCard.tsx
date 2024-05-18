@@ -262,7 +262,11 @@ export const TagCard: React.FC<IProps> = ({
           {maybeRenderChildren()}
         </>
       }
-      overlays={<>{renderFavoriteIcon()}</>}
+      overlays={
+        <>
+        {renderFavoriteIcon()}
+        </>
+      }
       popovers={maybeRenderPopoverButtonGroup()}
       selected={selected}
       selecting={selecting}

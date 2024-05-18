@@ -1,4 +1,4 @@
-import { Tab, Nav, Dropdown, Button } from "react-bootstrap";
+import { Tab, Nav, Dropdown, Button, ButtonGroup } from "react-bootstrap";
 import React, {
   useEffect,
   useState,
@@ -7,7 +7,7 @@ import React, {
   useRef,
   useLayoutEffect,
 } from "react";
-import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import * as GQL from "src/core/generated-graphql";
@@ -15,11 +15,12 @@ import {
   mutateMetadataScan,
   useFindScene,
   useSceneIncrementO,
+  useSceneDecrementO,
+  useSceneResetO,
   useSceneGenerateScreenshot,
   useSceneUpdate,
   queryFindScenes,
   queryFindScenesByID,
-  useSceneIncrementPlayCount,
 } from "src/core/StashService";
 
 import { SceneEditPanel } from "./SceneEditPanel";
@@ -31,6 +32,7 @@ import { useToast } from "src/hooks/Toast";
 import SceneQueue, { QueuedScene } from "src/models/sceneQueue";
 import { ListFilterModel } from "src/models/list-filter/filter";
 import Mousetrap from "mousetrap";
+import { OCounterButton } from "./OCounterButton";
 import { OrganizedButton } from "./OrganizedButton";
 import { ConfigurationContext } from "src/hooks/Config";
 import { getPlayerPosition } from "src/components/ScenePlayer/util";
@@ -38,19 +40,8 @@ import {
   faEllipsisV,
   faChevronRight,
   faChevronLeft,
-  faArrowsLeftRightToLine,
 } from "@fortawesome/free-solid-svg-icons";
-import { objectPath, objectTitle } from "src/core/files";
-import { RatingSystem } from "src/components/Shared/Rating/RatingSystem";
-import TextUtils from "src/utils/text";
-import {
-  OCounterButton,
-  ViewCountButton,
-} from "src/components/Shared/CountButton";
-import { useRatingKeybinds } from "src/hooks/keybinds";
 import { lazyComponent } from "src/utils/lazyComponent";
-import cx from "classnames";
-import { TruncatedText } from "src/components/Shared/TruncatedText";
 
 const SubmitStashBoxDraft = lazyComponent(
   () => import("src/components/Dialogs/SubmitDraft")
@@ -82,71 +73,8 @@ const GenerateDialog = lazyComponent(
 const SceneVideoFilterPanel = lazyComponent(
   () => import("./SceneVideoFilterPanel")
 );
-
-const VideoFrameRateResolution: React.FC<{
-  width?: number;
-  height?: number;
-  frameRate?: number;
-}> = ({ width, height, frameRate }) => {
-  const intl = useIntl();
-
-  const resolution = useMemo(() => {
-    if (width && height) {
-      const r = TextUtils.resolution(width, height);
-      return (
-        <span className="resolution" data-value={r}>
-          {r}
-        </span>
-      );
-    }
-    return undefined;
-  }, [width, height]);
-
-  const frameRateDisplay = useMemo(() => {
-    if (frameRate) {
-      return (
-        <span className="frame-rate" data-value={frameRate}>
-          <FormattedMessage
-            id="frames_per_second"
-            values={{ value: intl.formatNumber(frameRate ?? 0) }}
-          />
-        </span>
-      );
-    }
-    return undefined;
-  }, [intl, frameRate]);
-
-  const divider = useMemo(() => {
-    return resolution && frameRateDisplay ? (
-      <span className="divider"> | </span>
-    ) : undefined;
-  }, [resolution, frameRateDisplay]);
-
-  return (
-    <span>
-      {frameRateDisplay}
-      {divider}
-      {resolution}
-    </span>
-  );
-};
-
 import { objectPath, objectTitle } from "src/core/files";
-import { RatingSystem } from "src/components/Shared/Rating/RatingSystem";
-import { TagButtons } from "./TagsButtons";
-import { PerformerButtons } from "./PerformerButtons";
-import { SceneRecs } from "./SceneRecs";
-import TextUtils from "src/utils/text";
-  
-interface UBarProps {
-  scene: GQL.SceneDataFragment;
-  setWideMode: () => void;
-  setEditMode: () => void;
-}
-interface ISceneParams {
-  id: string;
-  
-}
+
 interface IProps {
   scene: GQL.SceneDataFragment;
   setTimestamp: (num: number) => void;
@@ -165,10 +93,28 @@ interface IProps {
   setCollapsed: (state: boolean) => void;
   setContinuePlaylist: (value: boolean) => void;
 }
-const UtilityBar: React.FC<UBarProps> = ({
+
+interface ISceneParams {
+  id: string;
+}
+
+const ScenePage: React.FC<IProps> = ({
   scene,
-  setWideMode,
-  setEditMode
+  setTimestamp,
+  queueScenes,
+  onQueueNext,
+  onQueuePrevious,
+  onQueueRandom,
+  onQueueSceneClicked,
+  onDelete,
+  continuePlaylist,
+  queueHasMoreScenes,
+  onQueueMoreScenes,
+  onQueueLessScenes,
+  queueStart,
+  collapsed,
+  setCollapsed,
+  setContinuePlaylist,
 }) => {
   const Toast = useToast();
   const intl = useIntl();
@@ -180,16 +126,8 @@ const UtilityBar: React.FC<UBarProps> = ({
   const boxes = configuration?.general?.stashBoxes ?? [];
 
   const [incrementO] = useSceneIncrementO(scene.id);
-
-  const [incrementPlay] = useSceneIncrementPlayCount();
-
-  function incrementPlayCount() {
-    incrementPlay({
-      variables: {
-        id: scene.id,
-      },
-    });
-  }
+  const [decrementO] = useSceneDecrementO(scene.id);
+  const [resetO] = useSceneResetO(scene.id);
 
   const [organizedLoading, setOrganizedLoading] = useState(false);
 
@@ -197,7 +135,8 @@ const UtilityBar: React.FC<UBarProps> = ({
 
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
-  const onIncrementOClick = async () => {
+
+  const onIncrementClick = async () => {
     try {
       await incrementO();
     } catch (e) {
@@ -205,22 +144,13 @@ const UtilityBar: React.FC<UBarProps> = ({
     }
   };
 
-  function setRating(v: number | null) {
-    updateScene({
-      variables: {
-        input: {
-          id: scene.id,
-          rating100: v,
-        },
-      },
-    });
-  }
-
-  useRatingKeybinds(
-    true,
-    configuration?.ui.ratingSystemOptions?.type,
-    setRating
-  );
+  const onDecrementClick = async () => {
+    try {
+      await decrementO();
+    } catch (e) {
+      Toast.error(e);
+    }
+  };
 
   // set up hotkeys
   useEffect(() => {
@@ -231,7 +161,7 @@ const UtilityBar: React.FC<UBarProps> = ({
     Mousetrap.bind("i", () => setActiveTabKey("scene-file-info-panel"));
     Mousetrap.bind("h", () => setActiveTabKey("scene-history-panel"));
     Mousetrap.bind("o", () => {
-      onIncrementOClick();
+      onIncrementClick();
     });
     Mousetrap.bind("p n", () => onQueueNext());
     Mousetrap.bind("p p", () => onQueuePrevious());
@@ -288,6 +218,14 @@ const UtilityBar: React.FC<UBarProps> = ({
     }
   };
 
+  const onResetClick = async () => {
+    try {
+      await resetO();
+    } catch (e) {
+      Toast.error(e);
+    }
+  };
+
   function onClickMarker(marker: GQL.SceneMarkerDataFragment) {
     setTimestamp(marker.seconds);
   }
@@ -309,6 +247,7 @@ const UtilityBar: React.FC<UBarProps> = ({
       )
     );
   }
+
   async function onGenerateScreenshot(at?: number) {
     await generateScreenshot({
       variables: {
@@ -318,12 +257,42 @@ const UtilityBar: React.FC<UBarProps> = ({
     });
     Toast.success(intl.formatMessage({ id: "toast.generating_screenshot" }));
   }
+
+  function onDeleteDialogClosed(deleted: boolean) {
+    setIsDeleteAlertOpen(false);
+    if (deleted) {
+      onDelete();
+    }
+  }
+
+  function maybeRenderDeleteDialog() {
+    if (isDeleteAlertOpen) {
+      return (
+        <DeleteScenesDialog selected={[scene]} onClose={onDeleteDialogClosed} />
+      );
+    }
+  }
+
+  function maybeRenderSceneGenerateDialog() {
+    if (isGenerateDialogOpen) {
+      return (
+        <GenerateDialog
+          selectedIds={[scene.id]}
+          onClose={() => {
+            setIsGenerateDialogOpen(false);
+          }}
+          type="scene"
+        />
+      );
+    }
+  }
+
   const renderOperations = () => (
-    <Dropdown className="h-fc">
+    <Dropdown>
       <Dropdown.Toggle
         variant="secondary"
         id="operation-menu"
-        className="minimal h-fc"
+        className="minimal"
         title={intl.formatMessage({ id: "operations" })}
       >
         <Icon icon={faEllipsisV} />
@@ -381,105 +350,6 @@ const UtilityBar: React.FC<UBarProps> = ({
       </Dropdown.Menu>
     </Dropdown>
   );
-  const onIncrementClick = async () => {
-    try {
-      await incrementO();
-    } catch (e) {
-      Toast.error(e);
-    }
-  };
-
-  const onDecrementClick = async () => {
-    try {
-      await decrementO();
-    } catch (e) {
-      Toast.error(e);
-    }
-  };
-  const onOrganizedClick = async () => {
-    try {
-      setOrganizedLoading(true);
-      await updateScene({
-        variables: {
-          input: {
-            id: scene.id,
-            organized: !scene.organized,
-          },
-        },
-      });
-    } catch (e) {
-      Toast.error(e);
-    } finally {
-      setOrganizedLoading(false);
-    }
-  };
-
-  const onResetClick = async () => {
-    try {
-      await resetO();
-    } catch (e) {
-      Toast.error(e);
-    }
-  };
-  const renderButtons = () => (
-    <ButtonGroup className="ml-auto">
-    <Nav.Item className="ml-auto">
-      <ExternalPlayerButton scene={scene} />
-    </Nav.Item>
-    <Nav.Item className="ml-auto">
-      <OCounterButton
-        value={scene.o_counter || 0}
-        onIncrement={onIncrementClick}
-        onDecrement={onDecrementClick}
-        onReset={onResetClick}
-      />
-    </Nav.Item>
-    <Nav.Item>
-      <OrganizedButton
-        loading={organizedLoading}
-        organized={scene.organized}
-        onClick={onOrganizedClick}
-      />
-    </Nav.Item>
-    <Nav.Item>
-      <Button
-      className="btn-clear"
-      onClick={()=>setWideMode()}
-      >
-        <Icon icon={faArrowsLeftRightToLine}/>
-      </Button>
-    </Nav.Item>
-    <Nav.Item>
-      <Button
-      className="btn-clear"
-      onClick={() => setEditMode()}
-      >
-        <FormattedMessage id="actions.edit"/>
-      </Button>
-    </Nav.Item>
-    <Nav.Item>{renderOperations()}</Nav.Item>
-  </ButtonGroup>
-  )
-  return <>{renderButtons()}</>
-};
-const QueueBar: React.FC<IProps> = ({
-  scene,
-  queueScenes,
-  onQueueNext,
-  onQueuePrevious,
-  onQueueRandom,
-  onQueueSceneClicked,
-  continuePlaylist,
-  queueHasMoreScenes,
-  onQueueMoreScenes,
-  onQueueLessScenes,
-  queueStart,
-  collapsed,
-  setCollapsed,
-  setContinuePlaylist,
-}) => {
-  const Toast = useToast();
-  const intl = useIntl();
 
   const renderTabs = () => (
     <Tab.Container
@@ -550,100 +420,135 @@ const QueueBar: React.FC<IProps> = ({
               <FormattedMessage id="actions.edit" />
             </Nav.Link>
           </Nav.Item>
+          <ButtonGroup className="ml-auto">
+            <Nav.Item className="ml-auto">
+              <ExternalPlayerButton scene={scene} />
+            </Nav.Item>
+            <Nav.Item className="ml-auto">
+              <OCounterButton
+                value={scene.o_counter || 0}
+                onIncrement={onIncrementClick}
+                onDecrement={onDecrementClick}
+                onReset={onResetClick}
+              />
+            </Nav.Item>
+            <Nav.Item>
+              <OrganizedButton
+                loading={organizedLoading}
+                organized={scene.organized}
+                onClick={onOrganizedClick}
+              />
+            </Nav.Item>
+            <Nav.Item>{renderOperations()}</Nav.Item>
+          </ButtonGroup>
         </Nav>
       </div>
 
+      <Tab.Content>
+        <Tab.Pane eventKey="scene-details-panel">
+          <SceneDetailPanel scene={scene} />
+        </Tab.Pane>
+        <Tab.Pane eventKey="scene-queue-panel">
+          <QueueViewer
+            scenes={queueScenes}
+            currentID={scene.id}
+            continue={continuePlaylist}
+            setContinue={setContinuePlaylist}
+            onSceneClicked={onQueueSceneClicked}
+            onNext={onQueueNext}
+            onPrevious={onQueuePrevious}
+            onRandom={onQueueRandom}
+            start={queueStart}
+            hasMoreScenes={queueHasMoreScenes}
+            onLessScenes={onQueueLessScenes}
+            onMoreScenes={onQueueMoreScenes}
+          />
+        </Tab.Pane>
+        <Tab.Pane eventKey="scene-markers-panel">
+          <SceneMarkersPanel
+            sceneId={scene.id}
+            onClickMarker={onClickMarker}
+            isVisible={activeTabKey === "scene-markers-panel"}
+          />
+        </Tab.Pane>
+        <Tab.Pane eventKey="scene-movie-panel">
+          <SceneMoviePanel scene={scene} />
+        </Tab.Pane>
+        {scene.galleries.length >= 1 && (
+          <Tab.Pane eventKey="scene-galleries-panel">
+            <SceneGalleriesPanel galleries={scene.galleries} />
+            {scene.galleries.length === 1 && (
+              <GalleryViewer galleryId={scene.galleries[0].id} />
+            )}
+          </Tab.Pane>
+        )}
+        <Tab.Pane eventKey="scene-video-filter-panel">
+          <SceneVideoFilterPanel scene={scene} />
+        </Tab.Pane>
+        <Tab.Pane className="file-info-panel" eventKey="scene-file-info-panel">
+          <SceneFileInfoPanel scene={scene} />
+        </Tab.Pane>
+        <Tab.Pane eventKey="scene-edit-panel" mountOnEnter>
+          <SceneEditPanel
+            isVisible={activeTabKey === "scene-edit-panel"}
+            scene={scene}
+            onSubmit={onSave}
+            onDelete={() => setIsDeleteAlertOpen(true)}
+          />
+        </Tab.Pane>
+        <Tab.Pane eventKey="scene-history-panel">
+          <SceneHistoryPanel scene={scene} />
+        </Tab.Pane>
+      </Tab.Content>
+    </Tab.Container>
   );
+
+  function getCollapseButtonIcon() {
+    return collapsed ? faChevronRight : faChevronLeft;
+  }
 
   const title = objectTitle(scene);
-
-  const file = useMemo(
-    () => (scene.files.length > 0 ? scene.files[0] : undefined),
-    [scene]
-  );
 
   return (
     <>
       <Helmet>
         <title>{title}</title>
       </Helmet>
+      {maybeRenderSceneGenerateDialog()}
+      {maybeRenderDeleteDialog()}
       <div
-        className="potato"
-
+        className={`scene-tabs order-xl-first order-last ${
+          collapsed ? "collapsed" : ""
+        }`}
       >
-        <div>
-          <div className="scene-header-container">
-            {scene.studio && (
-              <h1 className="text-center scene-studio-image">
-                <Link to={`/studios/${scene.studio.id}`}>
-                  <img
-                    src={scene.studio.image_path ?? ""}
-                    alt={`${scene.studio.name} logo`}
-                    className="studio-logo"
-                  />
-                </Link>
-              </h1>
-            )}
-            <h3 className={cx("scene-header", { "no-studio": !scene.studio })}>
-              <TruncatedText lineCount={2} text={title} />
-            </h3>
-          </div>
-
-          <div className="scene-subheader">
-            <span className="date" data-value={scene.date}>
-              {!!scene.date && (
-                <FormattedDate
-                  value={scene.date}
-                  format="long"
-                  timeZone="utc"
+        <div className="d-none d-xl-block">
+          {scene.studio && (
+            <h1 className="mt-3 text-center">
+              <Link to={`/studios/${scene.studio.id}`}>
+                <img
+                  src={scene.studio.image_path ?? ""}
+                  alt={`${scene.studio.name} logo`}
+                  className="studio-logo"
                 />
-              )}
-            </span>
-            <VideoFrameRateResolution
-              width={file?.width}
-              height={file?.height}
-              frameRate={file?.frame_rate}
-            />
-          </div>
-
-          <div className="scene-toolbar">
-            <span className="scene-toolbar-group">
-              <RatingSystem
-                value={scene.rating100}
-                onSetRating={setRating}
-                clickToRate
-                withoutContext
-              />
-            </span>
-            <span className="scene-toolbar-group">
-              <span>
-                <ExternalPlayerButton scene={scene} />
-              </span>
-              <span>
-                <ViewCountButton
-                  value={scene.play_count ?? 0}
-                  onIncrement={() => incrementPlayCount()}
-                />
-              </span>
-              <span>
-                <OCounterButton
-                  value={scene.o_counter ?? 0}
-                  onIncrement={() => onIncrementOClick()}
-                />
-              </span>
-              <span>
-                <OrganizedButton
-                  loading={organizedLoading}
-                  organized={scene.organized}
-                  onClick={onOrganizedClick}
-                />
-              </span>
-              <span>{renderOperations()}</span>
-            </span>
-          </div>
+              </Link>
+            </h1>
+          )}
+          <h3 className="scene-header">{title}</h3>
         </div>
         {renderTabs()}
       </div>
+      <div className="scene-divider d-none d-xl-block">
+        <Button onClick={() => setCollapsed(!collapsed)}>
+          <Icon className="fa-fw" icon={getCollapseButtonIcon()} />
+        </Button>
+      </div>
+      <SubmitStashBoxDraft
+        type="scene"
+        boxes={boxes}
+        entity={scene}
+        show={showDraftModal}
+        onHide={() => setShowDraftModal(false)}
+      />
     </>
   );
 };
@@ -658,16 +563,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   const { data, loading, error } = useFindScene(id);
 
   const [scene, setScene] = useState<GQL.SceneDataFragment>();
-  const file = useMemo(
-    () => (scene?.files.length! > 0 ? scene?.files[0] : undefined),
-    [scene]
-  );
-  const [sBCollapsed, setSBCollapsed] = useState(false)
-  const [wideMode, setWideMode] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  function getCollapseButtonIcon() {
-    return !sBCollapsed ? faChevronRight : faChevronLeft;
-  }
+
   // useLayoutEffect to update before paint
   useLayoutEffect(() => {
     // only update scene when loading is done
@@ -694,10 +590,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   }, [configuration?.interface.continuePlaylistDefault, queryParams]);
 
   const [queueScenes, setQueueScenes] = useState<QueuedScene[]>([]);
-  const [updateScene] = useSceneUpdate();
-  const Toast = useToast();
-  const intl = useIntl();
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
+
   const [collapsed, setCollapsed] = useState(false);
   const [continuePlaylist, setContinuePlaylist] = useState(queryContinue);
   const [hideScrubber, setHideScrubber] = useState(
@@ -915,33 +808,10 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
     if (error) return <ErrorMessage error={error.message} />;
     return <ErrorMessage error={`No scene found with id ${id}.`} />;
   }
-  function maybeRenderTags() {
-    return scene!.tags.length != 0 ? (
-      <div
-      className="d-flex flex-wrap justify-content-start align-items-start align-content-start h-fc" 
-      >
-        <TagButtons scene={scene!}/>
-      </div>
-    ) : ("")
-  }
-  function maybeRenderPerformers() {
-    return scene!.performers.length != 0 ? (
-      <div className="d-flex flex-wrap justify-content-start align-content-start" style={{
-      minWidth: scene!.performers.length > 1 ? "400px" : "",
-      maxWidth: "400px"
-      }} key={scene!.id}><PerformerButtons scene={scene!}/></div>
-    ) : ("")
-  }
-  const sbStuff = 
-  <div className="rec-row d-flex flex-col" style={{
-    width: sBCollapsed ? "0" : "calc(20vw + 15px)",
-    
-  }}>
-      <SceneRecs 
-      key={Math.random()}
-      scene={scene}
-      queue={
-        <QueueBar
+
+  return (
+    <div className="row">
+      <ScenePage
         scene={scene}
         setTimestamp={setTimestamp}
         queueScenes={queueScenes}
@@ -959,119 +829,19 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
         setCollapsed={setCollapsed}
         setContinuePlaylist={setContinuePlaylist}
       />
-      }
-      />
-  </div>
-
-  async function onSave(input: GQL.SceneCreateInput) {
-    await updateScene({
-      variables: {
-        input: {
-          id: scene!.id,
-          ...input,
-        },
-      },
-    });
-    Toast.success(
-      intl.formatMessage(
-        { id: "toast.updated_entity" },
-        { entity: intl.formatMessage({ id: "scene" }).toLocaleLowerCase() }
-      )
-    );
-  }
-  return (
-    <div 
-    className="the-window"
-    style={{
-    height: "calc(100vh - 4rem)"
-    }}>
-      <div className="d-flex flex-row" style={{height: "100%"}}>
-        <div className={`the-vert h-fc h-100 ${sBCollapsed || wideMode ? "expand": ""}`}>
-          <div className="scene-player-container mb-3">
-            <ScenePlayer
-              key="ScenePlayer"
-              scene={scene}
-              hideScrubberOverride={hideScrubber}
-              autoplay={autoplay}
-              permitLoop={!continuePlaylist}
-              initialTimestamp={initialTimestamp}
-              sendSetTimestamp={getSetTimestamp}
-              onComplete={onComplete}
-              onNext={() => queueNext(true)}
-              onPrevious={() => queuePrevious(true)}
-              />
-          </div>
-          <div className="d-flex flex-row under-player">
-            {!editMode ? 
-              <div className="the-deets" style={{margin: "0 15px", width: "-webkit-fill-available"}}>
-              <div className="top-row d-flex flex-row justify-content-between">
-
-                <div className="left-side w-100">
-                  <div className="d-flex">
-                    <h3>{scene.title}</h3>
-                    <div className="flex-grow-1"></div>
-                    <div className="d-flex flex-row mb-3" >
-                      <UtilityBar 
-                      scene={scene}
-                      setWideMode={() => setWideMode(!wideMode)}
-                      setEditMode={() => setEditMode(!editMode)}
-                      />
-                    </div>
-                  </div>
-                  <div className="studio-row">
-                    <Link to={`/studios/${scene.studio?.id}`} className="studio-row d-flex flex-row link w-fc">
-                        <img src={scene.studio?.image_path ?? ""} style={{height: "3rem", width: "3rem", borderRadius: "999px"}} className="mb-2"></img>
-                        <h5 className="ml-2 d-flex align-items-center">{scene.studio?.name}</h5>
-                    </Link>
-                  </div>
-                  <div className="date-row">
-                    <h6>{scene.date}</h6>
-                  </div>
-                    {file?.width && file?.height && (
-                    <h6>
-                      <FormattedMessage id="resolution" />:{" "}
-                      {TextUtils.resolution(file.width, file.height)}
-                    </h6>
-                    )}
-                <div className="tags-performers">
-                
-                <div>
-                {scene.tags.length > 0 ? <h5>Tags</h5> : ""}
-                {maybeRenderTags()}
-                {scene.details? <h5>Description</h5> : ""}
-                <span>
-                  {scene.details}
-                </span>
-                </div>
-                <div>
-                  {scene.performers.length > 0 ?
-                  <h5
-                    className="text-right"
-                  >
-                    Performers
-                  </h5> : ""
-                  }
-                  {maybeRenderPerformers()}
-                </div>
-                </div>
-                </div>
-              </div>
-            </div>
-            : 
-            <SceneEditPanel 
-              scene={scene}
-              isVisible={editMode}
-              onSubmit={onSave}
-              onDelete={() => setIsDeleteAlertOpen(true)}
-              setEditMode={() => setEditMode(false)}
-            />
-            }
-            {wideMode ? sbStuff : ""}
-          </div>
-        </div>
-        {!wideMode ? 
-          sbStuff : ""
-        }
+      <div className={`scene-player-container ${collapsed ? "expanded" : ""}`}>
+        <ScenePlayer
+          key="ScenePlayer"
+          scene={scene}
+          hideScrubberOverride={hideScrubber}
+          autoplay={autoplay}
+          permitLoop={!continuePlaylist}
+          initialTimestamp={initialTimestamp}
+          sendSetTimestamp={getSetTimestamp}
+          onComplete={onComplete}
+          onNext={() => queueNext(true)}
+          onPrevious={() => queuePrevious(true)}
+        />
       </div>
     </div>
   );

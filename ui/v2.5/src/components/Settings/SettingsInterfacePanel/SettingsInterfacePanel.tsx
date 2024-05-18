@@ -43,8 +43,9 @@ import {
   defaultImageWallMargin,
 } from "src/utils/imageWall";
 import { defaultMaxOptionsShown } from "src/core/config";
-
 const allMenuItems = [
+  { id: "home", headingID: "home" },
+  { id: "recommendations", headingID: "recommendations"},
   { id: "scenes", headingID: "scenes" },
   { id: "images", headingID: "images" },
   { id: "movies", headingID: "movies" },
@@ -53,11 +54,19 @@ const allMenuItems = [
   { id: "performers", headingID: "performers" },
   { id: "studios", headingID: "studios" },
   { id: "tags", headingID: "tags" },
+  { id: "stats", headingID: "stats"},
 ];
 
 export const SettingsInterfacePanel: React.FC = () => {
   const intl = useIntl();
-
+  const state = {
+    list: [
+      { name: 'Gender' },
+      { name: 'Age' },
+      { name: 'Country', subtitle: true },
+      { name: 'Tags' },
+    ],
+  };
   const {
     interface: iface,
     saveInterface,
@@ -564,6 +573,40 @@ export const SettingsInterfacePanel: React.FC = () => {
           checked={ui.compactExpandedDetails ?? undefined}
           onChange={(v) => saveUI({ compactExpandedDetails: v })}
         />
+      </SettingSection>
+      
+      <SettingSection headingID="config.ui.detail-order.heading">
+        <div className="setting-group">
+            <div className="setting">
+              <div>
+                <h3>
+                  {intl.formatMessage({
+                    id: "config.ui.detail-order.description",
+                  })}
+                </h3>
+              </div>
+              <div />
+            </div>
+          </div>
+          <div className="setting-group">
+            <div className="setting">
+              <div>
+                <h3>
+                  {intl.formatMessage({
+                    id: "config.ui.detail-order.collapse_section.heading",
+                  })}
+                </h3>
+                <div className="sub-heading">
+                {intl.formatMessage({
+                  id: "config.ui.detail-order.collapse_section.description",
+                })}
+                </div>
+              </div>
+              <div />
+            </div>
+            
+            {/* things go here */}
+          </div>
       </SettingSection>
 
       <SettingSection headingID="config.ui.editing.heading">
