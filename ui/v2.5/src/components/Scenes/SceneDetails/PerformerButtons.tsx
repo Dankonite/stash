@@ -29,7 +29,7 @@ export const PerformerButtons: React.FC<IProps> = ({
                 }
             }})
 
-            console.info(data?.findImages)
+            // console.info(data?.findImages)
 
             return data?.findImages.count != 0 ? data?.findImages.images[0].paths.image : performer.image_path
         }

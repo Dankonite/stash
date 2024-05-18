@@ -51,7 +51,7 @@ export const SceneRecs: React.FC<IProps> = ({
             variables: {
                 filter: {
                     sort: "random",
-                    per_page: 3000, 
+                    per_page: 1, 
                 },
                 scene_filter: {
                     tags: {
@@ -62,7 +62,7 @@ export const SceneRecs: React.FC<IProps> = ({
             }
         })
         if (data?.findScenes.scenes) scenesFound.push.apply(scenesFound, data?.findScenes.scenes)
-        console.info(data?.findScenes.scenes.length)
+        // // console.info(data?.findScenes.scenes.length)
     }
     queryCheck()
     function checkRw() {
@@ -138,7 +138,7 @@ export const SceneRecs: React.FC<IProps> = ({
             scenes.splice(sceneIds.indexOf(scene.id), 1)
             // console.info(sceneWscores)
             // console.info(scenes)
-            return scenes.slice(0,30)
+            return scenes.slice(0,10)
         }
     }
     

@@ -305,11 +305,13 @@ const SceneCardPopovers = PatchComponent(
         return (
           <>
             <hr />
-            <ButtonGroup className="card-popovers" style={{
-              position: "absolute",
-              right: 0,
-              bottom: 10.5
-            }}>
+            <ButtonGroup className="card-popovers" 
+            // style={{
+            //   position: "absolute",
+            //   right: 0,
+            //   bottom: 10.5
+            // }}
+            >
               {maybeRenderTagPopoverButton()}
               {maybeRenderPerformerPopoverButton()}
               {maybeRenderMoviePopoverButton()}
@@ -565,15 +567,24 @@ export const SceneCard = PatchComponent(
             justifyContent: "flex-end",
             height: "100%"
             }}>
-          <span className="scene-card__date">{props.scene.date}</span>
+          <div className="d-flex">
+            <span className="scene-card__date">{props.scene.date}</span>
+            <div className="flex-grow-1"></div>
+            <SceneCardPopovers {...props} />
+          </div>
           {maybeRenderStudioString()}
           <span className="file-path extra-scene-info">
           {objectPath(props.scene)}
           </span>
+          <TruncatedText
+          className="scene-card__description"
+          text={props.scene.details}
+          lineCount={3}
+          />
           </div>
         </div>
       }
-      popovers={<SceneCardPopovers {...props} />}
+      // popovers={<SceneCardPopovers {...props} />}
       selected={props.selected}
       selecting={props.selecting}
       onSelectedChanged={props.onSelectedChanged}
