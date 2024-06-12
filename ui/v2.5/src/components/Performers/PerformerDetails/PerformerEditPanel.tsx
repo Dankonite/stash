@@ -597,7 +597,6 @@ export const PerformerEditPanel: React.FC<IPerformerDetails> = ({
     return (
       <PerformerScrapeDialog
         performer={currentPerformer}
-        performerTags={tags}
         scraped={scrapedPerformer}
         scraper={scraper}
         onClose={(p) => {

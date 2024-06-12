@@ -199,7 +199,6 @@ func makeConfigDLNAResult() *ConfigDLNAResult {
 	return &ConfigDLNAResult{
 		ServerName:     config.GetDLNAServerName(),
 		Enabled:        config.GetDLNADefaultEnabled(),
-		Port:           config.GetDLNAPort(),
 		WhitelistedIPs: config.GetDLNADefaultIPWhitelist(),
 		Interfaces:     config.GetDLNAInterfaces(),
 		VideoSortOrder: config.GetVideoSortOrder(),

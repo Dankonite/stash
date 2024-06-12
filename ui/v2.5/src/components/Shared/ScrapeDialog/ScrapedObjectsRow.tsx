@@ -54,11 +54,7 @@ export const ScrapedStudioRow: React.FC<IScrapedStudioRow> = ({
         isDisabled={!isNew}
         onSelect={(items) => {
           if (onChangeFn) {
-            const { id, ...data } = items[0];
-            onChangeFn({
-              ...data,
-              stored_id: id,
-            });
+            onChangeFn(items[0]);
           }
         }}
         values={selectValue}
@@ -219,7 +215,7 @@ export const ScrapedMoviesRow: React.FC<
     const value = resultValue ?? [];
 
     const selectValue = value.map((p) => {
-      const aliases: string = "";
+      const aliases: string[] = [];
       return {
         id: p.stored_id ?? "",
         name: p.name ?? "",

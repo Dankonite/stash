@@ -862,9 +862,7 @@ func (qb *FileStore) Query(ctx context.Context, options models.FileQueryOptions)
 		return nil, err
 	}
 
-	if err := qb.setQuerySort(&query, findFilter); err != nil {
-		return nil, err
-	}
+	qb.setQuerySort(&query, findFilter)
 	query.sortAndPagination += getPagination(findFilter)
 
 	result, err := qb.queryGroupedFields(ctx, options, query)
@@ -913,24 +911,11 @@ func (qb *FileStore) queryGroupedFields(ctx context.Context, options models.File
 	return ret, nil
 }
 
-var fileSortOptions = sortOptions{
-	"created_at",
-	"id",
-	"path",
-	"random",
-	"updated_at",
-}
-
-func (qb *FileStore) setQuerySort(query *queryBuilder, findFilter *models.FindFilterType) error {
+func (qb *FileStore) setQuerySort(query *queryBuilder, findFilter *models.FindFilterType) {
 	if findFilter == nil || findFilter.Sort == nil || *findFilter.Sort == "" {
-		return nil
+		return
 	}
 	sort := findFilter.GetSort("path")
-
-	// CVE-2024-32231 - ensure sort is in the list of allowed sorts
-	if err := fileSortOptions.validateSort(sort); err != nil {
-		return err
-	}
 
 	direction := findFilter.GetDirection()
 	switch sort {
@@ -940,13 +925,12 @@ func (qb *FileStore) setQuerySort(query *queryBuilder, findFilter *models.FindFi
 	default:
 		query.sortAndPagination += getSort(sort, direction, "files")
 	}
-
-	return nil
 }
 
 func (qb *FileStore) captionRepository() *captionRepository {
 	return &captionRepository{
 		repository: repository{
+			tx:        qb.tx,
 			tableName: videoCaptionsTable,
 			idColumn:  fileIDColumn,
 		},

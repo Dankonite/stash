@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 
-	"github.com/stashapp/stash/internal/api/loaders"
 	"github.com/stashapp/stash/internal/api/urlbuilders"
 	"github.com/stashapp/stash/pkg/gallery"
 	"github.com/stashapp/stash/pkg/image"
@@ -13,43 +12,36 @@ import (
 )
 
 func (r *tagResolver) Parents(ctx context.Context, obj *models.Tag) (ret []*models.Tag, err error) {
-	if !obj.ParentIDs.Loaded() {
-		if err := r.withReadTxn(ctx, func(ctx context.Context) error {
-			return obj.LoadParentIDs(ctx, r.repository.Tag)
-		}); err != nil {
-			return nil, err
-		}
+	if err := r.withReadTxn(ctx, func(ctx context.Context) error {
+		ret, err = r.repository.Tag.FindByChildTagID(ctx, obj.ID)
+		return err
+	}); err != nil {
+		return nil, err
 	}
 
-	var errs []error
-	ret, errs = loaders.From(ctx).TagByID.LoadAll(obj.ParentIDs.List())
-	return ret, firstError(errs)
+	return ret, nil
 }
 
 func (r *tagResolver) Children(ctx context.Context, obj *models.Tag) (ret []*models.Tag, err error) {
-	if !obj.ChildIDs.Loaded() {
-		if err := r.withReadTxn(ctx, func(ctx context.Context) error {
-			return obj.LoadChildIDs(ctx, r.repository.Tag)
-		}); err != nil {
-			return nil, err
-		}
+	if err := r.withReadTxn(ctx, func(ctx context.Context) error {
+		ret, err = r.repository.Tag.FindByParentTagID(ctx, obj.ID)
+		return err
+	}); err != nil {
+		return nil, err
 	}
 
-	var errs []error
-	ret, errs = loaders.From(ctx).TagByID.LoadAll(obj.ChildIDs.List())
-	return ret, firstError(errs)
+	return ret, nil
 }
 
 func (r *tagResolver) Aliases(ctx context.Context, obj *models.Tag) (ret []string, err error) {
-	if !obj.Aliases.Loaded() {
-		if err := r.withReadTxn(ctx, func(ctx context.Context) error {
-			return obj.LoadAliases(ctx, r.repository.Tag)
-		}); err != nil {
-			return nil, err
-		}
+	if err := r.withReadTxn(ctx, func(ctx context.Context) error {
+		ret, err = r.repository.Tag.GetAliases(ctx, obj.ID)
+		return err
+	}); err != nil {
+		return nil, err
 	}
 
-	return obj.Aliases.List(), nil
+	return ret, err
 }
 
 func (r *tagResolver) SceneCount(ctx context.Context, obj *models.Tag, depth *int) (ret int, err error) {

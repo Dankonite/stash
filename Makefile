@@ -307,8 +307,7 @@ test:
 # runs all tests - including integration tests
 .PHONY: it
 it:
-	$(eval GO_BUILD_TAGS += integration)
-	go test -tags "$(GO_BUILD_TAGS)" ./...
+	go test -tags=integration ./...
 
 # generates test mocks
 .PHONY: generate-test-mocks

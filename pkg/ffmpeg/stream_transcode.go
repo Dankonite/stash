@@ -186,7 +186,7 @@ func (o TranscodeOptions) makeStreamArgs(sm *StreamManager) Args {
 
 	codec := o.FileGetCodec(sm, maxTranscodeSize)
 
-	fullhw := sm.config.GetTranscodeHardwareAcceleration() && sm.encoder.hwCanFullHWTranscode(sm.context, codec, o.VideoFile, maxTranscodeSize)
+	fullhw := sm.config.GetTranscodeHardwareAcceleration() && sm.encoder.hwCanFullHWTranscode(sm.context, o.VideoFile, codec)
 	args = sm.encoder.hwDeviceInit(args, codec, fullhw)
 	args = append(args, extraInputArgs...)
 

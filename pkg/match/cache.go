@@ -98,12 +98,10 @@ func getSingleLetterTags(ctx context.Context, c *Cache, reader models.TagAutoTag
 				Value:    singleFirstCharacterRegex,
 				Modifier: models.CriterionModifierMatchesRegex,
 			},
-			OperatorFilter: models.OperatorFilter[models.TagFilterType]{
-				Or: &models.TagFilterType{
-					Aliases: &models.StringCriterionInput{
-						Value:    singleFirstCharacterRegex,
-						Modifier: models.CriterionModifierMatchesRegex,
-					},
+			Or: &models.TagFilterType{
+				Aliases: &models.StringCriterionInput{
+					Value:    singleFirstCharacterRegex,
+					Modifier: models.CriterionModifierMatchesRegex,
 				},
 			},
 		}, &models.FindFilterType{

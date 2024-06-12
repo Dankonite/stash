@@ -1668,12 +1668,10 @@ func TestImageQueryPathOr(t *testing.T) {
 			Value:    image1Path,
 			Modifier: models.CriterionModifierEquals,
 		},
-		OperatorFilter: models.OperatorFilter[models.ImageFilterType]{
-			Or: &models.ImageFilterType{
-				Path: &models.StringCriterionInput{
-					Value:    image2Path,
-					Modifier: models.CriterionModifierEquals,
-				},
+		Or: &models.ImageFilterType{
+			Path: &models.StringCriterionInput{
+				Value:    image2Path,
+				Modifier: models.CriterionModifierEquals,
 			},
 		},
 	}
@@ -1704,12 +1702,10 @@ func TestImageQueryPathAndRating(t *testing.T) {
 			Value:    imagePath,
 			Modifier: models.CriterionModifierEquals,
 		},
-		OperatorFilter: models.OperatorFilter[models.ImageFilterType]{
-			And: &models.ImageFilterType{
-				Rating100: &models.IntCriterionInput{
-					Value:    int(imageRating.Int64),
-					Modifier: models.CriterionModifierEquals,
-				},
+		And: &models.ImageFilterType{
+			Rating100: &models.IntCriterionInput{
+				Value:    int(imageRating.Int64),
+				Modifier: models.CriterionModifierEquals,
 			},
 		},
 	}
@@ -1747,10 +1743,8 @@ func TestImageQueryPathNotRating(t *testing.T) {
 
 	imageFilter := models.ImageFilterType{
 		Path: &pathCriterion,
-		OperatorFilter: models.OperatorFilter[models.ImageFilterType]{
-			Not: &models.ImageFilterType{
-				Rating100: &ratingCriterion,
-			},
+		Not: &models.ImageFilterType{
+			Rating100: &ratingCriterion,
 		},
 	}
 
@@ -1781,10 +1775,8 @@ func TestImageIllegalQuery(t *testing.T) {
 	}
 
 	imageFilter := &models.ImageFilterType{
-		OperatorFilter: models.OperatorFilter[models.ImageFilterType]{
-			And: &subFilter,
-			Or:  &subFilter,
-		},
+		And: &subFilter,
+		Or:  &subFilter,
 	}
 
 	withTxn(func(ctx context.Context) error {

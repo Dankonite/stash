@@ -66,7 +66,7 @@ func (s *jsonScraper) loadURL(ctx context.Context, url string) (string, error) {
 		return "", errors.New("not valid json")
 	}
 
-	if s.config.DebugOptions != nil && s.config.DebugOptions.PrintHTML {
+	if err == nil && s.config.DebugOptions != nil && s.config.DebugOptions.PrintHTML {
 		logger.Infof("loadURL (%s) response: \n%s", url, docStr)
 	}
 

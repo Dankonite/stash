@@ -64,7 +64,6 @@ type MovieReader interface {
 	MovieFinder
 	MovieQueryer
 	MovieCounter
-	URLLoader
 
 	All(ctx context.Context) ([]*Movie, error)
 	GetFrontImage(ctx context.Context, movieID int) ([]byte, error)

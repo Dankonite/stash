@@ -82,11 +82,7 @@ func (f *FFMpeg) InitHWSupport(ctx context.Context) {
 	f.hwCodecSupport = hwCodecSupport
 }
 
-func (f *FFMpeg) hwCanFullHWTranscode(ctx context.Context, codec VideoCodec, vf *models.VideoFile, reqHeight int) bool {
-	if codec == VideoCodecCopy {
-		return false
-	}
-
+func (f *FFMpeg) hwCanFullHWTranscode(ctx context.Context, vf *models.VideoFile, codec VideoCodec) bool {
 	var args Args
 	args = append(args, "-hide_banner")
 	args = args.LogLevel(LogLevelWarning)
@@ -95,7 +91,7 @@ func (f *FFMpeg) hwCanFullHWTranscode(ctx context.Context, codec VideoCodec, vf 
 	args = args.Input(vf.Path)
 	args = args.Duration(0.1)
 
-	videoFilter := f.hwMaxResFilter(codec, vf.Width, vf.Height, reqHeight, true)
+	videoFilter := f.hwMaxResFilter(codec, vf.Width, vf.Height, minHeight, true)
 	args = append(args, CodecInit(codec)...)
 	args = args.VideoFilter(videoFilter)
 

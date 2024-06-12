@@ -59,12 +59,10 @@ func TestStudioQueryNameOr(t *testing.T) {
 			Value:    studio1Name,
 			Modifier: models.CriterionModifierEquals,
 		},
-		OperatorFilter: models.OperatorFilter[models.StudioFilterType]{
-			Or: &models.StudioFilterType{
-				Name: &models.StringCriterionInput{
-					Value:    studio2Name,
-					Modifier: models.CriterionModifierEquals,
-				},
+		Or: &models.StudioFilterType{
+			Name: &models.StringCriterionInput{
+				Value:    studio2Name,
+				Modifier: models.CriterionModifierEquals,
 			},
 		},
 	}
@@ -92,12 +90,10 @@ func TestStudioQueryNameAndUrl(t *testing.T) {
 			Value:    studioName,
 			Modifier: models.CriterionModifierEquals,
 		},
-		OperatorFilter: models.OperatorFilter[models.StudioFilterType]{
-			And: &models.StudioFilterType{
-				URL: &models.StringCriterionInput{
-					Value:    studioUrl,
-					Modifier: models.CriterionModifierEquals,
-				},
+		And: &models.StudioFilterType{
+			URL: &models.StringCriterionInput{
+				Value:    studioUrl,
+				Modifier: models.CriterionModifierEquals,
 			},
 		},
 	}
@@ -132,10 +128,8 @@ func TestStudioQueryNameNotUrl(t *testing.T) {
 
 	studioFilter := models.StudioFilterType{
 		Name: &nameCriterion,
-		OperatorFilter: models.OperatorFilter[models.StudioFilterType]{
-			Not: &models.StudioFilterType{
-				URL: &urlCriterion,
-			},
+		Not: &models.StudioFilterType{
+			URL: &urlCriterion,
 		},
 	}
 
@@ -166,10 +160,8 @@ func TestStudioIllegalQuery(t *testing.T) {
 	}
 
 	studioFilter := &models.StudioFilterType{
-		OperatorFilter: models.OperatorFilter[models.StudioFilterType]{
-			And: &subFilter,
-			Or:  &subFilter,
-		},
+		And: &subFilter,
+		Or:  &subFilter,
 	}
 
 	withTxn(func(ctx context.Context) error {

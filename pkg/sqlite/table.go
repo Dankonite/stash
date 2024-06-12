@@ -193,7 +193,8 @@ func (t *joinTable) insertJoins(ctx context.Context, id int, foreignIDs []int) e
 	// ignore duplicates
 	q := fmt.Sprintf("INSERT INTO %s (%s, %s) VALUES (?, ?) ON CONFLICT (%[2]s, %s) DO NOTHING", t.table.table.GetTable(), t.idColumn.GetCol(), t.fkColumn.GetCol())
 
-	stmt, err := dbWrapper.Prepare(ctx, q)
+	tx := dbWrapper{}
+	stmt, err := tx.Prepare(ctx, q)
 	if err != nil {
 		return err
 	}
@@ -203,7 +204,7 @@ func (t *joinTable) insertJoins(ctx context.Context, id int, foreignIDs []int) e
 	foreignIDs = sliceutil.AppendUniques(nil, foreignIDs)
 
 	for _, fk := range foreignIDs {
-		if _, err := dbWrapper.ExecStmt(ctx, stmt, id, fk); err != nil {
+		if _, err := tx.ExecStmt(ctx, stmt, id, fk); err != nil {
 			return err
 		}
 	}
@@ -1076,7 +1077,8 @@ func queryFunc(ctx context.Context, query *goqu.SelectDataset, single bool, f fu
 		return err
 	}
 
-	rows, err := dbWrapper.QueryxContext(ctx, q, args...)
+	wrapper := dbWrapper{}
+	rows, err := wrapper.QueryxContext(ctx, q, args...)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("querying `%s` [%v]: %w", q, args, err)
@@ -1105,7 +1107,8 @@ func querySimple(ctx context.Context, query *goqu.SelectDataset, out interface{}
 		return err
 	}
 
-	rows, err := dbWrapper.QueryxContext(ctx, q, args...)
+	wrapper := dbWrapper{}
+	rows, err := wrapper.QueryxContext(ctx, q, args...)
 	if err != nil {
 		return fmt.Errorf("querying `%s` [%v]: %w", q, args, err)
 	}

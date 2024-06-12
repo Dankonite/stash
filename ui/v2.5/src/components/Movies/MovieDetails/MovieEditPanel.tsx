@@ -9,6 +9,7 @@ import {
 } from "src/core/StashService";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
 import { DetailsEditNavbar } from "src/components/Shared/DetailsEditNavbar";
+import { URLField } from "src/components/Shared/URLField";
 import { useToast } from "src/hooks/Toast";
 import { Modal as BSModal, Form, Button } from "react-bootstrap";
 import TextUtils from "src/utils/text";
@@ -19,11 +20,7 @@ import { MovieScrapeDialog } from "./MovieScrapeDialog";
 import isEqual from "lodash-es/isEqual";
 import { handleUnsavedChanges } from "src/utils/navigation";
 import { formikUtils } from "src/utils/form";
-import {
-  yupDateString,
-  yupFormikValidate,
-  yupUniqueStringList,
-} from "src/utils/yup";
+import { yupDateString, yupFormikValidate } from "src/utils/yup";
 import { Studio, StudioSelect } from "src/components/Studios/StudioSelect";
 
 interface IMovieEditPanel {
@@ -67,7 +64,7 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     date: yupDateString(intl),
     studio_id: yup.string().required().nullable(),
     director: yup.string().ensure(),
-    urls: yupUniqueStringList(intl),
+    url: yup.string().ensure(),
     synopsis: yup.string().ensure(),
     front_image: yup.string().nullable().optional(),
     back_image: yup.string().nullable().optional(),
@@ -80,7 +77,7 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     date: movie?.date ?? "",
     studio_id: movie?.studio?.id ?? null,
     director: movie?.director ?? "",
-    urls: movie?.urls ?? [],
+    url: movie?.url ?? "",
     synopsis: movie?.synopsis ?? "",
   };
 
@@ -156,8 +153,8 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     if (state.synopsis) {
       formik.setFieldValue("synopsis", state.synopsis);
     }
-    if (state.urls) {
-      formik.setFieldValue("urls", state.urls);
+    if (state.url) {
+      formik.setFieldValue("url", state.url);
     }
 
     if (state.front_image) {
@@ -181,7 +178,8 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     setIsLoading(false);
   }
 
-  async function onScrapeMovieURL(url: string) {
+  async function onScrapeMovieURL() {
+    const { url } = formik.values;
     if (!url) return;
     setIsLoading(true);
 
@@ -336,7 +334,6 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     renderInputField,
     renderDateField,
     renderDurationField,
-    renderURLListField,
   } = formikUtils(intl, formik);
 
   function renderStudioField() {
@@ -349,6 +346,19 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
     );
 
     return renderField("studio_id", title, control);
+  }
+
+  function renderUrlField() {
+    const title = intl.formatMessage({ id: "url" });
+    const control = (
+      <URLField
+        {...formik.getFieldProps("url")}
+        onScrapeClick={onScrapeMovieURL}
+        urlScrapable={urlScrapable}
+      />
+    );
+
+    return renderField("url", title, control);
   }
 
   // TODO: CSS class
@@ -381,7 +391,7 @@ export const MovieEditPanel: React.FC<IMovieEditPanel> = ({
         {renderDateField("date")}
         {renderStudioField()}
         {renderInputField("director")}
-        {renderURLListField("urls", onScrapeMovieURL, urlScrapable)}
+        {renderUrlField()}
         {renderInputField("synopsis", "textarea")}
       </Form>
 

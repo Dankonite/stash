@@ -7,8 +7,7 @@ type ScrapedMovie {
   date: String
   rating: String
   director: String
-  url: String @deprecated(reason: "use urls")
-  urls: [String!]
+  url: String
   synopsis: String
   studio: ScrapedStudio
 
@@ -25,7 +24,6 @@ input ScrapedMovieInput {
   date: String
   rating: String
   director: String
-  url: String @deprecated(reason: "use urls")
-  urls: [String!]
+  url: String
   synopsis: String
 }

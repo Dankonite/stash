@@ -847,6 +847,7 @@ func (db *Anonymiser) anonymiseMovies(ctx context.Context) error {
 				table.Col("name"),
 				table.Col("aliases"),
 				table.Col("synopsis"),
+				table.Col("url"),
 				table.Col("director"),
 			).Where(table.Col(idColumn).Gt(lastID)).Limit(1000)
 
@@ -859,6 +860,7 @@ func (db *Anonymiser) anonymiseMovies(ctx context.Context) error {
 					name     sql.NullString
 					aliases  sql.NullString
 					synopsis sql.NullString
+					url      sql.NullString
 					director sql.NullString
 				)
 
@@ -867,6 +869,7 @@ func (db *Anonymiser) anonymiseMovies(ctx context.Context) error {
 					&name,
 					&aliases,
 					&synopsis,
+					&url,
 					&director,
 				); err != nil {
 					return err
@@ -876,6 +879,7 @@ func (db *Anonymiser) anonymiseMovies(ctx context.Context) error {
 				db.obfuscateNullString(set, "name", name)
 				db.obfuscateNullString(set, "aliases", aliases)
 				db.obfuscateNullString(set, "synopsis", synopsis)
+				db.obfuscateNullString(set, "url", url)
 				db.obfuscateNullString(set, "director", director)
 
 				if len(set) > 0 {
@@ -899,10 +903,6 @@ func (db *Anonymiser) anonymiseMovies(ctx context.Context) error {
 		}); err != nil {
 			return err
 		}
-	}
-
-	if err := db.anonymiseURLs(ctx, goqu.T(movieURLsTable), "movie_id"); err != nil {
-		return err
 	}
 
 	return nil

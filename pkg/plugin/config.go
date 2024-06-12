@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/stashapp/stash/pkg/plugin/hook"
-	"github.com/stashapp/stash/pkg/python"
 	"github.com/stashapp/stash/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
@@ -295,18 +294,16 @@ func (c Config) getConfigPath() string {
 }
 
 func (c Config) getExecCommand(task *OperationConfig) []string {
-	// #4859 - don't modify the original exec command
-	ret := append([]string{}, c.Exec...)
+	ret := c.Exec
 
 	if task != nil {
 		ret = append(ret, task.ExecArgs...)
 	}
 
-	// #4859 - don't use the plugin path in the exec command if it is a python command
-	if len(ret) > 0 && !python.IsPythonCommand(ret[0]) {
+	if len(ret) > 0 {
 		_, err := exec.LookPath(ret[0])
 		if err != nil {
-			// change command to run from the plugin path
+			// change command to use absolute path
 			pluginPath := filepath.Dir(c.path)
 			ret[0] = filepath.Join(pluginPath, ret[0])
 		}

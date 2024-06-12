@@ -43,7 +43,6 @@ interface ITypeProps {
     | "tags"
     | "scene_tags"
     | "performer_tags"
-    | "scenes"
     | "movies"
     | "galleries";
 }
@@ -380,8 +379,6 @@ export const FilterSelect: React.FC<IFilterProps & ITypeProps> = (props) => {
       return <PerformerSelect {...props} creatable={false} />;
     case "studios":
       return <StudioSelect {...props} creatable={false} />;
-    case "scenes":
-      return <SceneSelect {...props} creatable={false} />;
     case "movies":
       return <MovieSelect {...props} creatable={false} />;
     case "galleries":
