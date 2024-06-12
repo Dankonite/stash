@@ -1,7 +1,9 @@
 package models
 
 type TagFilterType struct {
-	OperatorFilter[TagFilterType]
+	And *TagFilterType `json:"AND"`
+	Or  *TagFilterType `json:"OR"`
+	Not *TagFilterType `json:"NOT"`
 	// Filter by tag name
 	Name *StringCriterionInput `json:"name"`
 	// Filter by tag aliases
@@ -32,12 +34,6 @@ type TagFilterType struct {
 	ChildCount *IntCriterionInput `json:"child_count"`
 	// Filter by autotag ignore value
 	IgnoreAutoTag *bool `json:"ignore_auto_tag"`
-	// Filter by related scenes that meet this criteria
-	ScenesFilter *SceneFilterType `json:"scenes_filter"`
-	// Filter by related images that meet this criteria
-	ImagesFilter *ImageFilterType `json:"images_filter"`
-	// Filter by related galleries that meet this criteria
-	GalleriesFilter *GalleryFilterType `json:"galleries_filter"`
 	// Filter by created at
 	CreatedAt *TimestampCriterionInput `json:"created_at"`
 	// Filter by updated at

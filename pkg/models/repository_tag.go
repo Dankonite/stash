@@ -84,7 +84,6 @@ type TagReader interface {
 	TagCounter
 
 	AliasLoader
-	TagRelationLoader
 
 	All(ctx context.Context) ([]*Tag, error)
 	GetImage(ctx context.Context, tagID int) ([]byte, error)

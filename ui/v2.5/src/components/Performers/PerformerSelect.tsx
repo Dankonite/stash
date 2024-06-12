@@ -27,7 +27,7 @@ import {
 import { useCompare } from "src/hooks/state";
 import { Link } from "react-router-dom";
 import { sortByRelevance } from "src/utils/query";
-import { PatchComponent, PatchFunction } from "src/patch";
+import { PatchComponent } from "src/patch";
 
 export type SelectObject = {
   id: string;
@@ -40,27 +40,6 @@ export type Performer = Pick<
   "id" | "name" | "alias_list" | "disambiguation" | "image_path"
 >;
 type Option = SelectOption<Performer>;
-
-type FindPerformersResult = Awaited<
-  ReturnType<typeof queryFindPerformersForSelect>
->["data"]["findPerformers"]["performers"];
-
-function sortPerformersByRelevance(
-  input: string,
-  performers: FindPerformersResult
-) {
-  return sortByRelevance(
-    input,
-    performers,
-    (p) => p.name,
-    (p) => p.alias_list
-  );
-}
-
-const performerSelectSort = PatchFunction(
-  "PerformerSelect.sort",
-  sortPerformersByRelevance
-);
 
 const _PerformerSelect: React.FC<
   IFilterProps & IFilterValueProps<Performer>
@@ -82,9 +61,11 @@ const _PerformerSelect: React.FC<
     filter.sortBy = "name";
     filter.sortDirection = GQL.SortDirectionEnum.Asc;
     const query = await queryFindPerformersForSelect(filter);
-    return performerSelectSort(
+    return sortByRelevance(
       input,
-      query.data.findPerformers.performers.slice()
+      query.data.findPerformers.performers,
+      (p) => p.name,
+      (p) => p.alias_list
     ).map((performer) => ({
       value: performer.id,
       object: performer,

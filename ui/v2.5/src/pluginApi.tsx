@@ -15,7 +15,6 @@ import { useSpriteInfo } from "./hooks/sprite";
 import { useToast } from "./hooks/Toast";
 import Event from "./hooks/event";
 import { before, instead, after, components, RegisterComponent } from "./patch";
-import { useSettings } from "./components/Settings/context";
 
 // due to code splitting, some components may not have been loaded when a plugin
 // page is loaded. This function will load all components passed to it.
@@ -93,7 +92,6 @@ export const PluginApi = {
     useLoadComponents,
     useSpriteInfo,
     useToast,
-    useSettings,
   },
   patch: {
     // intercept the arguments of supported functions

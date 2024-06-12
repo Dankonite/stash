@@ -1873,17 +1873,6 @@ export const useTagUpdate = () =>
     },
   });
 
-export const useBulkTagUpdate = (input: GQL.BulkTagUpdateInput) =>
-  GQL.useBulkTagUpdateMutation({
-    variables: { input },
-    update(cache, result) {
-      if (!result.data?.bulkTagUpdate) return;
-
-      evictTypeFields(cache, tagMutationImpactedTypeFields);
-      evictQueries(cache, tagMutationImpactedQueries);
-    },
-  });
-
 export const useTagDestroy = (input: GQL.TagDestroyInput) =>
   GQL.useTagDestroyMutation({
     variables: input,
@@ -2065,21 +2054,19 @@ export const queryScrapeSceneQueryFragment = (
 
 export const stashBoxSceneBatchQuery = (
   sceneIds: string[],
-  stashBoxEndpoint: string
+  stashBoxIndex: number
 ) =>
-  client.query<GQL.ScrapeMultiScenesQuery, GQL.ScrapeMultiScenesQueryVariables>(
-    {
-      query: GQL.ScrapeMultiScenesDocument,
-      variables: {
-        source: {
-          stash_box_endpoint: stashBoxEndpoint,
-        },
-        input: {
-          scene_ids: sceneIds,
-        },
+  client.query<GQL.ScrapeMultiScenesQuery>({
+    query: GQL.ScrapeMultiScenesDocument,
+    variables: {
+      source: {
+        stash_box_index: stashBoxIndex,
       },
-    }
-  );
+      input: {
+        scene_ids: sceneIds,
+      },
+    },
+  });
 
 export const useListPerformerScrapers = () =>
   GQL.useListPerformerScrapersQuery();
@@ -2123,16 +2110,13 @@ export const queryScrapePerformerURL = (url: string) =>
 
 export const stashBoxPerformerQuery = (
   searchVal: string,
-  stashBoxEndpoint: string
+  stashBoxIndex: number
 ) =>
-  client.query<
-    GQL.ScrapeSinglePerformerQuery,
-    GQL.ScrapeSinglePerformerQueryVariables
-  >({
+  client.query<GQL.ScrapeSinglePerformerQuery>({
     query: GQL.ScrapeSinglePerformerDocument,
     variables: {
       source: {
-        stash_box_endpoint: stashBoxEndpoint,
+        stash_box_index: stashBoxIndex,
       },
       input: {
         query: searchVal,
@@ -2143,16 +2127,13 @@ export const stashBoxPerformerQuery = (
 
 export const stashBoxStudioQuery = (
   query: string | null,
-  stashBoxEndpoint: string
+  stashBoxIndex: number
 ) =>
-  client.query<
-    GQL.ScrapeSingleStudioQuery,
-    GQL.ScrapeSingleStudioQueryVariables
-  >({
+  client.query<GQL.ScrapeSingleStudioQuery>({
     query: GQL.ScrapeSingleStudioDocument,
     variables: {
       source: {
-        stash_box_endpoint: stashBoxEndpoint,
+        stash_box_index: stashBoxIndex,
       },
       input: {
         query: query,

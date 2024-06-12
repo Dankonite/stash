@@ -3,7 +3,9 @@ package models
 import "context"
 
 type ImageFilterType struct {
-	OperatorFilter[ImageFilterType]
+	And          *ImageFilterType      `json:"AND"`
+	Or           *ImageFilterType      `json:"OR"`
+	Not          *ImageFilterType      `json:"NOT"`
 	ID           *IntCriterionInput    `json:"id"`
 	Title        *StringCriterionInput `json:"title"`
 	Code         *StringCriterionInput `json:"code"`
@@ -49,14 +51,6 @@ type ImageFilterType struct {
 	PerformerAge *IntCriterionInput `json:"performer_age"`
 	// Filter to only include images with these galleries
 	Galleries *MultiCriterionInput `json:"galleries"`
-	// Filter by related galleries that meet this criteria
-	GalleriesFilter *GalleryFilterType `json:"galleries_filter"`
-	// Filter by related performers that meet this criteria
-	PerformersFilter *PerformerFilterType `json:"performers_filter"`
-	// Filter by related studios that meet this criteria
-	StudiosFilter *StudioFilterType `json:"studios_filter"`
-	// Filter by related tags that meet this criteria
-	TagsFilter *TagFilterType `json:"tags_filter"`
 	// Filter by created at
 	CreatedAt *TimestampCriterionInput `json:"created_at"`
 	// Filter by updated at

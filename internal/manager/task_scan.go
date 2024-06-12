@@ -35,7 +35,6 @@ type ScanJob struct {
 }
 
 func (j *ScanJob) Execute(ctx context.Context, progress *job.Progress) error {
-	cfg := config.GetInstance()
 	input := j.input
 
 	if job.IsCancelled(ctx) {
@@ -56,7 +55,7 @@ func (j *ScanJob) Execute(ctx context.Context, progress *job.Progress) error {
 	start := time.Now()
 
 	const taskQueueSize = 200000
-	taskQueue := job.NewTaskQueue(ctx, progress, taskQueueSize, cfg.GetParallelTasksWithAutoDetection())
+	taskQueue := job.NewTaskQueue(ctx, progress, taskQueueSize, c.GetParallelTasksWithAutoDetection())
 
 	var minModTime time.Time
 	if j.input.Filter != nil && j.input.Filter.MinModTime != nil {
@@ -66,10 +65,9 @@ func (j *ScanJob) Execute(ctx context.Context, progress *job.Progress) error {
 	j.scanner.Scan(ctx, getScanHandlers(j.input, taskQueue, progress), file.ScanOptions{
 		Paths:                  paths,
 		ScanFilters:            []file.PathFilter{newScanFilter(c, repo, minModTime)},
-		ZipFileExtensions:      cfg.GetGalleryExtensions(),
-		ParallelTasks:          cfg.GetParallelTasksWithAutoDetection(),
-		HandlerRequiredFilters: []file.Filter{newHandlerRequiredFilter(cfg, repo)},
-		Rescan:                 j.input.Rescan,
+		ZipFileExtensions:      c.GetGalleryExtensions(),
+		ParallelTasks:          c.GetParallelTasksWithAutoDetection(),
+		HandlerRequiredFilters: []file.Filter{newHandlerRequiredFilter(c, repo)},
 	}, progress)
 
 	taskQueue.Close()

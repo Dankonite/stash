@@ -1,7 +1,6 @@
 package models
 
 type MovieFilterType struct {
-	OperatorFilter[MovieFilterType]
 	Name     *StringCriterionInput `json:"name"`
 	Director *StringCriterionInput `json:"director"`
 	Synopsis *StringCriterionInput `json:"synopsis"`
@@ -19,10 +18,6 @@ type MovieFilterType struct {
 	Performers *MultiCriterionInput `json:"performers"`
 	// Filter by date
 	Date *DateCriterionInput `json:"date"`
-	// Filter by related scenes that meet this criteria
-	ScenesFilter *SceneFilterType `json:"scenes_filter"`
-	// Filter by related studios that meet this criteria
-	StudiosFilter *StudioFilterType `json:"studios_filter"`
 	// Filter by created at
 	CreatedAt *TimestampCriterionInput `json:"created_at"`
 	// Filter by updated at

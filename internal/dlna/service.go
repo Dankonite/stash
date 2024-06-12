@@ -76,7 +76,6 @@ type Config interface {
 	GetDLNAServerName() string
 	GetDLNADefaultIPWhitelist() []string
 	GetVideoSortOrder() string
-	GetDLNAPortAsString() string
 }
 
 type Service struct {
@@ -139,7 +138,7 @@ func (s *Service) init() error {
 	var dmsConfig = &dmsConfig{
 		Path:           "",
 		IfNames:        s.config.GetDLNADefaultIPWhitelist(),
-		Http:           s.config.GetDLNAPortAsString(),
+		Http:           ":1338",
 		FriendlyName:   friendlyName,
 		LogHeaders:     false,
 		NotifyInterval: 30 * time.Second,
@@ -242,7 +241,7 @@ func (s *Service) Start(duration *time.Duration) error {
 		}
 
 		go func() {
-			logger.Info("Starting DLNA " + s.server.HTTPConn.Addr().String())
+			logger.Info("Starting DLNA")
 			if err := s.server.Serve(); err != nil {
 				logger.Error(err)
 			}

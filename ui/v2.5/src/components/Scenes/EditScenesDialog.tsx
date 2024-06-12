@@ -164,7 +164,7 @@ export const EditScenesDialog: React.FC<IListOperationProps> = (
     setExistingTagIds(updateTagIds);
     setExistingMovieIds(updateMovieIds);
     setOrganized(updateOrganized);
-  }, [props.selected]);
+  }, [props.selected, performerMode, tagMode, movieMode]);
 
   useEffect(() => {
     if (checkboxRef.current) {

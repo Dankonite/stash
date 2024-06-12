@@ -1303,15 +1303,6 @@ func getMovieNullStringValue(index int, field string) string {
 	return ret.String
 }
 
-func getMovieEmptyString(index int, field string) string {
-	v := getPrefixedNullStringValue("movie", index, field)
-	if !v.Valid {
-		return ""
-	}
-
-	return v.String
-}
-
 // createMoviees creates n movies with plain Name and o movies with camel cased NaMe included
 func createMovies(ctx context.Context, mqb models.MovieReaderWriter, n int, o int) error {
 	const namePlain = "Name"
@@ -1330,9 +1321,7 @@ func createMovies(ctx context.Context, mqb models.MovieReaderWriter, n int, o in
 		name = getMovieStringValue(index, name)
 		movie := models.Movie{
 			Name: name,
-			URLs: models.NewRelatedStrings([]string{
-				getMovieEmptyString(i, urlField),
-			}),
+			URL:  getMovieNullStringValue(index, urlField),
 		}
 
 		err := mqb.Create(ctx, &movie)
@@ -1431,14 +1420,6 @@ func performerStashID(i int) models.StashID {
 	}
 }
 
-func performerAliases(i int) []string {
-	if i%5 == 0 {
-		return []string{}
-	}
-
-	return []string{getPerformerStringValue(i, "alias")}
-}
-
 // createPerformers creates n performers with plain Name and o performers with camel cased NaMe included
 func createPerformers(ctx context.Context, n int, o int) error {
 	pqb := db.Performer
@@ -1462,7 +1443,7 @@ func createPerformers(ctx context.Context, n int, o int) error {
 		performer := models.Performer{
 			Name:           getPerformerStringValue(index, name),
 			Disambiguation: getPerformerStringValue(index, "disambiguation"),
-			Aliases:        models.NewRelatedStrings(performerAliases(index)),
+			Aliases:        models.NewRelatedStrings([]string{getPerformerStringValue(index, "alias")}),
 			URL:            getPerformerNullStringValue(i, urlField),
 			Favorite:       getPerformerBoolValue(i),
 			Birthdate:      getPerformerBirthdate(i),

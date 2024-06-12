@@ -252,8 +252,7 @@ func (t *SceneIdentifier) getSceneUpdater(ctx context.Context, s *models.Scene, 
 		}
 	}
 
-	// SetCoverImage defaults to true if unset
-	if options.SetCoverImage == nil || *options.SetCoverImage {
+	if utils.IsTrue(options.SetCoverImage) {
 		ret.CoverImage, err = rel.cover(ctx)
 		if err != nil {
 			return nil, err

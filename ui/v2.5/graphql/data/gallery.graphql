@@ -42,16 +42,6 @@ fragment GalleryData on Gallery {
 fragment SelectGalleryData on Gallery {
   id
   title
-  date
-  code
-  studio {
-    name
-  }
-  cover {
-    paths {
-      thumbnail
-    }
-  }
   files {
     path
   }

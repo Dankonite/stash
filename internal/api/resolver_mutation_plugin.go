@@ -103,7 +103,7 @@ func (r *mutationResolver) SetPluginsEnabled(ctx context.Context, enabledMap map
 		}
 	}
 
-	c.SetInterface(config.DisabledPlugins, newDisabled)
+	c.Set(config.DisabledPlugins, newDisabled)
 
 	if err := c.Write(); err != nil {
 		return false, err

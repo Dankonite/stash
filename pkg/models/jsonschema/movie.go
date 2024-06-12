@@ -21,13 +21,10 @@ type Movie struct {
 	Synopsis   string        `json:"synopsis,omitempty"`
 	FrontImage string        `json:"front_image,omitempty"`
 	BackImage  string        `json:"back_image,omitempty"`
-	URLs       []string      `json:"urls,omitempty"`
+	URL        string        `json:"url,omitempty"`
 	Studio     string        `json:"studio,omitempty"`
 	CreatedAt  json.JSONTime `json:"created_at,omitempty"`
 	UpdatedAt  json.JSONTime `json:"updated_at,omitempty"`
-
-	// deprecated - for import only
-	URL string `json:"url,omitempty"`
 }
 
 func (s Movie) Filename() string {

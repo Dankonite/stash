@@ -28,7 +28,6 @@ import { ExportDialog } from "../Shared/ExportDialog";
 import { tagRelationHook } from "../../core/tags";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { TagCardGrid } from "./TagCardGrid";
-import { EditTagsDialog } from "./EditTagsDialog";
 
 interface ITagList {
   filterHook?: (filter: ListFilterModel) => ListFilterModel;
@@ -326,13 +325,6 @@ export const TagList: React.FC<ITagList> = ({ filterHook, alterQuery }) => {
     );
   }
 
-  function renderEditDialog(
-    selectedTags: GQL.TagDataFragment[],
-    onClose: (confirmed: boolean) => void
-  ) {
-    return <EditTagsDialog selected={selectedTags} onClose={onClose} />;
-  }
-
   function renderDeleteDialog(
     selectedTags: GQL.TagDataFragment[],
     onClose: (confirmed: boolean) => void
@@ -369,7 +361,6 @@ export const TagList: React.FC<ITagList> = ({ filterHook, alterQuery }) => {
       addKeybinds={addKeybinds}
       renderContent={renderContent}
       renderDeleteDialog={renderDeleteDialog}
-      renderEditDialog={renderEditDialog}
     />
   );
 };
