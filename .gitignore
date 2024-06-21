@@ -62,3 +62,4 @@ dist
 .DS_Store
 /.local*
 stash-go.sqlite
+ui/v2.5/.env

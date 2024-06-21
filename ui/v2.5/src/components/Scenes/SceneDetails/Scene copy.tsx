@@ -494,6 +494,7 @@ const ScenePage: React.FC<IProps> = ({
             scene={scene}
             onSubmit={onSave}
             onDelete={() => setIsDeleteAlertOpen(true)}
+            setEditMode={()=> {}}
           />
         </Tab.Pane>
         <Tab.Pane eventKey="scene-history-panel">
@@ -832,6 +833,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
       <div className={`scene-player-container ${collapsed ? "expanded" : ""}`}>
         <ScenePlayer
           key="ScenePlayer"
+          play={false}
           scene={scene}
           hideScrubberOverride={hideScrubber}
           autoplay={autoplay}

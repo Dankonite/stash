@@ -61,9 +61,113 @@ a:visited {
   display: inline-block;
   margin: 5px;
 }
+.the-vert {
+  overflow-x: hidden;
+}
+.daPerfs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  .daPerfsCard {
+    padding: 2rem;
+  }
+}
+.daTags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  .daTagsTag {
+    padding: 2px 12px 3px 12px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #2b2a2a;
+    border-radius: 9999px;
+    text-decoration: none;
+    color: #fff;
+  }
+}
+.daTagsTag:visited {
+  text-decoration: none;
+  color: #fff;
+}
+.daPerfsCardImage {
+  width: 15vw;
+  height: calc(1920/1080*15vw);
+  background-size: cover;
+  background-position: 50% 50%;
+  border-radius: 1rem;
+}
+.StudioRowNext, .PerfRowNext {
+  img {
+    border-radius: 5px;
+  }
+  video {
+    border-radius: 5px;
+  }
+}
+.afterwindow {
+  overflow-x: hidden;
+}
+.the-window {
+  width: 100%;
+  background-color: #000;
+}
+.the-vert:has(.toolbarexpanded) .dadeets {
+  display: flex!important;
+  flex-direction: column;
+  padding: 0 5rem 5rem 5rem;
+  overflow-y: scroll;
+  position: relative;
+  top: -60px;
+  background-color: rgba(0,0,0,.70);
+}
+.dabars {
+  padding-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+}
+.dadeets {
+  display: none;
+}
+.topScene {
+  display: flex;
+  flex-direction: row;
+}
+.dadate {
+  font-size: 1em;
+  font-weight: bold;
+  color: rgb(136, 136, 136);
+  font-style: italic;
+}
+.floatingdeets {
+  padding-top: 5rem;
+  padding-left: 5rem;
+  z-index: 500;
+  width: 40%;
+  max-width: 700px;
+  min-width: 400px;
+}
 
 .performer-tag-container .performer-disambiguation {
   color: initial;
+}
+
+.previewvid {
+  position: absolute;
+  top: -9999px;
+}
+.the-window:has(.vjs-poster:hover) .previewvid {
+  top: 0;
+}
+.maybehide {
+  display: none;
+}
+
+.the-window:has(.vjs-has-started) .maybehide {
+  display: flex;
+  flex-direction: column;
 }
 
 .performer-tag.image,
@@ -272,6 +376,7 @@ textarea.scene-description {
 }
 
 .scene-card,
+.scene-card-preview,
 .gallery-card,
 .thumbnail-container {
   .scene-specs-overlay {
@@ -338,24 +443,190 @@ textarea.scene-description {
 .perfname-list:hover .comma-list.overflowable {
   max-height: unset!important;
 }
-
-.perfname-list:hover {
+.the-window:has(.vjs-has-started) .scene-player-container{
+  width: 100%!important;
+}
+.scene-player-container {
+  width: 0!important;
+}
+.topScene {
+  justify-content: space-between;
+}
+.tsfloat {
+  height: 500px;
+  width: calc(16/9*500px);
+}
+.tsfloat::after {
+  pointer-events: none;
   position: absolute;
-  display: block;
-  z-index: 100;
-  background: #202020;
-  margin-right: unset!important;
-  border-bottom-right-radius: 0.75rem;
-  border-bottom-left-radius: 0.75rem;
+  content:"";
+  height:500px;
+  width:100%;
+  top:0;
+  background: linear-gradient(to left, rgba(255,0,0,0) 70%,rgba(0,0,0,1) 100%);
 }
-.perfname-list:hover .comma-list.overflowable {
-  padding-bottom: .3rem!important;
+.scTitle {
+  font-family: "Oswald", sans-serif;
+  font-size: 1em;
+  font-weight: bold;
+  min-height: 1lh;
+  max-height: 2lh;
+  overflow: hidden;
+  display: flex;
 }
-.perfname-list:hover li span {
-  display: inline!important;
+.scStudio, .scDate {
+  color: #b9b9b9b9;
+  font-size: .9em;
 }
-.scene-card.card:hover {
-  overflow: visible!important;
+.scPerfs {
+  font-size: 0.9em;
+  min-height: 1lh;
+  max-height: 2lh;
+  overflow: hidden;
+  display: flex;
+
+}
+.floatingdeets .ubar {
+  margin-top: 70px;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  > :nth-child(1) {
+    margin-left: 0!important;
+  }
+}
+.sortfirst {
+  order: -1;
+}
+.btn-clear {
+  background-color: transparent;
+  border: transparent!important;
+}
+.btn-clear:hover {
+  background-color: #202020;
+}
+.btn-clear:active {
+  background-color: #454545!important;
+}
+.floatingdeets:has(.hideplugins) .ubar {
+  > :nth-child(2) {
+    display: none;
+  }
+}
+.under-player {
+  width: 100%;
+  position: relative;
+}
+.blurmaybe {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-size: cover;
+  background-repeat: repeat;
+  filter: blur(25px) opacity(0.2);
+}
+.barsordeets {
+  width: 100%;
+}
+.StudioNext, .PerfNext {
+  width: 100%;
+}
+.the-window {
+  padding: 0!important;
+}
+.container, .container-fluid, .container-xl, .container-lg, .container-md, .container-sm {
+  padding: 0;
+}
+.afterwindow {
+  width: 100%;
+}
+.StudioNext, .PerfNext {
+  overflow: hidden;
+}
+.NextRow {
+  margin: 0.3rem;
+  width: 25%;
+  
+}
+.perfbuttons {
+  text-wrap: nowrap;
+  overflow-x: scroll;
+}
+.dabars button {
+  width: 1vw;
+  padding: 0;
+}
+.perfbuttons button {
+  width: auto!important;
+}
+.StudioRowNext, .PerfRowNext {
+  width: 100%;
+  justify-content: flex-start;
+  a {
+    text-decoration: none;
+    color: #fff
+  }
+  a:visited {
+    text-decoration: none;
+  }
+}
+.StudioNext, .StudioRowNext, .PerfNext, .PerfRowNext {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.the-window:has(.vjs-has-started) .vjs-big-play-button,
+.the-window:has(.scenepage-gallery) .vjs-big-play-button,
+.the-window:has(.vjs-has-started) .tsfloat,
+.the-window:has(.scenepage-gallery) video-js,
+.the-window:has(.vjs-has-started) .floatingdeets,
+.the-window:has(.scenepage-gallery) .tsfloat {
+  display: none!important;
+}
+.gclose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+.imgsection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background-color: #000;
+  overflow-y: scroll;
+  height: calc(50vh - 44px);
+}
+.scenepage-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: fixed;
+  top: 44px;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  a {
+    margin: .6rem;
+    height: 100px;
+    width: 100px;
+    border-radius: 5px;
+  }
+}
+.aftersgfade {
+  width: 100%;
+  position: relative;
+  height: 7rem;
+  background: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0)) 100%;
+}
+.scenegallerylink {
+  background-position: 50% 50%;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .perfname-list {
   margin-left: -.75rem;
@@ -637,15 +908,11 @@ input[type="range"].blue-slider {
   }
 
   .edit-buttons-container {
-    background-color: $bg-color;
+    background-color: #000;
     position: sticky;
-    top: 3rem;
+    top: 0;
     z-index: 3;
-    margin-top: -1rem;
-
-    @media (min-width: 575px) and (max-width: 1199px) {
-      top: 3rem;
-    }
+    margin-top: 0;
   }
 }
 

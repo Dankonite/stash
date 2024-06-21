@@ -90,6 +90,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [image, setImage] = useState<string | null>();
   const [encodingImage, setEncodingImage] = useState<boolean>(false);
+  const [altImage, setAltImage] = useState<string | null>(null);
   const loadStickyHeader = useLoadStickyHeader();
   const toggleEditBar = () => {
     seteditbarActive(current => !current)
@@ -109,8 +110,11 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
   }, [image, isEditing, performer.image_path]);
 
   const lightboxImages = useMemo(
-    () => [{ paths: { thumbnail: activeImage, image: activeImage } }],
-    [activeImage]
+    () => [
+      { paths: { thumbnail: activeImage, image: activeImage } },
+      ...(altImage ? [{ paths: { thumbnail: altImage, image: altImage } }] : [])
+    ],
+    [activeImage, altImage]
   );
 
   const showLightbox = useLightbox({
@@ -238,7 +242,11 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
           }
       }
   }})
-
+  useEffect(() => {
+    if (data?.findImages.count != 0) {
+      setAltImage(data?.findImages.images[0].paths.image ?? null);
+    }
+  }, [data]);
   return data?.findImages.count != 0 ? <img className="alt-hidden" src={data?.findImages.images[0].paths.image ?? ""}/> : ""
   }
 

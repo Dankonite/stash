@@ -330,6 +330,11 @@ export const ListFilter: React.FC<IListFilterProps> = ({
               </Button>
             </OverlayTrigger>
           )}
+          {filter.sortBy != "random" && (
+            <Button variant="secondary" onClick={() => onChangeSortBy("random")}>
+              <Icon icon={faRandom} />
+            </Button>
+          )}
         </Dropdown>
 
         <div className="mb-2">
