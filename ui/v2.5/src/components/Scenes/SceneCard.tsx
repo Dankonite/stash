@@ -7,7 +7,7 @@ import { Icon } from "../Shared/Icon";
 import {
   GalleryLink,
   TagLink,
-  MovieLink,
+  GroupLink,
   SceneMarkerLink,
 } from "../Shared/TagLink";
 import { HoverPopover } from "../Shared/HoverPopover";
@@ -155,24 +155,24 @@ const SceneCardPopovers = PatchComponent(
       // return <PerformerPopoverButton performers={props.scene.performers} />;
     }
 
-    function maybeRenderMoviePopoverButton() {
+    function maybeRenderGroupPopoverButton() {
       if (props.scene.movies.length <= 0) return;
 
-      const popoverContent = props.scene.movies.map((sceneMovie) => (
-        <div className="movie-tag-container row" key="movie">
+      const popoverContent = props.scene.movies.map((sceneGroup) => (
+        <div className="group-tag-container row" key={sceneGroup.movie.id}>
           <Link
-            to={`/movies/${sceneMovie.movie.id}`}
-            className="movie-tag col m-auto zoom-2"
+            to={`/groups/${sceneGroup.movie.id}`}
+            className="group-tag col m-auto zoom-2"
           >
             <img
               className="image-thumbnail"
-              alt={sceneMovie.movie.name ?? ""}
-              src={sceneMovie.movie.front_image_path ?? ""}
+              alt={sceneGroup.movie.name ?? ""}
+              src={sceneGroup.movie.front_image_path ?? ""}
             />
           </Link>
-          <MovieLink
-            key={sceneMovie.movie.id}
-            movie={sceneMovie.movie}
+          <GroupLink
+            key={sceneGroup.movie.id}
+            group={sceneGroup.movie}
             className="d-block"
           />
         </div>
@@ -182,7 +182,7 @@ const SceneCardPopovers = PatchComponent(
         <HoverPopover
           placement="bottom"
           content={popoverContent}
-          className="movie-count tag-tooltip"
+          className="group-count tag-tooltip"
         >
           <Button className="minimal">
             <Icon icon={faFilm} />
@@ -314,7 +314,7 @@ const SceneCardPopovers = PatchComponent(
             >
               {maybeRenderTagPopoverButton()}
               {maybeRenderPerformerPopoverButton()}
-              {maybeRenderMoviePopoverButton()}
+              {maybeRenderGroupPopoverButton()}
               {maybeRenderSceneMarkerPopoverButton()}
               {maybeRenderOCounter()}
               {maybeRenderGallery()}
