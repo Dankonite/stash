@@ -34,6 +34,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { baseURL } from "src/core/createClient";
 import { PatchComponent } from "src/patch";
+import { SearchBox } from "./SearchBox";
 
 interface IMenuItem {
   name: string;
@@ -378,6 +379,8 @@ export const MainNavbar: React.FC = () => {
             </>
           </Fade>
         </Navbar.Collapse>
+        
+        <SearchBox />
 
         <Navbar.Brand as="div" onClick={handleDismiss}>
           <Link to="/">
