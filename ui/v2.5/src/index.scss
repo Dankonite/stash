@@ -71,6 +71,39 @@ dd {
   white-space: pre-line;
 }
 
+.search-results {
+  width: 26vw;
+  background-color: #202020;
+  position: absolute;
+  top: 3rem;
+  left: 0;
+  height: calc(100vh - 3.3rem);
+  overflow-y: scroll;
+  .grid-card {
+    width: calc(25vw - 10px)!important
+  }
+  >* {
+    justify-content: center;
+  }
+}
+.SearchBox:has(.Searching) {
+  .search-box-input {
+    margin-right: 0.5rem;
+  }
+}
+.SearchBox:has(.hide) {
+  width: 5rem;
+}
+.search-results.hide {
+  display: none;
+}
+.search-box-input {
+  width: 100%;
+}
+.search-box-input:focus {
+  margin-right: 0.5rem;
+}
+
 .sticky.detail-header {
   display: block;
   min-height: 50px;
