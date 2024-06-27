@@ -1,0 +1,9 @@
+{
+  "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions",
+  "dependencies": {
+    "react-draggable-list": "^4.1.0"
+  },
+  "resolutions": {
+    "@types/react": "^17.0.38"
+  }
+}

@@ -18,7 +18,7 @@
     width: 150px;
 
     &-video {
-      background-color: #495b68;
+      background-color: #454545;
     }
   }
 
@@ -40,7 +40,7 @@
 }
 
 .search-item {
-  background-color: #495b68;
+  background-color: #454545;
   border-radius: 3px;
   padding: 1rem;
 
@@ -296,7 +296,7 @@
   }
 
   &-studio {
-    background-color: #495b68;
+    background-color: $active;
     border-radius: 3px;
     display: flex;
     margin: 1rem;
@@ -310,7 +310,7 @@
       padding: 0;
 
       img {
-        background-color: #495b68;
+        background-color: $active;
         max-height: 150px;
         object-fit: contain;
         vertical-align: middle;
@@ -358,6 +358,8 @@
 
     .input-group-text {
       font-family: monospace;
+      background-color: $menu-gray;
+      border: none;
     }
   }
 }

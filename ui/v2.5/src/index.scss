@@ -49,16 +49,16 @@ body {
 
   @include media-breakpoint-down(xs) {
     @media (orientation: portrait) {
-      padding: 1rem 0 5rem;
-    }
+      padding: 3.5rem 0 0;
   }
+}
 }
 
 #group-page,
 #performer-page,
 #studio-page,
 #tag-page {
-  margin-top: -0.5rem;
+  margin-top: -1rem;
 }
 
 code,
@@ -71,16 +71,49 @@ dd {
   white-space: pre-line;
 }
 
+.search-results {
+  width: 26vw;
+  background-color: #202020;
+  position: absolute;
+  top: 3rem;
+  left: 0;
+  height: calc(100vh - 3.3rem);
+  overflow-y: scroll;
+  .grid-card {
+    width: calc(25vw - 10px)!important
+  }
+  >* {
+    justify-content: center;
+  }
+}
+.SearchBox:has(.Searching) {
+  .search-box-input {
+    margin-right: 0.5rem;
+  }
+}
+.SearchBox:has(.hide) {
+  width: 5rem;
+}
+.search-results.hide {
+  display: none;
+}
+.search-box-input {
+  width: 100%;
+}
+.search-box-input:focus {
+  margin-right: 0.5rem;
+}
+
 .sticky.detail-header {
   display: block;
   min-height: 50px;
   padding: unset;
   position: fixed;
-  top: 3.3rem;
+  top: 3rem;
   z-index: 10;
 
   @media (max-width: 576px) {
-    display: none;
+    // display: none;
   }
 
   .group-name,
@@ -133,7 +166,7 @@ dd {
 }
 
 .detail-header {
-  background-color: #192127;
+  background-color: #101010;
   min-height: 15rem;
   overflow: hidden;
   padding: 1rem;
@@ -849,9 +882,7 @@ div.dropdown-menu {
 
 .card {
   background-color: $card-bg;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0),
-    0 0 0 rgba(16, 22, 26, 0);
+  border-radius: .75rem;
   padding: 20px;
 }
 
@@ -990,15 +1021,7 @@ div.dropdown-menu {
 .top-nav {
   justify-content: start;
   padding: 0.25rem 1rem;
-
-  @include media-breakpoint-down(xs) {
-    padding: 0.25rem 2rem;
-
-    @media (orientation: portrait) {
-      bottom: 0;
-      top: auto;
-    }
-  }
+  filter: drop-shadow(.5rem 0.5rem .5rem black);
 
   .navbar-toggler {
     padding: 0.5em 0;
@@ -1013,7 +1036,6 @@ div.dropdown-menu {
   .navbar-collapse {
     justify-content: space-between;
     max-height: calc(100vh - 4rem);
-
     @include media-breakpoint-down(xs) {
       @media (orientation: landscape) {
         overflow-y: scroll;
@@ -1036,6 +1058,7 @@ div.dropdown-menu {
       }
 
       @include media-breakpoint-down(xs) {
+
         &:last-child {
           display: flex;
           min-height: 3rem;

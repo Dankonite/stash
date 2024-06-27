@@ -94,7 +94,7 @@ const HoverScrubber: React.FC<IHoverScrubber> = ({
 
 interface IScenePreviewProps {
   vttPath: string | undefined;
-  onClick?: (timestamp: number) => void;
+  onClick?: (timestamp: number, scene?: any) => void;
 }
 
 function scaleToFit(dimensions: { w: number; h: number }, bounds: DOMRect) {

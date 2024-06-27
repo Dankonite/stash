@@ -35,6 +35,7 @@ import {
   faChevronDown,
   faChevronUp,
   faHeart,
+  faPenToSquare,
   faSignInAlt,
   faSignOutAlt,
   faTrashAlt,
@@ -82,10 +83,12 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
   const enableBackgroundImage = uiConfig?.enableTagBackgroundImage ?? false;
   const showAllDetails = uiConfig?.showAllDetails ?? true;
   const compactExpandedDetails = uiConfig?.compactExpandedDetails ?? false;
-
+  const [edittagActive, setedittagActive] = useState<boolean>(false)
   const [collapsed, setCollapsed] = useState<boolean>(!showAllDetails);
   const loadStickyHeader = useLoadStickyHeader();
-
+  const toggleEditBar = () => {
+    setedittagActive(current => !current)
+  }
   // Editing state
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
@@ -392,11 +395,23 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         <TagDetailsPanel
           tag={tag}
           fullWidth={!collapsed && !compactExpandedDetails}
+          tabKey={tabKey}
         />
       );
     }
   }
-
+  function maybeRenderEditToggleButton() {
+    if (!isEditing) {
+      return (
+      <Button
+          className="minimal expand-collapse-edit edit-bar-toggle mr-2"
+          onClick={toggleEditBar}
+        >
+          <Icon className="fa-fw" icon={faPenToSquare} />
+        </Button>
+      )
+    }
+  }
   function maybeRenderEditPanel() {
     if (isEditing) {
       return (
@@ -412,6 +427,11 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
     }
     {
       return (
+        <div style={{
+          opacity: edittagActive ? '1' : '0',
+          display: edittagActive ? 'inline-flex' : 'none',
+          height: 1
+        }}>
         <DetailsEditNavbar
           objectName={tag.name}
           isNew={false}
@@ -426,6 +446,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
           classNames="mb-2"
           customButtons={renderMergeButton()}
         />
+        </div>
       );
     }
   }
@@ -576,7 +597,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
 
   function maybeRenderCompressedDetails() {
     if (!isEditing && loadStickyHeader) {
-      return <CompressedTagDetailsPanel tag={tag} />;
+      return <CompressedTagDetailsPanel tabKey={tabKey} tag={tag} />;
     }
   }
 
@@ -610,10 +631,12 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
                 <span className="tag-name">{tag.name}</span>
                 {maybeRenderShowCollapseButton()}
                 {renderClickableIcons()}
+                {maybeRenderEditToggleButton()}
+                {maybeRenderEditPanel()}
               </h2>
               {maybeRenderAliases()}
               {maybeRenderDetails()}
-              {maybeRenderEditPanel()}
+              
             </div>
           </div>
         </div>

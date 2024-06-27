@@ -198,6 +198,7 @@ button.collapse-button.btn-primary:not(:disabled):not(.disabled):active {
   a .card-section-title {
     color: $text-color;
     text-decoration: none;
+    margin-block-end: .2rem;
   }
 
   .progress-bar {
