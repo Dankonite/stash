@@ -179,23 +179,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
 
   // set up hotkeys
   useEffect(() => {
-    Mousetrap.bind("e", () => toggleEditing());
-    Mousetrap.bind("d d", () => {
-      setIsDeleteAlertOpen(true);
-    });
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
-    Mousetrap.bind("f", () => setFavorite(!tag.favorite));
-
-    return () => {
-      if (isEditing) {
-        Mousetrap.unbind("s s");
-      }
-
-      Mousetrap.unbind("e");
-      Mousetrap.unbind("d d");
-      Mousetrap.unbind(",");
-      Mousetrap.unbind("f");
-    };
   });
 
   async function onSave(input: GQL.TagCreateInput) {

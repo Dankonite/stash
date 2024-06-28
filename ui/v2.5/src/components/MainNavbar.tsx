@@ -286,30 +286,6 @@ export const MainNavbar: React.FC = () => {
     }
   }
 
-  // set up hotkeys
-  useEffect(() => {
-    Mousetrap.bind("?", () => openManual());
-    Mousetrap.bind("g z", () => goto("/settings"));
-
-    menuItems.forEach((item) =>
-      Mousetrap.bind(item.hotkey, () => goto(item.href))
-    );
-
-    if (newPath) {
-      Mousetrap.bind("n", () => history.push(String(newPath)));
-    }
-
-    return () => {
-      Mousetrap.unbind("?");
-      Mousetrap.unbind("g z");
-      menuItems.forEach((item) => Mousetrap.unbind(item.hotkey));
-
-      if (newPath) {
-        Mousetrap.unbind("n");
-      }
-    };
-  });
-
   function maybeRenderLogout() {
     if (SessionUtils.isLoggedIn()) {
       return (

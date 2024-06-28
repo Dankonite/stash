@@ -83,11 +83,11 @@ export const ListFilter: React.FC<IListFilterProps> = ({
       e.preventDefault();
     });
 
-    Mousetrap.bind("r", () => onReshuffleRandomSort());
+    Mousetrap.bind("r r", () => onReshuffleRandomSort());
 
     return () => {
       Mousetrap.unbind("/");
-      Mousetrap.unbind("r");
+      Mousetrap.unbind("r r");
     };
   });
 

@@ -164,7 +164,23 @@ a:visited {
 .maybehide {
   display: none;
 }
-
+.cheeseReset {
+  opacity: 0;
+  position: fixed;
+  top: 6rem;
+  left: 4rem;
+  z-index: 10005;
+  transition: opacity 1s;
+  svg {
+    height: 2rem;
+    width: 2rem;
+  }
+}
+.the-window:has(.vjs-has-started):has(.vjs-user-active) {
+  .cheeseReset {
+    opacity: 1;
+  }
+}
 .the-window:has(.vjs-has-started) .maybehide {
   display: flex;
   flex-direction: column;

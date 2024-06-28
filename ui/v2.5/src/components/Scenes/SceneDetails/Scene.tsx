@@ -45,6 +45,9 @@ import {
   faImage,
   faX,
   faPlay,
+  faArrowLeft,
+  faUsersViewfinder,
+  faCamera,
 } from "@fortawesome/free-solid-svg-icons";
 import { lazyComponent } from "src/utils/lazyComponent";
 
@@ -87,6 +90,7 @@ import TextUtils from "src/utils/text";
 import cx from "classnames";
 import { sortPerformers } from "src/core/performers";
 import { HoverPopover } from "src/components/Shared/HoverPopover";
+import { VideoJsPlayer } from "video.js";
 
 interface Oprops {
   scene: GQL.SceneDataFragment
@@ -291,31 +295,9 @@ const ScenePage: React.FC<IProps> = ({
 
   // set up hotkeys
   useEffect(() => {
-    Mousetrap.bind("a", () => setActiveTabKey("scene-details-panel"));
-    Mousetrap.bind("q", () => setActiveTabKey("scene-queue-panel"));
-    Mousetrap.bind("e", () => setActiveTabKey("scene-edit-panel"));
-    Mousetrap.bind("k", () => setActiveTabKey("scene-markers-panel"));
-    Mousetrap.bind("i", () => setActiveTabKey("scene-file-info-panel"));
-    Mousetrap.bind("h", () => setActiveTabKey("scene-history-panel"));
-    Mousetrap.bind("o", () => {
-      onIncrementClick();
-    });
-    Mousetrap.bind("p n", () => onQueueNext());
-    Mousetrap.bind("p p", () => onQueuePrevious());
-    Mousetrap.bind("p r", () => onQueueRandom());
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
 
     return () => {
-      Mousetrap.unbind("a");
-      Mousetrap.unbind("q");
-      Mousetrap.unbind("e");
-      Mousetrap.unbind("k");
-      Mousetrap.unbind("i");
-      Mousetrap.unbind("h");
-      Mousetrap.unbind("o");
-      Mousetrap.unbind("p n");
-      Mousetrap.unbind("p p");
-      Mousetrap.unbind("p r");
       Mousetrap.unbind(",");
     };
   });
@@ -1186,7 +1168,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   const initialTimestamp = useMemo(() => {
     return Number.parseInt(queryParams.get("t") ?? "0", 10);
   }, [queryParams]);
-
+  const [cheeseKey, setKey] = useState(0);
   const [queueTotal, setQueueTotal] = useState(0);
   const [queueStart, setQueueStart] = useState(1);
 
@@ -1446,7 +1428,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
       )}
     <Button
       className="btn-success mt-4"
-      onClick={() => setPlay(true)}
+      onClick={() => setPlay(!play)}
     >
       <Icon icon={faPlay}/> Watch
     </Button>
@@ -1481,7 +1463,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
             {leftDeets}
             <div className="scene-player-container">
               <ScenePlayer
-                key="ScenePlayer"
+                key={cheeseKey}
                 play={play}
                 scene={scene}
                 hideScrubberOverride={hideScrubber}
@@ -1506,6 +1488,30 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
           <div className="d-flex flex-row under-player">
             {!editMode ? 
               <div className="barsordeets">
+                <div className="cheeseReset">
+                  <Button 
+                  className="btn-clear"
+                  onClick={() => {
+                    setKey(cheeseKey + 1);
+                  }}
+                  >
+                    <Icon icon={faArrowLeft}/>
+                  </Button>
+                  <Button 
+                  className="btn-clear"
+                  onClick={() => {
+                    let canvas = document.createElement('canvas');
+                    let video = (document.getElementById("VideoJsPlayer_html5_api") as HTMLVideoElement);
+                    canvas.width = 3840;
+                    canvas.height = 2160;
+                    let ctx = canvas.getContext('2d');
+                    ctx!.drawImage( video, 0, 0, canvas.width, canvas.height );
+                    canvas.toBlob((blob) => {window.open(URL.createObjectURL(blob!), '_blank')})
+                  }}
+                  >
+                    <Icon icon={faCamera}/>
+                  </Button>
+                </div>
                 <div className="dadeets">
                   {scene.date ? <span className="dadate mt-3">{scene.date!}</span> : ""}
                   {scene.details ? <span className="dadetails mt-5">{scene.details!}</span>: ""}

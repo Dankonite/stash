@@ -125,12 +125,6 @@ const GroupPage: React.FC<IProps> = ({ group }) => {
     };
   });
 
-  useRatingKeybinds(
-    true,
-    configuration?.ui.ratingSystemOptions?.type,
-    setRating
-  );
-
   async function onSave(input: GQL.MovieCreateInput) {
     await updateMovie({
       variables: {

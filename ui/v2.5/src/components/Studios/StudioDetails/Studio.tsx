@@ -170,26 +170,12 @@ const StudioPage: React.FC<IProps> = ({ studio, tabKey }) => {
 
   // set up hotkeys
   useEffect(() => {
-    Mousetrap.bind("e", () => toggleEditing());
-    Mousetrap.bind("d d", () => {
-      setIsDeleteAlertOpen(true);
-    });
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
-    Mousetrap.bind("f", () => setFavorite(!studio.favorite));
 
     return () => {
-      Mousetrap.unbind("e");
-      Mousetrap.unbind("d d");
       Mousetrap.unbind(",");
-      Mousetrap.unbind("f");
     };
   });
-
-  useRatingKeybinds(
-    true,
-    configuration?.ui.ratingSystemOptions?.type,
-    setRating
-  );
 
   async function onSave(input: GQL.StudioCreateInput) {
     await updateStudio({

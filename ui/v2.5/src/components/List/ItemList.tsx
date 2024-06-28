@@ -187,20 +187,7 @@ export function makeItemList<T extends QueryResult, E extends IDataItem>({
       }
     }, [filter, onChangePage, totalCount]);
 
-    // set up hotkeys
-    useEffect(() => {
-      Mousetrap.bind("f", (e) => {
-        setShowEditFilter(true);
-        // prevent default behavior of typing f in a text field
-        // otherwise the filter dialog closes, the query field is focused and
-        // f is typed.
-        e.preventDefault();
-      });
-
-      return () => {
-        Mousetrap.unbind("f");
-      };
-    }, []);
+    
     useEffect(() => {
       const pages = Math.ceil(totalCount / filter.itemsPerPage);
       Mousetrap.bind("right", () => {

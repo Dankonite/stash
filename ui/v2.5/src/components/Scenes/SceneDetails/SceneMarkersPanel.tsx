@@ -25,17 +25,6 @@ export const SceneMarkersPanel: React.FC<ISceneMarkersPanelProps> = ({
   const [editingMarker, setEditingMarker] =
     useState<GQL.SceneMarkerDataFragment>();
 
-  // set up hotkeys
-  useEffect(() => {
-    if (!isVisible) return;
-
-    Mousetrap.bind("n", () => onOpenEditor());
-
-    return () => {
-      Mousetrap.unbind("n");
-    };
-  });
-
   if (loading) return null;
 
   function onOpenEditor(marker?: GQL.SceneMarkerDataFragment) {

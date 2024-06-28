@@ -70,6 +70,23 @@ code,
 dd {
   white-space: pre-line;
 }
+.pagination> .btn:first-child {
+  border-left: 1px solid #121212
+}
+.pagination> .btn:last-child {
+  border-right: 1px solid #121212
+}
+
+.tag-head {
+  display: flex;
+  flex-direction: column ;
+}
+.detail-group {
+  flex-grow: 1;
+}
+.custom-nav-tabs {
+  margin-bottom: -1rem;
+}
 
 .search-results {
   width: 26vw;
@@ -79,11 +96,25 @@ dd {
   left: 0;
   height: calc(100vh - 3.3rem);
   overflow-y: scroll;
+  .grid-card:not(.scene-card) .card-section {
+    align-items: center;
+  }
+  img {
+    object-fit: cover;
+    height: auto!important;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
   .grid-card {
     width: calc(25vw - 10px)!important
   }
   >* {
     justify-content: center;
+  }
+}
+.SearchBox:not(:has(:focus)) {
+  .search-results {
+    opacity: 0.4;
   }
 }
 .SearchBox:has(.Searching) {
@@ -92,7 +123,7 @@ dd {
   }
 }
 .SearchBox:has(.hide) {
-  width: 5rem;
+  width: 4.5rem;
 }
 .search-results.hide {
   display: none;
@@ -100,7 +131,7 @@ dd {
 .search-box-input {
   width: 100%;
 }
-.search-box-input:focus {
+.SearchBox {
   margin-right: 0.5rem;
 }
 

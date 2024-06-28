@@ -190,27 +190,12 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     }
   }
 
-  useRatingKeybinds(
-    true,
-    configuration?.ui.ratingSystemOptions?.type,
-    setRating
-  );
 
   // set up hotkeys
   useEffect(() => {
-    Mousetrap.bind("e", () => toggleEditing());
-    Mousetrap.bind("c", () => setTabKey("scenes"));
-    Mousetrap.bind("g", () => setTabKey("galleries"));
-    Mousetrap.bind("m", () => setTabKey("groups"));
-    Mousetrap.bind("f", () => setFavorite(!performer.favorite));
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
 
     return () => {
-      Mousetrap.unbind("e");
-      Mousetrap.unbind("c");
-      Mousetrap.unbind("g");
-      Mousetrap.unbind("m");
-      Mousetrap.unbind("f");
       Mousetrap.unbind(",");
     };
   });
@@ -376,6 +361,10 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
           performer={performer}
         />
       </Tab>
+      )
+    }
+  function maybeRenderAppearsWith() {
+      return (
       <Tab
         eventKey="appearswith"
         title={
