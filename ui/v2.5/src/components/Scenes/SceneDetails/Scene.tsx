@@ -1,4 +1,4 @@
-import { Tab, Nav, Dropdown, Button, ButtonGroup, Toast, Modal } from "react-bootstrap";
+import { Tab, Nav, Dropdown, Button, ButtonGroup, Modal } from "react-bootstrap";
 import React, {
   useEffect,
   useState,
@@ -40,15 +40,12 @@ import {
   faEllipsisV,
   faChevronRight,
   faChevronLeft,
-  faArrowsLeftRightToLine,
   faLightbulb,
   faImage,
   faX,
   faPlay,
   faArrowLeft,
-  faUsersViewfinder,
   faCamera,
-  faMapPin,
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import { lazyComponent } from "src/utils/lazyComponent";
@@ -84,15 +81,10 @@ const SceneVideoFilterPanel = lazyComponent(
   () => import("./SceneVideoFilterPanel")
 );
 import { objectPath, objectTitle } from "src/core/files";
-import { RatingSystem } from "src/components/Shared/Rating/RatingSystem";
-import { TagButtons } from "./TagsButtons";
-import { PerformerButtons } from "./PerformerButtons";
-import { SceneRecs } from "./SceneRecs";
 import TextUtils from "src/utils/text";
 import cx from "classnames";
 import { sortPerformers } from "src/core/performers";
 import { HoverPopover } from "src/components/Shared/HoverPopover";
-import { VideoJsPlayer } from "video.js";
 import { SceneMarkerForm } from "./SceneMarkerForm";
 
 interface Oprops {
@@ -170,8 +162,6 @@ export const ScenePreview: React.FC<IScenePreviewProps> = ({
   video,
   isPortrait,
   soundActive,
-  vttPath,
-  onScrubberClick,
 }) => {
   const videoEl = useRef<HTMLVideoElement>(null);
 
@@ -626,10 +616,6 @@ const ScenePage: React.FC<IProps> = ({
     </Tab.Container>
   );
 
-  function getCollapseButtonIcon() {
-    return collapsed ? faChevronRight : faChevronLeft;
-  }
-
   const title = objectTitle(scene);
 
   return (
@@ -660,11 +646,6 @@ const ScenePage: React.FC<IProps> = ({
         </div>
         {renderTabs()}
       </div>
-      {/* <div className="scene-divider d-none d-xl-block">
-        <Button onClick={() => setCollapsed(!collapsed)}>
-          <Icon className="fa-fw" icon={getCollapseButtonIcon()} />
-        </Button>
-      </div> */}
       <SubmitStashBoxDraft
         type="scene"
         boxes={boxes}
@@ -693,8 +674,6 @@ const UtilityBar: React.FC<UBarProps> = ({
   const [resetO] = useSceneResetO(scene.id);
 
   const [organizedLoading, setOrganizedLoading] = useState(false);
-
-  const [activeTabKey, setActiveTabKey] = useState("scene-details-panel");
   const [hidePlugins, setHidePlugins] = useState<boolean>(true);
   const [toolbarExpand, setToolbarExpand] = useState<boolean>(false);
   const [isGalleryOpen, setGalleryOpen] = useState<boolean>(false)
@@ -829,15 +808,6 @@ const UtilityBar: React.FC<UBarProps> = ({
       Toast.error(e);
     }
   };
-  const scenegalleries = () => {
-    const {data} = GQL.useFindGalleryQuery({
-      variables: {
-        id: scene.galleries[0].id
-      }
-    })
-    const imagesrender = data?.findGallery!.files.map((img) => <img src={img.path ?? ""} />)
-    return imagesrender
-  }
 
   const galleriesimages = scene.galleries.map((gallery) => {
     const {data} = GQL.useFindImagesQuery({
@@ -1410,23 +1380,6 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
     if (loading) return <LoadingIndicator />;
     if (error) return <ErrorMessage error={error.message} />;
     return <ErrorMessage error={`No scene found with id ${id}.`} />;
-  }
-  function maybeRenderTags() {
-    return scene!.tags.length != 0 ? (
-      <div
-      className="d-flex flex-wrap justify-content-start align-items-start align-content-start h-fc" 
-      >
-        <TagButtons scene={scene!}/>
-      </div>
-    ) : ("")
-  }
-  function maybeRenderPerformers() {
-    return scene!.performers.length != 0 ? (
-      <div className="d-flex flex-wrap justify-content-start align-content-start" style={{
-      minWidth: scene!.performers.length > 1 ? "400px" : "",
-      maxWidth: "400px"
-      }} key={scene!.id}><PerformerButtons scene={scene!}/></div>
-    ) : ("")
   }
 
   async function onSave(input: GQL.SceneCreateInput) {
