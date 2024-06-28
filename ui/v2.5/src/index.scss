@@ -54,7 +54,7 @@ body {
 }
 }
 
-#movie-page,
+#group-page,
 #performer-page,
 #studio-page,
 #tag-page {
@@ -70,6 +70,23 @@ code,
 dd {
   white-space: pre-line;
 }
+.pagination> .btn:first-child {
+  border-left: 1px solid #121212
+}
+.pagination> .btn:last-child {
+  border-right: 1px solid #121212
+}
+
+.tag-head {
+  display: flex;
+  flex-direction: column ;
+}
+.detail-group {
+  flex-grow: 1;
+}
+.custom-nav-tabs {
+  margin-bottom: -1rem;
+}
 
 .search-results {
   width: 26vw;
@@ -79,11 +96,25 @@ dd {
   left: 0;
   height: calc(100vh - 3.3rem);
   overflow-y: scroll;
+  .grid-card:not(.scene-card) .card-section {
+    align-items: center;
+  }
+  img {
+    object-fit: cover;
+    height: auto!important;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
   .grid-card {
     width: calc(25vw - 10px)!important
   }
   >* {
     justify-content: center;
+  }
+}
+.SearchBox:not(:has(:focus)) {
+  .search-results {
+    opacity: 0.4;
   }
 }
 .SearchBox:has(.Searching) {
@@ -92,7 +123,7 @@ dd {
   }
 }
 .SearchBox:has(.hide) {
-  width: 5rem;
+  width: 4.5rem;
 }
 .search-results.hide {
   display: none;
@@ -100,7 +131,7 @@ dd {
 .search-box-input {
   width: 100%;
 }
-.search-box-input:focus {
+.SearchBox {
   margin-right: 0.5rem;
 }
 
@@ -116,7 +147,7 @@ dd {
     // display: none;
   }
 
-  .movie-name,
+  .group-name,
   .performer-name,
   .studio-name,
   .tag-name {
@@ -126,7 +157,7 @@ dd {
   .sticky.detail-header-group {
     padding: 1rem 2.5rem;
 
-    a.movie-name,
+    a.group-name,
     a.performer-name,
     a.studio-name,
     a.tag-name {
@@ -346,7 +377,7 @@ dd {
   justify-content: center;
   padding: 0 1rem;
 
-  .movie-images {
+  .group-images {
     height: 100%;
   }
 
@@ -355,7 +386,7 @@ dd {
     height: auto;
     padding: 0;
 
-    .movie-images {
+    .group-images {
       .img {
         max-width: 100%;
       }
@@ -368,18 +399,18 @@ dd {
     transition: 0.5s;
   }
 
-  .movie-images img {
+  .group-images img {
     @media (max-width: 576px) {
       max-width: 100%;
     }
   }
 }
 
-#movie-page .detail-header-image .movie-images img {
+#group-page .detail-header-image .group-images img {
   max-width: 13rem;
 }
 
-#movie-page .detail-header-image img,
+#group-page .detail-header-image img,
 #performer-page .detail-header-image img,
 #tag-page .detail-header-image img {
   border-radius: 0.5rem;

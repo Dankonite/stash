@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   defineMessages,
   FormattedMessage,
@@ -62,9 +68,9 @@ const messages = defineMessages({
     id: "images",
     defaultMessage: "Images",
   },
-  movies: {
-    id: "movies",
-    defaultMessage: "Movies",
+  groups: {
+    id: "groups",
+    defaultMessage: "Groups",
   },
   markers: {
     id: "markers",
@@ -132,9 +138,9 @@ const allMenuItems: IMenuItem[] = [
     hotkey: "g i",
   },
   {
-    name: "movies",
-    message: messages.movies,
-    href: "/movies",
+    name: "groups",
+    message: messages.groups,
+    href: "/groups",
     icon: faFilm,
     hotkey: "g v",
     userCreatable: true,
@@ -211,20 +217,26 @@ export const MainNavbar: React.FC = () => {
   const { configuration, loading } = React.useContext(ConfigurationContext);
   const { openManual } = React.useContext(ManualStateContext);
 
-  // Show all menu items by default, unless config says otherwise
-  const [menuItems, setMenuItems] = useState<IMenuItem[]>(allMenuItems);
-
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    const iCfg = configuration?.interface;
-    if (iCfg?.menuItems) {
-      setMenuItems(
-        allMenuItems.filter((menuItem) =>
-          iCfg.menuItems!.includes(menuItem.name)
-        )
-      );
+  // Show all menu items by default, unless config says otherwise
+  const menuItems = useMemo(() => {
+    let cfgMenuItems = configuration?.interface.menuItems;
+    if (!cfgMenuItems) {
+      return allMenuItems;
     }
+
+    // translate old movies menu item to groups
+    cfgMenuItems = cfgMenuItems.map((item) => {
+      if (item === "movies") {
+        return "groups";
+      }
+      return item;
+    });
+
+    return allMenuItems.filter((menuItem) =>
+      cfgMenuItems!.includes(menuItem.name)
+    );
   }, [configuration]);
 
   // react-bootstrap typing bug
@@ -273,30 +285,6 @@ export const MainNavbar: React.FC = () => {
       newPath += "?q=" + encodeURIComponent(queryParam);
     }
   }
-
-  // set up hotkeys
-  useEffect(() => {
-    Mousetrap.bind("?", () => openManual());
-    Mousetrap.bind("g z", () => goto("/settings"));
-
-    menuItems.forEach((item) =>
-      Mousetrap.bind(item.hotkey, () => goto(item.href))
-    );
-
-    if (newPath) {
-      Mousetrap.bind("n", () => history.push(String(newPath)));
-    }
-
-    return () => {
-      Mousetrap.unbind("?");
-      Mousetrap.unbind("g z");
-      menuItems.forEach((item) => Mousetrap.unbind(item.hotkey));
-
-      if (newPath) {
-        Mousetrap.unbind("n");
-      }
-    };
-  });
 
   function maybeRenderLogout() {
     if (SessionUtils.isLoggedIn()) {

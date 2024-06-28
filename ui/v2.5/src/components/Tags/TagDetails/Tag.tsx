@@ -26,6 +26,7 @@ import { TagScenesPanel } from "./TagScenesPanel";
 import { TagMarkersPanel } from "./TagMarkersPanel";
 import { TagImagesPanel } from "./TagImagesPanel";
 import { TagPerformersPanel } from "./TagPerformersPanel";
+import { TagStudiosPanel } from "./TagStudiosPanel";
 import { TagGalleriesPanel } from "./TagGalleriesPanel";
 import { CompressedTagDetailsPanel, TagDetailsPanel } from "./TagDetailsPanel";
 import { TagEditPanel } from "./TagEditPanel";
@@ -42,6 +43,7 @@ import {
 import { DetailImage } from "src/components/Shared/DetailImage";
 import { useLoadStickyHeader } from "src/hooks/detailsPanel";
 import { useScrollToTopOnMount } from "src/hooks/scrollToTop";
+import { TagGroupsPanel } from "./TagMoviesPanel";
 
 interface IProps {
   tag: GQL.TagDataFragment;
@@ -58,8 +60,10 @@ const validTabs = [
   "scenes",
   "images",
   "galleries",
+  "groups",
   "markers",
   "performers",
+  "studios",
 ] as const;
 type TabKey = (typeof validTabs)[number];
 
@@ -104,10 +108,14 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
     (showAllCounts ? tag.image_count_all : tag.image_count) ?? 0;
   const galleryCount =
     (showAllCounts ? tag.gallery_count_all : tag.gallery_count) ?? 0;
+  const groupCount =
+    (showAllCounts ? tag.movie_count_all : tag.movie_count) ?? 0;
   const sceneMarkerCount =
     (showAllCounts ? tag.scene_marker_count_all : tag.scene_marker_count) ?? 0;
   const performerCount =
     (showAllCounts ? tag.performer_count_all : tag.performer_count) ?? 0;
+  const studioCount =
+    (showAllCounts ? tag.studio_count_all : tag.studio_count) ?? 0;
 
   const populatedDefaultTab = useMemo(() => {
     let ret: TabKey = "scenes";
@@ -116,15 +124,27 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         ret = "images";
       } else if (galleryCount != 0) {
         ret = "galleries";
+      } else if (groupCount != 0) {
+        ret = "groups";
       } else if (sceneMarkerCount != 0) {
         ret = "markers";
       } else if (performerCount != 0) {
         ret = "performers";
+      } else if (studioCount != 0) {
+        ret = "studios";
       }
     }
 
     return ret;
-  }, [sceneCount, imageCount, galleryCount, sceneMarkerCount, performerCount]);
+  }, [
+    sceneCount,
+    imageCount,
+    galleryCount,
+    sceneMarkerCount,
+    performerCount,
+    studioCount,
+    groupCount,
+  ]);
 
   const setTabKey = useCallback(
     (newTabKey: string | null) => {
@@ -159,23 +179,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
 
   // set up hotkeys
   useEffect(() => {
-    Mousetrap.bind("e", () => toggleEditing());
-    Mousetrap.bind("d d", () => {
-      setIsDeleteAlertOpen(true);
-    });
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
-    Mousetrap.bind("f", () => setFavorite(!tag.favorite));
-
-    return () => {
-      if (isEditing) {
-        Mousetrap.unbind("s s");
-      }
-
-      Mousetrap.unbind("e");
-      Mousetrap.unbind("d d");
-      Mousetrap.unbind(",");
-      Mousetrap.unbind("f");
-    };
   });
 
   async function onSave(input: GQL.TagCreateInput) {
@@ -485,6 +489,21 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         <TagGalleriesPanel active={tabKey === "galleries"} tag={tag} />
       </Tab>
       <Tab
+        eventKey="groups"
+        title={
+          <>
+            {intl.formatMessage({ id: "groups" })}
+            <Counter
+              abbreviateCounter={abbreviateCounter}
+              count={groupCount}
+              hideZero
+            />
+          </>
+        }
+      >
+        <TagGroupsPanel active={tabKey === "groups"} tag={tag} />
+      </Tab>
+      <Tab
         eventKey="markers"
         title={
           <>
@@ -513,6 +532,21 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         }
       >
         <TagPerformersPanel active={tabKey === "performers"} tag={tag} />
+      </Tab>
+      <Tab
+        eventKey="studios"
+        title={
+          <>
+            {intl.formatMessage({ id: "studios" })}
+            <Counter
+              abbreviateCounter={abbreviateCounter}
+              count={studioCount}
+              hideZero
+            />
+          </>
+        }
+      >
+        <TagStudiosPanel active={tabKey === "studios"} tag={tag} />
       </Tab>
     </Tabs>
   );

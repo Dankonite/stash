@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, ButtonGroup, ModalBody, ModalFooter, ModalTitle, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
@@ -7,7 +7,7 @@ import { Icon } from "../Shared/Icon";
 import {
   GalleryLink,
   TagLink,
-  MovieLink,
+  GroupLink,
   SceneMarkerLink,
 } from "../Shared/TagLink";
 import { HoverPopover } from "../Shared/HoverPopover";
@@ -17,14 +17,11 @@ import NavUtils from "src/utils/navigation";
 import TextUtils from "src/utils/text";
 import { SceneQueue } from "src/models/sceneQueue";
 import { ConfigurationContext } from "src/hooks/Config";
-import { PerformerPopoverButton } from "../Shared/PerformerPopoverButton";
 import { PerformerNameButton } from  "../Shared/PerformerNameButton";
 import { GridCard, calculateCardWidth } from "../Shared/GridCard/GridCard";
 import { RatingBanner } from "../Shared/RatingBanner";
 import { FormattedNumber } from "react-intl";
 import {
-  faBox,
-  faVideo,
   faCopy,
   faFilm,
   faImages,
@@ -118,14 +115,14 @@ const SceneCardPopovers = PatchComponent(
       () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
       [props.scene]
     );
-
+    const [tagModal, setTagModal] = useState(false);
+    const [markerModal, setMarkerModal] = useState(false);
     function maybeRenderTagPopoverButton() {
       if (props.scene.tags.length <= 0) return;
 
       const popoverContent = props.scene.tags.map((tag) => (
         <TagLink key={tag.id} tag={tag} />
       ));
-      const [tagModal, setTagModal] = useState(false);
       function onCancelTagDialog() {
         setTagModal(false)
       }
@@ -155,24 +152,24 @@ const SceneCardPopovers = PatchComponent(
       // return <PerformerPopoverButton performers={props.scene.performers} />;
     }
 
-    function maybeRenderMoviePopoverButton() {
+    function maybeRenderGroupPopoverButton() {
       if (props.scene.movies.length <= 0) return;
 
-      const popoverContent = props.scene.movies.map((sceneMovie) => (
-        <div className="movie-tag-container row" key="movie">
+      const popoverContent = props.scene.movies.map((sceneGroup) => (
+        <div className="group-tag-container row" key={sceneGroup.movie.id}>
           <Link
-            to={`/movies/${sceneMovie.movie.id}`}
-            className="movie-tag col m-auto zoom-2"
+            to={`/groups/${sceneGroup.movie.id}`}
+            className="group-tag col m-auto zoom-2"
           >
             <img
               className="image-thumbnail"
-              alt={sceneMovie.movie.name ?? ""}
-              src={sceneMovie.movie.front_image_path ?? ""}
+              alt={sceneGroup.movie.name ?? ""}
+              src={sceneGroup.movie.front_image_path ?? ""}
             />
           </Link>
-          <MovieLink
-            key={sceneMovie.movie.id}
-            movie={sceneMovie.movie}
+          <GroupLink
+            key={sceneGroup.movie.id}
+            group={sceneGroup.movie}
             className="d-block"
           />
         </div>
@@ -182,7 +179,7 @@ const SceneCardPopovers = PatchComponent(
         <HoverPopover
           placement="bottom"
           content={popoverContent}
-          className="movie-count tag-tooltip"
+          className="group-count tag-tooltip"
         >
           <Button className="minimal">
             <Icon icon={faFilm} />
@@ -199,7 +196,6 @@ const SceneCardPopovers = PatchComponent(
         const markerWithScene = { ...marker, scene: { id: props.scene.id } };
         return <SceneMarkerLink key={marker.id} marker={markerWithScene} />;
       });
-      const [markerModal, setMarkerModal] = useState(false);
       function onCancelMarkerDialog() {
         setMarkerModal(false)
       }
@@ -314,7 +310,7 @@ const SceneCardPopovers = PatchComponent(
             >
               {maybeRenderTagPopoverButton()}
               {maybeRenderPerformerPopoverButton()}
-              {maybeRenderMoviePopoverButton()}
+              {maybeRenderGroupPopoverButton()}
               {maybeRenderSceneMarkerPopoverButton()}
               {maybeRenderOCounter()}
               {maybeRenderGallery()}
