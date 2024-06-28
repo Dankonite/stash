@@ -134,7 +134,9 @@ dd {
 .SearchBox {
   margin-right: 0.5rem;
 }
-
+.ssbutton {
+  pointer-events: all;
+}
 .sticky.detail-header {
   display: block;
   min-height: 50px;

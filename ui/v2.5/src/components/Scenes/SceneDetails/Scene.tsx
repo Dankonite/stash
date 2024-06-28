@@ -1225,6 +1225,12 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
     }
   }, [sceneQueue]);
 
+  useEffect(() => {
+    let dabutton = (document.querySelector('.ssbutton'));
+    let duration = (document.querySelector('.vjs-duration'));
+    duration?.appendChild(dabutton!);
+  }, [play])
+
   async function onQueueLessScenes() {
     if (!sceneQueue.query || queueStart <= 1) {
       return;
@@ -1498,7 +1504,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
                     <Icon icon={faArrowLeft}/>
                   </Button>
                   <Button 
-                  className="btn-clear"
+                  className="btn-clear ssbutton"
                   onClick={() => {
                     let canvas = document.createElement('canvas');
                     let video = (document.getElementById("VideoJsPlayer_html5_api") as HTMLVideoElement);
