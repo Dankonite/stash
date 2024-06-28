@@ -1,4 +1,4 @@
-import { Tab, Nav, Dropdown, Button, ButtonGroup, Toast } from "react-bootstrap";
+import { Tab, Nav, Dropdown, Button, ButtonGroup, Toast, Modal } from "react-bootstrap";
 import React, {
   useEffect,
   useState,
@@ -48,6 +48,8 @@ import {
   faArrowLeft,
   faUsersViewfinder,
   faCamera,
+  faMapPin,
+  faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import { lazyComponent } from "src/utils/lazyComponent";
 
@@ -91,6 +93,7 @@ import cx from "classnames";
 import { sortPerformers } from "src/core/performers";
 import { HoverPopover } from "src/components/Shared/HoverPopover";
 import { VideoJsPlayer } from "video.js";
+import { SceneMarkerForm } from "./SceneMarkerForm";
 
 interface Oprops {
   scene: GQL.SceneDataFragment
@@ -1112,7 +1115,30 @@ scene,
   </>
   return render
 }
-
+interface MDProps {
+  scene: GQL.SceneDataFragment;
+  onCancel: () => void;
+}
+const NewMarkerDialog: React.FC<MDProps> = ({
+  scene,
+  onCancel,
+}) => {
+  const [editingMarker, setEditingMarker] = useState<GQL.SceneMarkerDataFragment>();
+  return <>
+  <Modal show onHide={() => onCancel()} className="sceneMarkerDialog">
+    <Modal.Header className="sceneMarkerDialogHeader">
+      <span>New Marker</span>
+    </Modal.Header>
+    <Modal.Body>
+      <SceneMarkerForm
+          sceneID={scene.id}
+          marker={editingMarker}
+          onClose={() =>onCancel()}
+        />
+    </Modal.Body>
+  </Modal>
+  </>
+};
 const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   location,
   history,
@@ -1155,6 +1181,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
 
   const [queueScenes, setQueueScenes] = useState<QueuedScene[]>([]);
   const [updateScene] = useSceneUpdate();
+  const [markerModal, setMarkerModal] = useState(false)
   const Toast = useToast();
   const intl = useIntl();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState<boolean>(false);
@@ -1226,9 +1253,11 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
   }, [sceneQueue]);
 
   useEffect(() => {
-    let dabutton = (document.querySelector('.ssbutton'));
+    let ssbutton = (document.querySelector('.ssbutton'));
+    let nmbutton = (document.querySelector('.nmbutton'));
     let duration = (document.querySelector('.vjs-duration'));
-    duration?.appendChild(dabutton!);
+    duration?.appendChild(ssbutton!);
+    duration?.appendChild(nmbutton!);
   }, [play])
 
   async function onQueueLessScenes() {
@@ -1494,7 +1523,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
           <div className="d-flex flex-row under-player">
             {!editMode ? 
               <div className="barsordeets">
-                <div className="cheeseReset">
+                <div className="cheeseReset" key={cheeseKey}>
                   <Button 
                   className="btn-clear"
                   onClick={() => {
@@ -1503,7 +1532,7 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
                   >
                     <Icon icon={faArrowLeft}/>
                   </Button>
-                  <Button 
+                  <Button
                   className="btn-clear ssbutton"
                   onClick={() => {
                     let canvas = document.createElement('canvas');
@@ -1517,6 +1546,15 @@ const SceneLoader: React.FC<RouteComponentProps<ISceneParams>> = ({
                   >
                     <Icon icon={faCamera}/>
                   </Button>
+                  <Button 
+                  className="btn-clear nmbutton"
+                  onClick={() => {
+                    setMarkerModal(true);
+                  }}
+                  >
+                    <Icon icon={faLocationDot}/>
+                  </Button>
+                  {markerModal ? <NewMarkerDialog onCancel={() => setMarkerModal(false)} scene={scene}/> : ""}
                 </div>
                 <div className="dadeets">
                   {scene.date ? <span className="dadate mt-3">{scene.date!}</span> : ""}
