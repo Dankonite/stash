@@ -87,8 +87,13 @@ dd {
 .custom-nav-tabs {
   margin-bottom: -1rem;
 }
-
+// img, video, video-js {
+//   filter: blur(10px)
+// }
 .search-results {
+  @media (max-width: 576px) {
+    width: calc(67vw);
+  }
   width: 26vw;
   background-color: #202020;
   position: absolute;
@@ -106,15 +111,13 @@ dd {
     border-bottom-right-radius: 0.75rem;
   }
   .grid-card {
-    width: calc(25vw - 10px)!important
+    width: calc(25vw - 10px)!important;
+    @media (max-width: 576px) {
+      width: calc(66vw - 10px)!important;
+    }
   }
   >* {
     justify-content: center;
-  }
-}
-.SearchBox:not(:has(:focus)) {
-  .search-results {
-    opacity: 0.4;
   }
 }
 .SearchBox:has(.Searching) {
