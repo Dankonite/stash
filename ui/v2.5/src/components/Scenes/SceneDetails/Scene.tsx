@@ -707,6 +707,19 @@ const UtilityBar: React.FC<UBarProps> = ({
     });
     Toast.success(intl.formatMessage({ id: "toast.generating_screenshot" }));
   }
+  function maybeRenderSceneGenerateDialog() {
+    if (isGenerateDialogOpen) {
+      return (
+        <GenerateDialog
+          selectedIds={[scene!.id]}
+          onClose={() => {
+            setIsGenerateDialogOpen(false);
+          }}
+          type="scene"
+        />
+      );
+    }
+  }
   const renderOperations = () => (
     <Dropdown className="h-fc">
       <Dropdown.Toggle
@@ -830,6 +843,7 @@ const UtilityBar: React.FC<UBarProps> = ({
   })
   const renderButtons = () => (
     <ButtonGroup className={`ml-auto ubar ${hidePlugins ? "hideplugins" : ""} ${toolbarExpand ? "toolbarexpanded" : ""}`}>
+    {maybeRenderSceneGenerateDialog()}
     <Nav.Item className="ml-auto">
       <ExternalPlayerButton scene={scene} />
     </Nav.Item>
