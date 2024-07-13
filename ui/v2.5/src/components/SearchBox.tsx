@@ -7,7 +7,7 @@ import {
 import * as GQL from "src/core/generated-graphql";
 import { Icon } from "./Shared/Icon";
 import useFocus from "src/utils/focus";
-import Fuse from "fuse.js";
+import Fuse from "fuse.js"
 import { PerformerCard } from "./Performers/PerformerCard";
 import { TagCard } from "./Tags/TagCard";
 import { SceneCard } from "./Scenes/SceneCard";

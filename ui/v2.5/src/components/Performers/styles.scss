@@ -56,13 +56,17 @@
 .perfbuttondiv:hover .performer {
   opacity: 0;
 }
+.tiltythingy:hover {
+  z-index: 2;
+}
 div.row:has(.performer-card) {
   .performer-card {
-    min-width: calc(100vw/5 - 10px)!important;
+    width: calc(100vw/5 - 10px)!important;
     background-color: #202020;
     margin: 5px;
     border-radius: 0.75rem;
     margin-top: 1rem;
+    height: 332.5px!important;
     margin-bottom: 1rem;
   }
   
@@ -92,7 +96,7 @@ div.row:has(.performer-card) {
       animation: rgb 6s linear infinite;
       left: 0;
       top: -100%;
-      height: 100%;
+      height: 332.5px;
     }
     .performer-card:hover::after {
       opacity: 1;
