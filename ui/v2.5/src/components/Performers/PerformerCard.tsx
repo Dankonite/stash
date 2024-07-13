@@ -23,6 +23,7 @@ import { usePerformerUpdate } from "src/core/StashService";
 import { ILabeledId } from "src/models/list-filter/types";
 import ScreenUtils from "src/utils/screen";
 import { FavoriteIcon } from "../Shared/FavoriteIcon";
+import { toLower } from "lodash-es";
 
 export interface IPerformerCardExtraCriteria {
   scenes?: Criterion<CriterionValue>[];
@@ -243,58 +244,110 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
       );
     }
   }
-
   return (
-    <GridCard
-      className="performer-card"
-      url={`/performers/${performer.id}`}
-      width={cardWidth}
-      pretitleIcon={
-        <GenderIcon className="gender-icon" gender={performer.gender} />
-      }
-      title={
-        <div>
-          <span className="performer-name">{performer.name}</span>
-          {performer.disambiguation && (
-            <span className="performer-disambiguation">
-              {` (${performer.disambiguation})`}
-            </span>
-          )}
-        </div>
-      }
-      image={
-        <>
+    <div className="performer-card">
+      <a href={`/performers/${performer.id}`} className="d-flex flex-col pl-0">
+        <div className="top">
+          <div className="toptop">
+            <div className="perfNameFloat">
+              <span className="performer-name">{performer.name}</span>
+                {performer.disambiguation && (
+                  <span className="performer-disambiguation">
+                    {` (${performer.disambiguation})`}
+                  </span>
+                )}
+            </div>
+            <FavoriteIcon
+              favorite={performer.favorite}
+              onToggleFavorite={onToggleFavorite}
+            />
+          </div>
           <img
             loading="lazy"
             className="performer-card-image"
             alt={performer.name ?? ""}
             src={performer.image_path ?? ""}
           />
-        </>
-      }
-      overlays={
-        <>
-          <FavoriteIcon
-            favorite={performer.favorite}
-            onToggleFavorite={onToggleFavorite}
-          />
-          {maybeRenderRatingBanner()}
-          {maybeRenderFlag()}
-        </>
-      }
-      details={
-        <>
-          {age !== 0 ? (
-            <div className="performer-card__age">{ageString}</div>
-          ) : (
-            ""
-          )}
-        </>
-      }
-      popovers={maybeRenderPopoverButtonGroup()}
-      selected={selected}
-      selecting={selecting}
-      onSelectedChanged={onSelectedChanged}
-    />
-  );
+        </div>
+        <div className="flex-grow-1"></div>
+        <div className="bott d-flex flex-row">
+          <div className="d-flex flex-col 1stCol">
+            {age !== 0 ? (
+                <div className="performer-card__age pl-3">{ageString}</div>
+              ) : (
+                ""
+              )}
+              {maybeRenderScenesPopoverButton()}
+          </div>
+          <div className="d-flex flex-col 2ndCol">
+            {performer.gender ? (
+                  <div className="performer-card__gender pl-3">{toLower(performer.gender)}</div>
+                ) : (
+                  ""
+                )}
+              {maybeRenderTagPopoverButton()}
+          </div>
+          <div className="d-flex flex-col 3rdCol">
+            <div className="idk pl-3">
+              uCntCdis
+            </div>
+            {maybeRenderFlag()}
+          </div>
+        </div>
+      </a>
+    </div>
+  )
+  // return (
+  //   <GridCard
+  //     className="performer-card"
+  //     url={`/performers/${performer.id}`}
+  //     width={cardWidth}
+  //     pretitleIcon={
+  //       <GenderIcon className="gender-icon" gender={performer.gender} />
+  //     }
+  //     title={
+  //       <div>
+  //         <span className="performer-name">{performer.name}</span>
+  //         {performer.disambiguation && (
+  //           <span className="performer-disambiguation">
+  //             {` (${performer.disambiguation})`}
+  //           </span>
+  //         )}
+  //       </div>
+  //     }
+  //     image={
+  //       <>
+  //         <img
+  //           loading="lazy"
+  //           className="performer-card-image"
+  //           alt={performer.name ?? ""}
+  //           src={performer.image_path ?? ""}
+  //         />
+  //       </>
+  //     }
+  //     overlays={
+  //       <>
+  //         <FavoriteIcon
+  //           favorite={performer.favorite}
+  //           onToggleFavorite={onToggleFavorite}
+  //         />
+  //         {maybeRenderRatingBanner()}
+  //         {maybeRenderFlag()}
+  //       </>
+  //     }
+  //     details={
+  //       <>
+  //         {age !== 0 ? (
+  //           <div className="performer-card__age">{ageString}</div>
+  //         ) : (
+  //           ""
+  //         )}
+  //       </>
+  //     }
+  //     popovers={maybeRenderPopoverButtonGroup()}
+  //     selected={selected}
+  //     selecting={selecting}
+  //     onSelectedChanged={onSelectedChanged}
+  //   />
+  // );
 };
