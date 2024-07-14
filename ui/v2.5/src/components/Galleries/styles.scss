@@ -74,8 +74,11 @@
     min-height: 15rem;
   }
 }
-
+a, a:visited, a:hover {
+  text-decoration: none;
+}
 .gallery-card {
+  color: #fff!important;
   &.card {
     overflow: hidden;
     padding: 0;
