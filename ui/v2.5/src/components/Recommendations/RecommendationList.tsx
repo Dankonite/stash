@@ -14,7 +14,7 @@ interface IProps {
 export const RecommendationList: React.FC<IProps> = ({
 }) => {
     const defaultCount:string = "15"
-    const [randomSeed, setRandomSeed] = useState(Math.random()*10000000)
+    const [randomSeed, setRandomSeed] = useState(Math.round(Math.random()*10000000))
     const [shuffle, setShuffled] = useState(true)
     const [useFromLastWatched, setUseFromLastWatched] = useState(true)
     const [useFromFavorited, setUseFromFavorited] = useState(true)
@@ -187,13 +187,13 @@ export const RecommendationList: React.FC<IProps> = ({
         function score() {
             return (1.57 * percent) + (.6*(scMax - scCheck)/scMax)
         }
-        percent > .25 ?
-        console.info(
-            tag.name + 
-            " Percent: " + Math.round(percent*100) + 
-            " Rarity Score: " + Math.round(50*(scMax - scCheck)/scMax) + 
-            " Total Score: " + score() + "   " +(score() > 1)
-            ) : ""
+        // percent > .25 ?
+        // console.info(
+        //     tag.name + 
+        //     " Percent: " + Math.round(percent*100) + 
+        //     " Rarity Score: " + Math.round(50*(scMax - scCheck)/scMax) + 
+        //     " Total Score: " + score() + "   " +(score() > 1)
+        //     ) : ""
         return score()
     }
     function checkRw() {
@@ -280,7 +280,7 @@ export const RecommendationList: React.FC<IProps> = ({
         function randomFromLastStudio() {
             const tagsToUsePre = tagBools?.map((tag, index) => (tagBools[index][1] ? tagBools[index][0] : "")).filter(isNotNull)
             const tagsToUse = tagsToUsePre?.map((tag) => (tag as any).id)
-            var {data} = GQL.useFindScenesQuery({
+            var {data, error} = GQL.useFindScenesQuery({
                 variables: {
                     filter: {
                         per_page: Math.round(count*lastStudioWeight/totalWeight()),
@@ -298,6 +298,7 @@ export const RecommendationList: React.FC<IProps> = ({
                     }
                 }
             })
+            console.info(error?.graphQLErrors)
             useLastStudio ? scenes.push.apply(scenes, data?.findScenes.scenes!) : ""
         }
         function randomFromLastWatched() {
@@ -362,6 +363,7 @@ export const RecommendationList: React.FC<IProps> = ({
         }
         const scenesUniqued = removeDuplicates(scenes)
         var shuffledScenes = scenesUniqued?.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value)
+        console.info(shuffledScenes)
         return shuffle ? shuffledScenes.slice(0,count) : scenesUniqued.slice(0,count)
     }
     var content = (
@@ -418,7 +420,7 @@ export const RecommendationList: React.FC<IProps> = ({
                             height: "fit-content"
                         }}
                         onClick={() => {
-                            setRandomSeed(Math.random() * 1000000)
+                            setRandomSeed(Math.round(Math.random() * 1000000))
                         }}
                         >
                             <Icon icon={faShuffle} />

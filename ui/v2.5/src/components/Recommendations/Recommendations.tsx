@@ -2,7 +2,6 @@ import React from "react";
 import { Route, Switch } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useTitleProps } from "src/hooks/title";
-import { PersistanceLevel } from "../List/ItemList";
 import { lazyComponent } from "src/utils/lazyComponent";
 import { useScrollToTopOnMount } from "src/hooks/scrollToTop";
 

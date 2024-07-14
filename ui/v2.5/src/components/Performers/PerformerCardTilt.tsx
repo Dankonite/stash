@@ -4,17 +4,13 @@ import { useIntl } from "react-intl";
 import * as GQL from "src/core/generated-graphql";
 import NavUtils from "src/utils/navigation";
 import TextUtils from "src/utils/text";
-import { GridCard, calculateCardWidth } from "../Shared/GridCard/GridCard";
 import { CountryFlag } from "../Shared/CountryFlag";
 import { SweatDrops } from "../Shared/SweatDrops";
 import { HoverPopover } from "../Shared/HoverPopover";
 import { Icon } from "../Shared/Icon";
 import { TagLink } from "../Shared/TagLink";
 import { Button, ButtonGroup } from "react-bootstrap";
-import {
-  Criterion,
-  CriterionValue,
-} from "src/models/list-filter/criteria/criterion";
+import { Criterion, CriterionValue } from "src/models/list-filter/criteria/criterion";
 import { PopoverCountButton } from "../Shared/PopoverCountButton";
 import GenderIcon from "./GenderIcon";
 import { faTag } from "@fortawesome/free-solid-svg-icons";
@@ -44,7 +40,7 @@ interface IPerformerCardProps {
   extraCriteria?: IPerformerCardExtraCriteria;
 }
 
-export const PerformerCard: React.FC<IPerformerCardProps> = ({
+export const PerformerCardTilt: React.FC<IPerformerCardProps> = ({
   performer,
   containerWidth,
   ageFromDate,
@@ -54,17 +50,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   extraCriteria,
 }) => {
   const intl = useIntl();
-  const defaultOptions = {
-    reverse:        false,  // reverse the tilt direction
-    max:            10,     // max tilt rotation (degrees)
-    perspective:    1000,   // Transform perspective, the lower the more extreme the tilt gets.
-    scale:          1.1,    // 2 = 200%, 1.5 = 150%, etc..
-    speed:          100,   // Speed of the enter/exit transition
-    transition:     true,   // Set a transition on enter/exit.
-    axis:           null,   // What axis should be disabled. Can be X or Y.
-    reset:          true,    // If the tilt effect has to be reset on exit.
-    easing:         "cubic-bezier(.03,.98,.52,.99)",    // Easing on enter/exit.
-  }
+  
   const age = TextUtils.age(
     performer.birthdate,
     ageFromDate ?? performer.death_date
@@ -82,18 +68,6 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   );
 
   const [updatePerformer] = usePerformerUpdate();
-  const [cardWidth, setCardWidth] = useState<number>();
-
-  useEffect(() => {
-    if (!containerWidth || ScreenUtils.isMobile()) return;
-
-    let preferredCardWidth = 300;
-    let fittedCardWidth = calculateCardWidth(
-      containerWidth,
-      preferredCardWidth!
-    );
-    setCardWidth(fittedCardWidth);
-  }, [containerWidth]);
 
   function onToggleFavorite(v: boolean) {
     if (performer.id) {
@@ -109,7 +83,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderScenesPopoverButton() {
-    if (!performer.scene_count) return;
+    if (!performer.scene_count) return null;
 
     return (
       <PopoverCountButton
@@ -126,7 +100,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderImagesPopoverButton() {
-    if (!performer.image_count) return;
+    if (!performer.image_count) return null;
 
     return (
       <PopoverCountButton
@@ -143,7 +117,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderGalleriesPopoverButton() {
-    if (!performer.gallery_count) return;
+    if (!performer.gallery_count) return null;
 
     return (
       <PopoverCountButton
@@ -160,7 +134,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderOCounter() {
-    if (!performer.o_counter) return;
+    if (!performer.o_counter) return null;
 
     return (
       <div className="o-counter">
@@ -175,7 +149,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderTagPopoverButton() {
-    if (performer.tags.length <= 0) return;
+    if (performer.tags.length <= 0) return null;
 
     const popoverContent = performer.tags.map((tag) => (
       <TagLink key={tag.id} linkType="performer" tag={tag} />
@@ -192,7 +166,7 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderGroupsPopoverButton() {
-    if (!performer.movie_count) return;
+    if (!performer.movie_count) return null;
 
     return (
       <PopoverCountButton
@@ -208,34 +182,9 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
     );
   }
 
-  function maybeRenderPopoverButtonGroup() {
-    if (
-      performer.scene_count ||
-      performer.image_count ||
-      performer.gallery_count ||
-      performer.tags.length > 0 ||
-      performer.o_counter ||
-      performer.movie_count
-    ) {
-      return (
-        <>
-          <hr />
-          <ButtonGroup className="card-popovers">
-            {maybeRenderScenesPopoverButton()}
-            {maybeRenderGroupsPopoverButton()}
-            {maybeRenderImagesPopoverButton()}
-            {maybeRenderGalleriesPopoverButton()}
-            {maybeRenderTagPopoverButton()}
-            {maybeRenderOCounter()}
-          </ButtonGroup>
-        </>
-      );
-    }
-  }
-
   function maybeRenderRatingBanner() {
     if (!performer.rating100) {
-      return;
+      return null;
     }
     return <RatingBanner rating={performer.rating100} />;
   }
@@ -255,58 +204,67 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
         </Link>
       );
     }
+    return null;
   }
+
   return (
-    <GridCard
-      className="performer-card"
-      url={`/performers/${performer.id}`}
-      width={cardWidth}
-      pretitleIcon={
-        <GenderIcon className="gender-icon" gender={performer.gender} />
-      }
-      title={
-        <div>
-          <span className="performer-name">{performer.name}</span>
-          {performer.disambiguation && (
-            <span className="performer-disambiguation">
-              {` (${performer.disambiguation})`}
-            </span>
-          )}
-        </div>
-      }
-      image={
-        <>
-          <img
-            loading="lazy"
-            className="performer-card-image"
-            alt={performer.name ?? ""}
-            src={performer.image_path ?? ""}
-          />
-        </>
-      }
-      overlays={
-        <>
-          <FavoriteIcon
-            favorite={performer.favorite}
-            onToggleFavorite={onToggleFavorite}
-          />
-          {maybeRenderRatingBanner()}
-          {maybeRenderFlag()}
-        </>
-      }
-      details={
-        <>
-          {age !== 0 ? (
-            <div className="performer-card__age">{ageString}</div>
-          ) : (
-            ""
-          )}
-        </>
-      }
-      popovers={maybeRenderPopoverButtonGroup()}
-      selected={selected}
-      selecting={selecting}
-      onSelectedChanged={onSelectedChanged}
-    />
+    <Tilt
+      className="tilt-root performer-card"
+      options={{
+        max: 25,
+        perspective: 1000,
+        scale: 1.05,
+        speed: 300,
+        transition: true,
+        reset: true,
+        easing: "cubic-bezier(.03,.98,.52,.99)",
+      }}
+    >
+      <div className="tilt-child">
+        <a href={`/performers/${performer.id}`} className="performer-card-link">
+          <div className="performer-card-inner">
+            <div className="performer-card-top">
+              <div className="performer-card-image-container">
+                <img
+                  loading="lazy"
+                  className="performer-card-image"
+                  alt={performer.name ?? ""}
+                  src={performer.image_path ?? ""}
+                />
+              </div>
+              <div className="performer-card-title">
+                <span className="performer-name">{performer.name}</span>
+                {performer.disambiguation && (
+                  <span className="performer-disambiguation">
+                    {" "}
+                    ({performer.disambiguation})
+                  </span>
+                )}
+              </div>
+              <FavoriteIcon
+                favorite={performer.favorite}
+                onToggleFavorite={onToggleFavorite}
+              />
+            </div>
+            <div className="performer-card-details">
+              <div className="performer-card-age">{ageString}</div>
+              <div className="performer-card-gender">
+                {performer.gender && toLower(performer.gender)}
+              </div>
+              <div className='d-flex flex-row flex-wrap justify-content-center'>
+              {maybeRenderScenesPopoverButton()}
+              {maybeRenderImagesPopoverButton()}
+              {maybeRenderGalleriesPopoverButton()}
+              {maybeRenderTagPopoverButton()}
+              {maybeRenderGroupsPopoverButton()}
+              {maybeRenderOCounter()}
+              </div>
+              {/* {maybeRenderRatingBanner()} */}
+              {maybeRenderFlag()}
+            </div>
+          </div>
+        </a>
+      </div>
+    </Tilt>
   );
 };

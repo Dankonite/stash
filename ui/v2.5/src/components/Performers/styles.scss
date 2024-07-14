@@ -50,171 +50,78 @@
     width: 100%;
   }
 }
-.perfbuttondiv:hover .alt-hidden {
-  opacity: 1!important;
-}
-.perfbuttondiv:hover .performer {
-  opacity: 0;
-}
-.tiltythingy:hover {
-  z-index: 2;
-}
+
 div.row:has(.performer-card) {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+  justify-content: unset!important; /* Center align cards */
+  width: 100vw; /* Make the row take the full width of the viewport */
+  padding: 0 10px; /* Add padding for the row */
+  .performer-card__country-string {
+    display: none;
+  }
+  .performer-card__country-flag {
+    position:absolute;
+    top: 1rem;
+    left: 1rem;
+  }
+  .favorite-button {
+    position:absolute;
+    top: 1rem;
+    right: 1rem;
+  }
   .performer-card {
-    width: calc(100vw/5 - 10px)!important;
+    flex: 0 0 20%; /* Adjust to show 5 cards */
+    max-width: 20%; /* Ensure each card takes up 20% of the width */
+    margin: 0 10px; /* Adjust margin between cards */
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
     background-color: #202020;
-    margin: 5px;
     border-radius: 0.75rem;
-    margin-top: 1rem;
-    height: 332.5px!important;
-    margin-bottom: 1rem;
   }
   
-  .performer-card::after {
-      opacity: 0;
-      transition: opacity 0.2s ease-out;
-      content:"";
-      background: linear-gradient(45deg,
-      #ff0000 0%, 
-      #ff9a00 10%,
-      #d0de21 20%,
-      #4fdc4a 30%, 
-      #3fdad8 40%,
-      #2fc9e2 50%, 
-      #1c7fee 60%, 
-      #5f15f2 70%, 
-      #ba0cf8 80%, 
-      #fb07d9 90%, 
-      #ff0000 100%  )
-      repeat 0% 0% / 300% 100%;
-      display: flex;
-      position: relative;
-      inset: -3px;
-      border-radius: 16px;
-      filter: blur(8px);
-      z-index: -1; /*or z-index */
-      animation: rgb 6s linear infinite;
-      left: 0;
-      top: -100%;
-      height: 332.5px;
-    }
-    .performer-card:hover::after {
-      opacity: 1;
-    }
-    @keyframes rgb {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
-    }
   .performer-card-image {
-    margin-top:1rem;
-    margin-bottom: 2rem;
-    width: 75%;
-    aspect-ratio: 1;
-    border-radius: 9999px;
-    align-self: center;
+    width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
   }
-  button.btn.favorite-button {
-    position: unset;
-  }
-  .toptop {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin: 0.75rem;
-  }
-  .bott {
-    margin-left: 0.25rem;
-    .performer-card__gender {
-      text-transform: capitalize;
-    }
-  }
-  .idk {
-    visibility: hidden;
-  }
-  .top {
-    display: flex;
-    flex-direction: column;
+  
+  .performer-card-title {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
   }
   a, a:visited, a:hover {
     text-decoration: none;
     color: #fff
   }
-  a:has(.fi) {
-    padding-left: 1rem;
-    .fi {
-      line-height: 1.5rem;
+  .performer-card-details {
+    color: #ccc;
+    font-size: 0.9rem;
+  }
+  .performer-card-age {
+    text-align: center;
+  }
+  .performer-card-gender {
+    text-transform: capitalize;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .card {
+    &.performer-card {
+      padding: 0 0 1rem 0;
     }
   }
-  display: flex;
-  justify-content: unset!important;
-  margin-left: 0;
-  margin-right: 0;
-  flex-wrap: nowrap;
-  overflow-x: scroll;
-  width: 100vw;
 }
-.alt-hidden {
-  opacity: 0;
-  position: absolute;
-  left: 2rem;
+.row::-webkit-scrollbar {
+  display: none; /* Hide scrollbar */
 }
-.performer-card {
-  width: 20rem;
-
-  @media (max-width: 576px) {
-    width: 100%;
-  }
-
-  .thumbnail-section {
-    position: relative;
-  }
-
-  &-image {
-    aspect-ratio: 2/3;
-    min-width: 11.25rem;
-    object-fit: cover;
-    object-position: top;
-    width: 100%;
-  }
-
-  .fi {
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
-  }
-
-  button.btn.favorite-button {
-    padding: 0;
-    position: absolute;
-    right: 5px;
-    top: 10px;
-
-    svg.fa-icon {
-      margin-left: 0.4rem;
-      margin-right: 0.4rem;
-    }
-  }
-
-  &:hover button.btn.favorite-button.not-favorite {
-    opacity: 1;
-  }
-
-  &__age {
-    color: $muted-gray;
-  }
-
-  // allow country string to be shown, but disable by default
-  &__country-string {
-    display: none;
-  }
-}
-
-.card {
-  &.performer-card {
-    padding: 0 0 1rem 0;
-  }
-}
-
-.scrape-dialog .performer-image {
+  .scrape-dialog .performer-image {
   display: block;
   margin-bottom: 10px;
   margin-top: 10px;
@@ -283,7 +190,7 @@ div.row:has(.performer-card) {
 .performer-table .weight-imperial,
 .performer-table .penis-length-imperial,
 .performer-disambiguation {
-  color: $text-muted;
+  color: #808080;
   font-size: 0.875em;
 }
 
