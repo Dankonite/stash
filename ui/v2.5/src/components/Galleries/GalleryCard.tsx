@@ -14,6 +14,7 @@ import { faBox, faPlayCircle, faTag } from "@fortawesome/free-solid-svg-icons";
 import { galleryTitle } from "src/core/galleries";
 import ScreenUtils from "src/utils/screen";
 import { StudioOverlay } from "../Shared/GridCard/StudioOverlay";
+import { Link } from "react-router-dom";
 
 interface IProps {
   gallery: GQL.SlimGalleryDataFragment;
@@ -159,11 +160,12 @@ export const GalleryCard: React.FC<IProps> = (props) => {
   }
 
   return (
+    <a href={`/galleries/${props.gallery.id}`}>
     <GridCard
       className={`gallery-card zoom-${props.zoomIndex}`}
       url={`/galleries/${props.gallery.id}`}
       width={cardWidth}
-      title={galleryTitle(props.gallery)}
+      title={<></>}
       linkClassName="gallery-card-header"
       image={
         <>
@@ -178,10 +180,11 @@ export const GalleryCard: React.FC<IProps> = (props) => {
           <RatingBanner rating={props.gallery.rating100} />
         </>
       }
-      overlays={<StudioOverlay studio={props.gallery.studio} />}
+      // overlays={<StudioOverlay studio={props.gallery.studio} />}
       details={
         <div className="gallery-card__details">
-          <span className="gallery-card__date">{props.gallery.date}</span>
+          <span>{props.gallery.studio?.name}</span>
+          <h5>{galleryTitle(props.gallery)}</h5>
           <TruncatedText
             className="gallery-card__description"
             text={props.gallery.details}
@@ -194,5 +197,6 @@ export const GalleryCard: React.FC<IProps> = (props) => {
       selecting={props.selecting}
       onSelectedChanged={props.onSelectedChanged}
     />
+    </a>
   );
 };
