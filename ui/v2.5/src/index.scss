@@ -6,7 +6,7 @@
 @import "src/components/Help/styles.scss";
 @import "src/components/Images/styles.scss";
 @import "src/components/List/styles.scss";
-@import "src/components/Movies/styles.scss";
+@import "src/components/Groups/styles.scss";
 @import "src/components/Performers/styles.scss";
 @import "src/components/FrontPage/styles.scss";
 @import "src/components/Scenes/styles.scss";
@@ -327,6 +327,15 @@ dd {
     padding: 5px 0;
   }
 
+  .item-list-header {
+    align-content: center;
+    // border-bottom: solid 2px #192127;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 5px 0 0 0;
+  }
+
   .item-list-container {
     padding-top: 15px;
 
@@ -560,7 +569,7 @@ textarea.text-input {
 .zoom-0 {
   .gallery-card-image,
   .tag-card-image {
-    max-height: 180px;
+    height: 180px;
   }
 }
 
@@ -569,7 +578,7 @@ textarea.text-input {
 
   .gallery-card-image,
   .tag-card-image {
-    max-height: 240px;
+    height: 240px;
   }
 
   .image-card-preview {
@@ -580,7 +589,7 @@ textarea.text-input {
 .zoom-2 {
   .gallery-card-image,
   .tag-card-image {
-    max-height: 360px;
+    height: 360px;
   }
 
   .image-card-preview {
@@ -591,7 +600,7 @@ textarea.text-input {
 .zoom-3 {
   .tag-card-image,
   .gallery-card-image {
-    max-height: 480px;
+    height: 480px;
   }
 
   .image-card-preview {

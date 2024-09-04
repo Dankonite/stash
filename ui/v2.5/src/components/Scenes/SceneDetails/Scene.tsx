@@ -69,7 +69,7 @@ const SceneMarkersPanel = lazyComponent(() => import("./SceneMarkersPanel"));
 const SceneFileInfoPanel = lazyComponent(() => import("./SceneFileInfoPanel"));
 const SceneDetailPanel = lazyComponent(() => import("./SceneDetailPanel"));
 const SceneHistoryPanel = lazyComponent(() => import("./SceneHistoryPanel"));
-const SceneGroupPanel = lazyComponent(() => import("./SceneMoviePanel"));
+const SceneGroupPanel = lazyComponent(() => import("./SceneGroupPanel"));
 const SceneGalleriesPanel = lazyComponent(
   () => import("./SceneGalleriesPanel")
 );
@@ -347,6 +347,7 @@ const ScenePage: React.FC<IProps> = ({
   async function onRescan() {
     await mutateMetadataScan({
       paths: [objectPath(scene)],
+      rescan: true,
     });
 
     Toast.success(
@@ -457,7 +458,7 @@ const ScenePage: React.FC<IProps> = ({
           onClick={() => setIsDeleteAlertOpen(true)}
         >
           <FormattedMessage
-            id="actions.delete_entity"
+            id="actions.delete"
             values={{ entityType: intl.formatMessage({ id: "scene" }) }}
           />
         </Dropdown.Item>
@@ -491,12 +492,12 @@ const ScenePage: React.FC<IProps> = ({
               <FormattedMessage id="markers" />
             </Nav.Link>
           </Nav.Item>
-          {scene.movies.length > 0 ? (
+          {scene.groups.length > 0 ? (
             <Nav.Item>
               <Nav.Link eventKey="scene-group-panel">
                 <FormattedMessage
                   id="countables.groups"
-                  values={{ count: scene.movies.length }}
+                  values={{ count: scene.groups.length }}
                 />
               </Nav.Link>
             </Nav.Item>
