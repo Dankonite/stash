@@ -166,13 +166,13 @@ export const PerformerCardTilt: React.FC<IPerformerCardProps> = ({
   }
 
   function maybeRenderGroupsPopoverButton() {
-    if (!performer.movie_count) return null;
+    if (!performer.group_count) return null;
 
     return (
       <PopoverCountButton
         className="group-count"
         type="group"
-        count={performer.movie_count}
+        count={performer.group_count}
         url={NavUtils.makePerformerGroupsUrl(
           performer,
           extraCriteria?.performer,
@@ -208,19 +208,7 @@ export const PerformerCardTilt: React.FC<IPerformerCardProps> = ({
   }
 
   return (
-    <Tilt
-      className="tilt-root performer-card"
-      options={{
-        max: 25,
-        perspective: 1000,
-        scale: 1.05,
-        speed: 300,
-        transition: true,
-        reset: true,
-        easing: "cubic-bezier(.03,.98,.52,.99)",
-      }}
-    >
-      <div className="tilt-child">
+    <div className="performer-card">
         <a href={`/performers/${performer.id}`} className="performer-card-link">
           <div className="performer-card-inner">
             <div className="performer-card-top">
@@ -232,6 +220,14 @@ export const PerformerCardTilt: React.FC<IPerformerCardProps> = ({
                   src={performer.image_path ?? ""}
                 />
               </div>
+              <div className="d-flex flex-row popbuttons">
+                  <FavoriteIcon
+                    favorite={performer.favorite}
+                    onToggleFavorite={onToggleFavorite}
+                  />
+                  <div className="flex-grow-1"></div>
+                  {maybeRenderFlag()}
+                </div>
               <div className="performer-card-title">
                 <span className="performer-name">{performer.name}</span>
                 {performer.disambiguation && (
@@ -241,10 +237,7 @@ export const PerformerCardTilt: React.FC<IPerformerCardProps> = ({
                   </span>
                 )}
               </div>
-              <FavoriteIcon
-                favorite={performer.favorite}
-                onToggleFavorite={onToggleFavorite}
-              />
+
             </div>
             <div className="performer-card-details">
               <div className="performer-card-age">{ageString}</div>
@@ -260,11 +253,9 @@ export const PerformerCardTilt: React.FC<IPerformerCardProps> = ({
               {maybeRenderOCounter()}
               </div>
               {/* {maybeRenderRatingBanner()} */}
-              {maybeRenderFlag()}
             </div>
           </div>
         </a>
-      </div>
-    </Tilt>
+    </div>
   );
 };

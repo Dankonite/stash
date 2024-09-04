@@ -51,71 +51,82 @@
   }
 }
 
+.slick-track {
+  width: 100% !important;
+  overflow-x: scroll;
+}
+
 div.row:has(.performer-card) {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
   justify-content: unset!important; /* Center align cards */
   width: 100vw; /* Make the row take the full width of the viewport */
-  padding: 0 10px; /* Add padding for the row */
-  .performer-card__country-string {
-    display: none;
-  }
-  .performer-card__country-flag {
-    position:absolute;
-    top: 1rem;
-    left: 1rem;
-  }
-  .favorite-button {
-    position:absolute;
-    top: 1rem;
-    right: 1rem;
-  }
-  .performer-card {
-    flex: 0 0 20%; /* Adjust to show 5 cards */
-    max-width: 20%; /* Ensure each card takes up 20% of the width */
-    margin: 0 10px; /* Adjust margin between cards */
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
-    background-color: #202020;
-    border-radius: 0.75rem;
-  }
-  
-  .performer-card-image {
-    width: 100%;
-    height: auto;
-    border-radius: 0.75rem;
-  }
-  
-  .performer-card-title {
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #fff;
-    text-align: center;
-  }
-  a, a:visited, a:hover {
-    text-decoration: none;
-    color: #fff
-  }
-  .performer-card-details {
-    color: #ccc;
-    font-size: 0.9rem;
-  }
-  .performer-card-age {
-    text-align: center;
-  }
-  .performer-card-gender {
-    text-transform: capitalize;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-  
-  .card {
-    &.performer-card {
-      padding: 0 0 1rem 0;
-    }
+  padding: 0 1rem 0 0; /* Add padding for the row */
+  margin: 0!important;
+}
+.performer-card__country-string {
+  display: none;
+}
+.popbuttons {
+  position: relative;
+  top: -31.8rem;
+  margin-bottom: -3rem;
+}
+.performer-card .fi {
+  margin-right: 0.6rem;
+}
+.favorite-button svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+.performer-card {
+  flex: 0 0 20%; /* Adjust to show 5 cards */
+  max-width: calc(20% - 10px); /* Ensure each card takes up 20% of the width */
+  margin: 5px 5px; /* Adjust margin between cards */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  background-color: #202020;
+  border-radius: 0.75rem;
+}
+.performer-card-image-container {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+.performer-card-image {
+  height: 32rem;
+}
+
+.performer-card-title {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+a, a:visited, a:hover {
+  text-decoration: none;
+  color: #fff
+}
+.performer-card-details {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+.performer-card-age {
+  text-align: center;
+}
+.performer-card-gender {
+  text-transform: capitalize;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.card {
+  &.performer-card {
+    padding: 0 0 1rem 0;
   }
 }
 .row::-webkit-scrollbar {

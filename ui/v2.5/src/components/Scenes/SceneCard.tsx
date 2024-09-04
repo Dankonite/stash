@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
 import { Icon } from "../Shared/Icon";
@@ -130,7 +130,8 @@ const SceneCardPopovers = PatchComponent(
       () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
       [props.scene]
     );
-
+    const [tagModal, setTagModal] = useState(false);
+    const [markerModal, setMarkerModal] = useState(false);
     const sceneNumber = useMemo(() => {
       if (!props.fromGroupId) {
         return undefined;

@@ -94,11 +94,14 @@ dd {
   @media (max-width: 576px) {
     width: calc(67vw);
   }
-  width: 26vw;
+  width: 55vw;
   background-color: #202020;
   position: absolute;
   top: 3rem;
+  margin-left: auto;
+  margin-right: auto;
   left: 0;
+  right: 0;
   height: calc(100vh - 3.3rem);
   overflow-y: scroll;
   .grid-card:not(.scene-card) .card-section {
@@ -110,9 +113,16 @@ dd {
     border-bottom-left-radius: 0.75rem;
     border-bottom-right-radius: 0.75rem;
   }
-  .grid-card {
+  .performer-card {
+    height: 287px;
+  }
+  .grid-card, .performer-card {
     width: calc(25vw - 10px)!important;
+    height: 287px;
+    max-width: unset;
     @media (max-width: 576px) {
+      max-width: unset;
+      height: 287px;
       width: calc(66vw - 10px)!important;
     }
   }

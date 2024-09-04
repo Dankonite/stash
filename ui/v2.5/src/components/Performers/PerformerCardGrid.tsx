@@ -2,6 +2,7 @@ import React from "react";
 import * as GQL from "src/core/generated-graphql";
 import { IPerformerCardExtraCriteria, PerformerCardTilt } from "./PerformerCardTilt";
 import { useContainerDimensions } from "../Shared/GridCard/GridCard";
+import { PerformerCard } from "./PerformerCard";
 
 interface IPerformerCardGrid {
   performers: GQL.PerformerDataFragment[];

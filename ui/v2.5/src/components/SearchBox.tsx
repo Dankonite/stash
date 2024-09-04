@@ -14,6 +14,7 @@ import { SceneCard } from "./Scenes/SceneCard";
 import { StudioCard } from "./Studios/StudioCard";
 import Mousetrap from "mousetrap";
 import { useHistory } from "react-router-dom";
+import { PerformerCardTilt } from "./Performers/PerformerCardTilt";
 interface SBProps {
 
 }
@@ -130,7 +131,7 @@ export const SearchBox: React.FC<SBProps> = ({
             })
             const fuse = new Fuse<SearchResult>(searchResults, { keys: ['ShortName'], shouldSort: true, threshold: 0.4, });
             const fuseSearched = fuse.search(searchTerm).map(({item}) => item).slice(0,15).map((sResult) => {
-                if (sResult.TypeData.__typename == "Performer") return <PerformerCard performer={sResult.TypeData} />
+                if (sResult.TypeData.__typename == "Performer") return <PerformerCardTilt performer={sResult.TypeData} />
                 if (sResult.TypeData.__typename == "Tag") return <TagCard tag={sResult.TypeData} zoomIndex={4}/>
                 if (sResult.TypeData.__typename == "Scene") return <SceneCard scene={sResult.TypeData}/>
                 if (sResult.TypeData.__typename == "Studio") return <StudioCard studio={sResult.TypeData}/>
