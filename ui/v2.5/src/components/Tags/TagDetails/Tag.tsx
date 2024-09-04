@@ -523,6 +523,7 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
               {!isEditing && (
                 <TagDetailsPanel
                   tag={tag}
+                  tabKey={"default"}
                   fullWidth={!collapsed && !compactExpandedDetails}
                 />
               )}
@@ -556,9 +557,9 @@ const TagPage: React.FC<IProps> = ({ tag, tabKey }) => {
         </div>
       </div>
 
-      {!isEditing && loadStickyHeader && (
+      {/* {!isEditing && loadStickyHeader && (
         <CompressedTagDetailsPanel tag={tag} />
-      )}
+      )} */}
 
       <div className="detail-body">
         <div className="tag-body">

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Tabs, Tab, Col, Row } from "react-bootstrap";
+import { Tabs, Tab, Col, Row, Button } from "react-bootstrap";
 import { useIntl } from "react-intl";
 import { useHistory, Redirect, RouteComponentProps } from "react-router-dom";
 import { Helmet } from "react-helmet";
@@ -41,7 +41,7 @@ import { useRatingKeybinds } from "src/hooks/keybinds";
 import { DetailImage } from "src/components/Shared/DetailImage";
 import { useLoadStickyHeader } from "src/hooks/detailsPanel";
 import { useScrollToTopOnMount } from "src/hooks/scrollToTop";
-import { ExternalLinkButtons } from "src/components/Shared/ExternalLinksButton";
+import { ExternalLinkButtons, ExternalLinksButton } from "src/components/Shared/ExternalLinksButton";
 import { BackgroundImage } from "src/components/Shared/DetailsPage/BackgroundImage";
 import {
   TabTitleCounter,
@@ -53,6 +53,8 @@ import { FavoriteIcon } from "src/components/Shared/FavoriteIcon";
 import { AliasList } from "src/components/Shared/DetailsPage/AliasList";
 import { HeaderImage } from "src/components/Shared/DetailsPage/HeaderImage";
 import { LightboxLink } from "src/hooks/Lightbox/LightboxLink";
+import { Counter } from "src/components/Shared/Counter";
+import { Icon } from "src/components/Shared/Icon";
 
 interface IProps {
   performer: GQL.PerformerDataFragment;
@@ -214,7 +216,6 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
   const intl = useIntl();
 
   // Configuration settings
-  const detailbody = useRef<HTMLDivElement>(null);
   const { configuration } = React.useContext(ConfigurationContext);
   const uiConfig = configuration?.ui;
   const abbreviateCounter = uiConfig?.abbreviateCounters ?? false;
@@ -360,22 +361,6 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
   return data?.findImages.count != 0 ? <img className="alt-hidden" src={data?.findImages.images[0].paths.image ?? ""}/> : ""
   }
 
-  function renderImage() {
-    if (activeImage) {
-      return (
-        <Button variant="link" onClick={() => showLightbox()}>
-          <div className="perfbuttondiv">
-          <DetailImage
-            className="performer"
-            src={activeImage}
-            alt={performer.name}
-          />
-          {maybeRenderAlt()}
-          </div>
-        </Button>
-      );
-    }
-  }
   function maybeRenderGaleries() {
       return (
         <Tab
@@ -451,7 +436,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
             {intl.formatMessage({ id: "groups" })}
             <Counter
               abbreviateCounter={abbreviateCounter}
-              count={performer.movie_count}
+              count={performer.group_count}
               hideZero
             />
           </>
@@ -492,7 +477,7 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
       mountOnEnter
       unmountOnExit
       activeKey={tabKey}
-      onSelect={setTabKey}
+
     >
       {maybeRenderScenes()}
       {maybeRenderGaleries()}
@@ -727,7 +712,6 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
                   <Icon className="fa-fw" icon={faPenToSquare} />
                 </Button>
                 {maybeRenderEditPanel()}
-              </h2>
               {maybeRenderAliases()}
                 <span className="name-icons">
                   <FavoriteIcon
