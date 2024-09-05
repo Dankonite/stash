@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import cloneDeep from "lodash-es/cloneDeep";
 import { FormattedNumber, useIntl } from "react-intl";
 import { useHistory } from "react-router-dom";
@@ -25,6 +25,9 @@ import { SceneMergeModal } from "./SceneMergeDialog";
 import { objectTitle } from "src/core/files";
 import TextUtils from "src/utils/text";
 import { View } from "../List/views";
+import { SetFilterURL, useFilter } from "../List/FilterProvider";
+import { LoadingIndicator } from "../Shared/LoadingIndicator";
+import ReactDOM from "react-dom";
 
 function getItems(result: GQL.FindScenesQueryResult) {
   return result?.data?.findScenes?.scenes ?? [];
@@ -268,7 +271,6 @@ export const SceneList: React.FC<ISceneList> = ({
         );
       }
     }
-
     function renderMergeDialog() {
       if (mergeScenes) {
         return (
@@ -285,23 +287,50 @@ export const SceneList: React.FC<ISceneList> = ({
         );
       }
     }
-
+    const [scenes, setScenes]:any[] = useState([])
+    useEffect(() => {
+      !result.loading ? 
+      scenes.push(<SceneCardsGrid
+        scenes={result.data?.findScenes.scenes!}
+        zoomIndex={filter.zoomIndex}
+        selectedIds={selectedIds}
+        onSelectChange={onSelectChange}
+        fromGroupId={fromGroupId}
+        />)
+      : ""
+    }, [result]
+    )
+    useEffect( () => {
+      console.info(scenes)
+    }, [scenes]) 
+    
+    function getMore() {
+      result.refetch({
+        filter: {
+          per_page: result.variables?.filter?.per_page!,
+          direction: result.variables?.filter?.direction,
+          page: result.variables?.filter?.page! + 1,
+          q: result.variables?.filter?.q,
+          sort: result.variables?.filter?.sort
+        }
+      })
+    }
+    
+    const handleScroll = () => {
+      if (document.body.scrollHeight < window.scrollY + window.innerHeight) {
+        getMore();
+      }
+    };
     function renderScenes() {
       if (!result.data?.findScenes) return;
 
       const queue = SceneQueue.fromListFilterModel(filter);
 
       if (filter.displayMode === DisplayMode.Grid) {
-        return (
-          <SceneCardsGrid
-            scenes={result.data.findScenes.scenes}
-            queue={queue}
-            zoomIndex={filter.zoomIndex}
-            selectedIds={selectedIds}
-            onSelectChange={onSelectChange}
-            fromGroupId={fromGroupId}
-          />
-        );
+        window.addEventListener("scroll", handleScroll);
+        return scenes ? (
+          scenes.map((thing:JSX.Element) => thing)
+        ): "";
       }
       if (filter.displayMode === DisplayMode.List) {
         return (
@@ -364,7 +393,7 @@ export const SceneList: React.FC<ISceneList> = ({
         view={view}
         selectable
       >
-        <ItemList
+      <ItemList
           zoomable
           view={view}
           otherOperations={otherOperations}
@@ -379,4 +408,4 @@ export const SceneList: React.FC<ISceneList> = ({
   );
 };
 
-export default SceneList;
+export default React.memo(SceneList);

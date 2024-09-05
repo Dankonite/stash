@@ -81,9 +81,17 @@ div.row:has(.performer-card) {
   height: 1.5rem;
   width: 1.5rem;
 }
+.Searching .performer-card {
+  
+  width: calc(287px * 2);
+  .performer-card-image-container {
+    width: calc(25vw - 10px) !important;
+    height: calc(185px) !important;
+  }
+}
 .performer-card {
   flex: 0 0 20%; /* Adjust to show 5 cards */
-  max-width: calc(20% - 10px); /* Ensure each card takes up 20% of the width */
+  max-width: calc(((100vw - 1rem) / (5)) - 10px); /* Ensure each card takes up 20% of the width */
   margin: 5px 5px; /* Adjust margin between cards */
   box-sizing: border-box; /* Include padding and border in element's total width and height */
   background-color: #202020;

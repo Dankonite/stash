@@ -76,7 +76,7 @@ export const SearchBox: React.FC<SBProps> = ({
             }
         })
         if (!loading && searchTerm != "" && data?.findScenes.count != 0) data!.findScenes.scenes.map((scene) => searchResults.push({ShortName: scene.title!, TypeData: scene }))  
-        console.info("Scenes Searched...")
+        // console.info("Scenes Searched...")
     }
     function getPerfResults() {
         const {data, loading} = GQL.useFindPerformersQuery({
@@ -88,7 +88,7 @@ export const SearchBox: React.FC<SBProps> = ({
             }
         })
         if (!loading && searchTerm != "" && data?.findPerformers.count != 0) data!.findPerformers.performers.map((perf) => searchResults.push({ShortName: perf.name, TypeData: perf }))
-        console.info("Performers Searched...")
+        // console.info("Performers Searched...")
     }
     function getTagResults() {
         const {data, loading} = GQL.useFindTagsQuery({
@@ -100,7 +100,7 @@ export const SearchBox: React.FC<SBProps> = ({
             }
         })
         if (!loading && searchTerm != "" && data?.findTags.count != 0) data!.findTags.tags.map((tag) => searchResults.push({ShortName: tag.name, TypeData: tag }))
-        console.info("Tags Searched...")
+        // console.info("Tags Searched...")
     }
     function getStudioResults() {
         const {data, loading} = GQL.useFindStudiosQuery({
@@ -112,7 +112,7 @@ export const SearchBox: React.FC<SBProps> = ({
             }
         })
         if (!loading && searchTerm != "" && data?.findStudios.count != 0) data!.findStudios.studios.map((studio) => searchResults.push({ShortName: studio.name!, TypeData: studio }))
-        console.info("Studios Searched...")
+        // console.info("Studios Searched...")
 
     }
     function getSearchResults() {

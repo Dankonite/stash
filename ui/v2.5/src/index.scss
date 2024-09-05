@@ -109,12 +109,15 @@ dd {
   }
   img {
     object-fit: cover;
-    height: auto!important;
+    width: 100%;
     border-bottom-left-radius: 0.75rem;
     border-bottom-right-radius: 0.75rem;
   }
   .performer-card {
     height: 287px;
+  }
+  .popbuttons {
+    top: calc(-13rem)
   }
   .grid-card, .performer-card {
     width: calc(25vw - 10px)!important;

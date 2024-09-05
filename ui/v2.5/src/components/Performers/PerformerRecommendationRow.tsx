@@ -7,6 +7,7 @@ import { ListFilterModel } from "src/models/list-filter/filter";
 import { getSlickSliderSettings } from "src/core/recommendations";
 import { RecommendationRow } from "../FrontPage/RecommendationRow";
 import { FormattedMessage } from "react-intl";
+import { PerformerCardTilt } from "./PerformerCardTilt";
 
 interface IProps {
   isTouch: boolean;
@@ -46,7 +47,7 @@ export const PerformerRecommendationRow: React.FC<IProps> = (props) => {
               ></div>
             ))
           : result.data?.findPerformers.performers.map((p) => (
-              <PerformerCard key={p.id} performer={p} />
+              <PerformerCardTilt key={p.id} performer={p} />
             ))}
       </Slider>
     </RecommendationRow>

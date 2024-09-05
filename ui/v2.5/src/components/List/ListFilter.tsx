@@ -381,6 +381,9 @@ export const ListFilter: React.FC<IListFilterProps> = ({
               <Icon icon={faRandom} />
             </Button>
           )}
+          <Button variant="secondary" onClick={() => onChangeSortBy("last_played_at")}>
+            History
+          </Button>
         </Dropdown>
 
         <PageSizeSelector
