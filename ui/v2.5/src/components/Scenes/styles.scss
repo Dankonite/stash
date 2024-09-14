@@ -138,31 +138,31 @@ a:visited {
   }
 }
 
-.scene-card-preview, .modal-body img {
-  overflow: hidden;
-}
-.TruncatedText, .studio-name span {
-  visibility: hidden;
-}
-.TruncatedText::after {
-  visibility: visible;
-  position: absolute;
-  left: .75rem;
-  content: "CSS SFW Title"
-}
-.studio-name span {
-  display: flex;
-  width: 100%;
-}
-.studio-name span::after {
-  visibility: visible;
-  position: absolute;
-  left: 0;
-  content: "CSS SFW Studio"
-}
-img, video {
-  filter:blur(25px)
-}
+// .scene-card-preview, .modal-body img {
+//   overflow: hidden;
+// }
+// .TruncatedText, .studio-name span {
+//   visibility: hidden;
+// }
+// .TruncatedText::after {
+//   visibility: visible;
+//   position: absolute;
+//   left: .75rem;
+//   content: "CSS SFW Title"
+// }
+// .studio-name span {
+//   display: flex;
+//   width: 100%;
+// }
+// .studio-name span::after {
+//   visibility: visible;
+//   position: absolute;
+//   left: 0;
+//   content: "CSS SFW Studio"
+// }
+// img, video {
+//   filter:blur(25px)
+// }
 
 .scene-toolbar {
   align-items: center;
