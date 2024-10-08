@@ -465,7 +465,7 @@ const ScenePage: React.FC<IProps> = ({
       </Dropdown.Menu>
     </Dropdown>
   );
-
+  
   const renderTabs = () => (
     <Tab.Container
       activeKey={activeTabKey}
