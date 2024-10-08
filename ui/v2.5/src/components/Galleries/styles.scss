@@ -74,18 +74,37 @@
     min-height: 15rem;
   }
 }
-
+a, a:visited, a:hover {
+  text-decoration: none;
+}
 .gallery-card {
+  color: #fff!important;
   &.card {
     overflow: hidden;
     padding: 0;
     padding-bottom: 1rem;
-
+    width: min-content!important;
     @media (max-width: 576px) {
       width: 100%;
     }
   }
-
+  .thumbnail-section {
+    margin-bottom: 1rem;
+    width: max-content;
+    height: 240px;
+  }
+  .TruncatedText.gallery-card__description {
+    -webkit-line-clamp: 3!important;
+  }
+  .thumbnail-section::after {
+    content: "";
+    display: flex;
+    position: relative;
+    width: 100%;
+    top: -100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 80%, #202020 100%);
+  }
   .card-section {
     margin-top: auto;
 

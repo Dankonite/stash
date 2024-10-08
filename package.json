@@ -1,0 +1,12 @@
+{
+  "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions",
+  "dependencies": {
+    "fuse.js": "^7.0.0",
+    "react-draggable-list": "^4.1.0",
+    "react-tilt": "^1.0.2",
+    "react-vanilla-tilt": "^1.0.0"
+  },
+  "resolutions": {
+    "@types/react": "^17.0.38"
+  }
+}

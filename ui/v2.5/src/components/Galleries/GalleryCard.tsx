@@ -204,11 +204,12 @@ export const GalleryCard: React.FC<IProps> = (props) => {
   }
 
   return (
+    <a href={`/galleries/${props.gallery.id}`}>
     <GridCard
       className={`gallery-card zoom-${props.zoomIndex}`}
       url={`/galleries/${props.gallery.id}`}
       width={cardWidth}
-      title={galleryTitle(props.gallery)}
+      title={<></>}
       linkClassName="gallery-card-header"
       image={
         <>
@@ -221,10 +222,11 @@ export const GalleryCard: React.FC<IProps> = (props) => {
           <RatingBanner rating={props.gallery.rating100} />
         </>
       }
-      overlays={<StudioOverlay studio={props.gallery.studio} />}
+      // overlays={<StudioOverlay studio={props.gallery.studio} />}
       details={
         <div className="gallery-card__details">
-          <span className="gallery-card__date">{props.gallery.date}</span>
+          <span>{props.gallery.studio?.name}</span>
+          <h5>{galleryTitle(props.gallery)}</h5>
           <TruncatedText
             className="gallery-card__description"
             text={props.gallery.details}
@@ -237,5 +239,6 @@ export const GalleryCard: React.FC<IProps> = (props) => {
       selecting={props.selecting}
       onSelectedChanged={props.onSelectedChanged}
     />
+    </a>
   );
 };

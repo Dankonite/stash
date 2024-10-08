@@ -25,6 +25,8 @@ export const HierarchicalLabelValueFilter: React.FC<
     inputType !== "scene_tags" &&
     inputType !== "performer_tags" &&
     inputType !== "groups"
+    inputType !== "performer_tags" &&
+    inputType !== "groups"
   ) {
     return null;
   }

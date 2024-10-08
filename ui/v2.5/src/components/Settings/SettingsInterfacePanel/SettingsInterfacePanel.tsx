@@ -46,6 +46,8 @@ import { defaultMaxOptionsShown } from "src/core/config";
 import { PatchComponent } from "src/patch";
 
 const allMenuItems = [
+  { id: "home", headingID: "home" },
+  { id: "recommendations", headingID: "recommendations"},
   { id: "scenes", headingID: "scenes" },
   { id: "images", headingID: "images" },
   { id: "groups", headingID: "groups" },
@@ -54,6 +56,7 @@ const allMenuItems = [
   { id: "performers", headingID: "performers" },
   { id: "studios", headingID: "studios" },
   { id: "tags", headingID: "tags" },
+  { id: "stats", headingID: "stats"},
 ];
 
 export const SettingsInterfacePanel: React.FC = PatchComponent(

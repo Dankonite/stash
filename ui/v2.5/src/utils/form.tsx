@@ -80,7 +80,15 @@ export const NumberField: React.FC<
 
   return <Form.Control {...props} type="number" ref={inputRef} />;
 };
+const InputField: React.FC<
+  InputHTMLAttributes<HTMLInputElement> & FormControlProps
+> = (props) => {
+  const inputRef = useRef<HTMLInputElement>(null);
 
+  useStopWheelScroll(inputRef);
+
+  return <Form.Control {...props} ref={inputRef} />;
+};
 type Formik<V extends FormikValues> = ReturnType<typeof useFormik<V>>;
 
 interface IProps {
@@ -149,7 +157,7 @@ export function formikUtils<V extends FormikValues>(
       );
     } else {
       control = (
-        <Form.Control
+        <InputField
           type={type}
           className="text-input"
           placeholder={placeholder}

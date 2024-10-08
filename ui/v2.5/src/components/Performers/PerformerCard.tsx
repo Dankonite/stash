@@ -23,6 +23,8 @@ import { usePerformerUpdate } from "src/core/StashService";
 import { ILabeledId } from "src/models/list-filter/types";
 import ScreenUtils from "src/utils/screen";
 import { FavoriteIcon } from "../Shared/FavoriteIcon";
+import { toLower } from "lodash-es";
+import { Tilt } from "react-tilt";
 
 export interface IPerformerCardExtraCriteria {
   scenes?: Criterion<CriterionValue>[];
@@ -52,6 +54,17 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
   extraCriteria,
 }) => {
   const intl = useIntl();
+  const defaultOptions = {
+    reverse:        false,  // reverse the tilt direction
+    max:            10,     // max tilt rotation (degrees)
+    perspective:    1000,   // Transform perspective, the lower the more extreme the tilt gets.
+    scale:          1.1,    // 2 = 200%, 1.5 = 150%, etc..
+    speed:          100,   // Speed of the enter/exit transition
+    transition:     true,   // Set a transition on enter/exit.
+    axis:           null,   // What axis should be disabled. Can be X or Y.
+    reset:          true,    // If the tilt effect has to be reset on exit.
+    easing:         "cubic-bezier(.03,.98,.52,.99)",    // Easing on enter/exit.
+  }
   const age = TextUtils.age(
     performer.birthdate,
     ageFromDate ?? performer.death_date
@@ -243,7 +256,6 @@ export const PerformerCard: React.FC<IPerformerCardProps> = ({
       );
     }
   }
-
   return (
     <GridCard
       className="performer-card"

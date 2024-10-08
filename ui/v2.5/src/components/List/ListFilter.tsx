@@ -380,6 +380,14 @@ export const ListFilter: React.FC<IListFilterProps> = ({
               </Button>
             </OverlayTrigger>
           )}
+          {filter.sortBy != "random" && (
+            <Button variant="secondary" onClick={() => onChangeSortBy("random")}>
+              <Icon icon={faRandom} />
+            </Button>
+          )}
+          <Button variant="secondary" onClick={() => onChangeSortBy("last_played_at")}>
+            History
+          </Button>
         </Dropdown>
 
         <PageSizeSelector

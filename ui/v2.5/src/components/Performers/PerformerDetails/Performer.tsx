@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Tabs, Tab, Col, Row } from "react-bootstrap";
+import { Tabs, Tab, Col, Row, Button } from "react-bootstrap";
 import { useIntl } from "react-intl";
 import { useHistory, Redirect, RouteComponentProps } from "react-router-dom";
 import { Helmet } from "react-helmet";
@@ -29,11 +29,19 @@ import { PerformerImagesPanel } from "./PerformerImagesPanel";
 import { PerformerAppearsWithPanel } from "./performerAppearsWithPanel";
 import { PerformerEditPanel } from "./PerformerEditPanel";
 import { PerformerSubmitButton } from "./PerformerSubmitButton";
+import {
+  faChevronDown,
+  faChevronUp,
+  faHeart,
+  faLink,
+  faPenToSquare,
+} from "@fortawesome/free-solid-svg-icons";
+import { faInstagram, faTwitter } from "@fortawesome/free-brands-svg-icons";
 import { useRatingKeybinds } from "src/hooks/keybinds";
 import { DetailImage } from "src/components/Shared/DetailImage";
 import { useLoadStickyHeader } from "src/hooks/detailsPanel";
 import { useScrollToTopOnMount } from "src/hooks/scrollToTop";
-import { ExternalLinkButtons } from "src/components/Shared/ExternalLinksButton";
+import { ExternalLinkButtons, ExternalLinksButton } from "src/components/Shared/ExternalLinksButton";
 import { BackgroundImage } from "src/components/Shared/DetailsPage/BackgroundImage";
 import {
   TabTitleCounter,
@@ -45,6 +53,8 @@ import { FavoriteIcon } from "src/components/Shared/FavoriteIcon";
 import { AliasList } from "src/components/Shared/DetailsPage/AliasList";
 import { HeaderImage } from "src/components/Shared/DetailsPage/HeaderImage";
 import { LightboxLink } from "src/hooks/Lightbox/LightboxLink";
+import { Counter } from "src/components/Shared/Counter";
+import { Icon } from "src/components/Shared/Icon";
 
 interface IProps {
   performer: GQL.PerformerDataFragment;
@@ -213,12 +223,40 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     uiConfig?.enablePerformerBackgroundImage ?? false;
   const showAllDetails = uiConfig?.showAllDetails ?? true;
   const compactExpandedDetails = uiConfig?.compactExpandedDetails ?? false;
-
+  const [editbarActive, seteditbarActive] = useState<boolean>(false)
   const [collapsed, setCollapsed] = useState<boolean>(!showAllDetails);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [image, setImage] = useState<string | null>();
   const [encodingImage, setEncodingImage] = useState<boolean>(false);
+  const [altImage, setAltImage] = useState<string | null>(null);
   const loadStickyHeader = useLoadStickyHeader();
+
+  const toggleEditBar = () => {
+    seteditbarActive(current => !current)
+  }
+
+  // a list of urls to display in the performer details
+  const urls = useMemo(() => {
+    if (!performer.urls?.length) {
+      return [];
+    }
+
+    const twitter = performer.urls.filter((u) =>
+      u.match(/https?:\/\/(?:www\.)?twitter.com\//)
+    );
+    const instagram = performer.urls.filter((u) =>
+      u.match(/https?:\/\/(?:www\.)?instagram.com\//)
+    );
+    const others = performer.urls.filter(
+      (u) => !twitter.includes(u) && !instagram.includes(u)
+    );
+
+    return [
+      { icon: faLink, className: "", urls: others },
+      { icon: faTwitter, className: "twitter", urls: twitter },
+      { icon: faInstagram, className: "instagram", urls: instagram },
+    ];
+  }, [performer.urls]);
 
   const activeImage = useMemo(() => {
     const performerImage = performer.image_path;
@@ -235,8 +273,11 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
   }, [image, isEditing, performer.image_path]);
 
   const lightboxImages = useMemo(
-    () => [{ paths: { thumbnail: activeImage, image: activeImage } }],
-    [activeImage]
+    () => [
+      { paths: { thumbnail: activeImage, image: activeImage } },
+      ...(altImage ? [{ paths: { thumbnail: altImage, image: altImage } }] : [])
+    ],
+    [activeImage, altImage]
   );
 
   const [updatePerformer] = usePerformerUpdate();
@@ -251,21 +292,12 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     }
   }
 
-  useRatingKeybinds(
-    true,
-    configuration?.ui.ratingSystemOptions?.type,
-    setRating
-  );
 
   // set up hotkeys
   useEffect(() => {
-    Mousetrap.bind("e", () => toggleEditing());
-    Mousetrap.bind("f", () => setFavorite(!performer.favorite));
     Mousetrap.bind(",", () => setCollapsed(!collapsed));
 
     return () => {
-      Mousetrap.unbind("e");
-      Mousetrap.unbind("f");
       Mousetrap.unbind(",");
     };
   });
@@ -308,6 +340,255 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
     setImage(undefined);
   }
 
+  function maybeRenderAlt() {
+    const {data} = GQL.useFindImagesQuery({variables: {
+      image_filter: {
+          performers: {
+              modifier: GQL.CriterionModifier.Includes,
+              value: [performer.id]
+          },
+          tags: {
+              modifier: GQL.CriterionModifier.Includes,
+              value: ["1736"]
+          }
+      }
+  }})
+  useEffect(() => {
+    if (data?.findImages.count != 0) {
+      setAltImage(data?.findImages.images[0].paths.image ?? null);
+    }
+  }, [data]);
+  return data?.findImages.count != 0 ? <img className="alt-hidden" src={data?.findImages.images[0].paths.image ?? ""}/> : ""
+  }
+
+  function maybeRenderGaleries() {
+      return (
+        <Tab
+          eventKey="galleries"
+          title={
+        <>
+          {intl.formatMessage({ id: "galleries" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.gallery_count}
+            hideZero
+          />
+        </>
+      }
+      >
+      <PerformerGalleriesPanel
+        active={tabKey === "galleries"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderScenes() {
+      return (
+      <Tab
+      eventKey="scenes"
+      title={
+        <>
+          {intl.formatMessage({ id: "scenes" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.scene_count}
+            hideZero
+          />
+        </>
+      }
+      >
+      <PerformerScenesPanel
+        active={tabKey === "scenes"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderImages() {
+      return (
+      <Tab
+      eventKey="images"
+      title={
+        <>
+          {intl.formatMessage({ id: "images" })}
+          <Counter
+            abbreviateCounter={abbreviateCounter}
+            count={performer.image_count}
+            hideZero
+          />
+        </>
+      }
+      >
+      <PerformerImagesPanel
+        active={tabKey === "images"}
+        performer={performer}
+      />
+    </Tab>
+      )
+    }
+  function maybeRenderMovies() {
+      return (
+      <Tab
+        eventKey="groups"
+        title={
+          <>
+            {intl.formatMessage({ id: "groups" })}
+            <Counter
+              abbreviateCounter={abbreviateCounter}
+              count={performer.group_count}
+              hideZero
+            />
+          </>
+        }
+      >
+        <PerformerGroupsPanel
+          active={tabKey === "groups"}
+          performer={performer}
+        />
+      </Tab>
+      )
+    }
+  function maybeRenderAppearsWith() {
+      return (
+      <Tab
+        eventKey="appearswith"
+        title={
+          <>
+            {intl.formatMessage({ id: "appears_with" })}
+            <Counter
+              abbreviateCounter={abbreviateCounter}
+              count={performer.performer_count}
+              hideZero
+            />
+          </>
+        }
+      >
+        <PerformerAppearsWithPanel
+          active={tabKey === "appearswith"}
+          performer={performer}
+        />
+      </Tab>
+      )
+    }
+  const renderTabs = () => (
+    <Tabs
+      id="performer-tabs"
+      mountOnEnter
+      unmountOnExit
+      activeKey={tabKey}
+
+    >
+      {maybeRenderScenes()}
+      {maybeRenderGaleries()}
+      {maybeRenderImages()}
+      {maybeRenderMovies()}
+      {maybeRenderAppearsWith()}
+    </Tabs>
+  );
+  function maybeRenderHeaderBackgroundImage() {
+    if (enableBackgroundImage && !isEditing && activeImage) {
+      const activeImageURL = new URL(activeImage);
+      let isDefaultImage = activeImageURL.searchParams.get("default");
+      if (!isDefaultImage) {
+        return (
+          <div className="background-image-container">
+            <picture>
+              <source src={activeImage} />
+              <img
+                className="background-image"
+                src={activeImage}
+                alt={`${performer.name} background`}
+              />
+            </picture>
+          </div>
+        );
+      }
+    }
+  }
+
+  function maybeRenderEditPanel() {
+    if (isEditing) {
+      return (
+        <PerformerEditPanel
+          performer={performer}
+          isVisible={isEditing}
+          onSubmit={onSave}
+          onCancel={() => toggleEditing()}
+          setImage={setImage}
+          setEncodingImage={setEncodingImage}
+        />
+      );
+    }
+    {
+      return (
+          <div style={{
+            opacity: editbarActive ? '1' : '0',
+            display: editbarActive ? 'inline-flex' : 'none',
+            height: 1
+          }}>
+            <DetailsEditNavbar
+              objectName={
+                performer?.name ?? intl.formatMessage({ id: "performer" })
+              }
+              onToggleEdit={() => toggleEditing()}
+              onDelete={onDelete}
+              onAutoTag={onAutoTag}
+              autoTagDisabled={performer.ignore_auto_tag}
+              isNew={false}
+              isEditing={false}
+              onSave={() => {}}
+              onImageChange={() => {}}
+              classNames="mb-2"
+              customButtons={
+                <div>
+                  <PerformerSubmitButton performer={performer} />
+                </div>
+              }
+            ></DetailsEditNavbar>
+          </div>
+      );
+    }
+  }
+
+  function getCollapseButtonIcon() {
+    return collapsed ? faChevronDown : faChevronUp;
+  }
+
+  function maybeRenderDetails() {
+    if (!isEditing) {
+      return (
+        <PerformerDetailsPanel
+          performer={performer}
+          collapsed={collapsed}
+          fullWidth={!collapsed && !compactExpandedDetails}
+        />
+      );
+    }
+  }
+
+  function maybeRenderCompressedDetails() {
+    if (!isEditing && loadStickyHeader) {
+      return <CompressedPerformerDetailsPanel performer={performer} />;
+    }
+  }
+
+  function maybeRenderTab() {
+    if (!isEditing) {
+      return renderTabs();
+    }
+  }
+
+  function maybeRenderAliases() {
+    if (performer?.alias_list?.length) {
+      return (
+        <div>
+          <span className="alias-head">{performer.alias_list?.join(", ")}</span>
+        </div>
+      );
+    }
+  }
+
   function setFavorite(v: boolean) {
     if (performer.id) {
       updatePerformer({
@@ -332,6 +613,44 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
         },
       });
     }
+  }
+
+  function maybeRenderShowCollapseButton() {
+    if (!isEditing) {
+      return (
+        <span className="detail-expand-collapse">
+          <Button
+            className="minimal expand-collapse"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            <Icon className="fa-fw" icon={getCollapseButtonIcon()} />
+          </Button>
+        </span>
+      );
+    }
+  }
+  function renderClickableIcons() {
+    return (
+      <span className="name-icons">
+        <Button
+          className={cx(
+            "minimal",
+            performer.favorite ? "favorite" : "not-favorite"
+          )}
+          onClick={() => setFavorite(!performer.favorite)}
+        >
+          <Icon icon={faHeart} />
+        </Button>
+        {urls.map((url) => (
+          <ExternalLinksButton
+            key={url.icon.iconName}
+            icon={url.icon}
+            className={url.className}
+            urls={url.urls}
+          />
+        ))}
+      </span>
+    );
   }
 
   if (isDestroying)
@@ -384,6 +703,16 @@ const PerformerPage: React.FC<IProps> = ({ performer, tabKey }) => {
                     setCollapsed={(v) => setCollapsed(v)}
                   />
                 )}
+                {maybeRenderShowCollapseButton()}
+                {renderClickableIcons()}
+                <Button
+                  className="minimal expand-collapse-edit edit-bar-toggle mr-2"
+                  onClick={toggleEditBar}
+                >
+                  <Icon className="fa-fw" icon={faPenToSquare} />
+                </Button>
+                {maybeRenderEditPanel()}
+              {maybeRenderAliases()}
                 <span className="name-icons">
                   <FavoriteIcon
                     favorite={performer.favorite}
