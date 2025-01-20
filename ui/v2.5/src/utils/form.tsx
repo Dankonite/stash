@@ -48,6 +48,7 @@ export function renderLabel(options: {
 // the mouse wheel will change the field value _and_ scroll the window.
 // This hook prevents the propagation that causes the window to scroll.
 export function useStopWheelScroll(ref: React.RefObject<HTMLElement>) {
+  // removed the dependency array because the underlying ref value may change
   useEffect(() => {
     const { current } = ref;
 
@@ -66,9 +67,19 @@ export function useStopWheelScroll(ref: React.RefObject<HTMLElement>) {
         current.removeEventListener("wheel", stopWheelScroll);
       }
     };
-  }, [ref]);
+  });
 }
 
+// NumberField is a wrapper around Form.Control that prevents wheel events from scrolling the window.
+export const NumberField: React.FC<
+  InputHTMLAttributes<HTMLInputElement> & FormControlProps
+> = (props) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useStopWheelScroll(inputRef);
+
+  return <Form.Control {...props} type="number" ref={inputRef} />;
+};
 const InputField: React.FC<
   InputHTMLAttributes<HTMLInputElement> & FormControlProps
 > = (props) => {
@@ -78,7 +89,6 @@ const InputField: React.FC<
 
   return <Form.Control {...props} ref={inputRef} />;
 };
-
 type Formik<V extends FormikValues> = ReturnType<typeof useFormik<V>>;
 
 interface IProps {
@@ -127,6 +137,17 @@ export function formikUtils<V extends FormikValues>(
       control = (
         <Form.Control
           as="textarea"
+          className="text-input"
+          placeholder={placeholder}
+          {...formikProps}
+          value={value}
+          isInvalid={!!error}
+        />
+      );
+    } else if (type === "number") {
+      control = (
+        <NumberField
+          type={type}
           className="text-input"
           placeholder={placeholder}
           {...formikProps}

@@ -1457,3 +1457,9 @@ select {
 .table-list .rating-number {
   width: 6rem;
 }
+
+.modal-body {
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  padding-right: 1.5rem;
+}

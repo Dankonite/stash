@@ -31,7 +31,6 @@ import { CompressedTagDetailsPanel, TagDetailsPanel } from "./TagDetailsPanel";
 import { TagEditPanel } from "./TagEditPanel";
 import { TagMergeModal } from "./TagMergeDialog";
 import {
-  faPenToSquare,
   faSignInAlt,
   faSignOutAlt,
   faTrashAlt,
@@ -83,7 +82,9 @@ const TagTabs: React.FC<{
   abbreviateCounter: boolean;
   showAllCounts?: boolean;
 }> = ({ tabKey, tag, abbreviateCounter, showAllCounts = false }) => {
-  const [showAllDetails, setShowAllDetails] = useState<boolean>(showAllCounts);
+  const [showAllDetails, setShowAllDetails] = useState<boolean>(
+    showAllCounts && tag.children.length > 0
+  );
 
   const sceneCount =
     (showAllDetails ? tag.scene_count_all : tag.scene_count) ?? 0;
@@ -136,8 +137,12 @@ const TagTabs: React.FC<{
     baseURL: `/tags/${tag.id}`,
   });
 
-  const contentSwitch = useMemo(
-    () => (
+  const contentSwitch = useMemo(() => {
+    if (tag.children.length === 0) {
+      return null;
+    }
+
+    return (
       <div className="item-list-header">
         <Form.Check
           id="showSubContent"
@@ -147,9 +152,8 @@ const TagTabs: React.FC<{
           label={<FormattedMessage id="include_sub_tag_content" />}
         />
       </div>
-    ),
-    [showAllDetails]
-  );
+    );
+  }, [showAllDetails, tag.children.length]);
 
   return (
     <Tabs

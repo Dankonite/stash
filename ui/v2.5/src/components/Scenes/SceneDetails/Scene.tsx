@@ -360,6 +360,7 @@ const ScenePage: React.FC<IProps> = ({
   async function onRescan() {
     await mutateMetadataScan({
       paths: [objectPath(scene)],
+      rescan: true,
     });
 
     Toast.success(
@@ -479,7 +480,7 @@ const ScenePage: React.FC<IProps> = ({
           onClick={() => setIsDeleteAlertOpen(true)}
         >
           <FormattedMessage
-            id="actions.delete_entity"
+            id="actions.delete"
             values={{ entityType: intl.formatMessage({ id: "scene" }) }}
             />
           </Dropdown.Item>
